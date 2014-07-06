@@ -7727,7 +7727,7 @@
 			// only basic modifications, controls added later
 			$("textarea#auction_description", $dc).css("width","270px").closest("tr").append("<td id='twdb_msd_desc_cc'>");
 			var $t2 = $("table:nth-child(2)", $dc);
-			$("tr:first-child", $t2).after($("<tr>").append('<td>','<td id="twdb_msd_bid_cc">','<td>','<td id="twdb_msd_buy_cc">'));
+			$("tr:first-child", $t2).after($("<tr>").append('<td>','<td id="twdb_msd_bid_cc" style="min-width: 90px;">','<td>','<td id="twdb_msd_buy_cc" style="min-width: 90px;">'));
 			$("tr:nth-last-child(5) td:nth-child(2) span.tw2gui_textfield", $t2).after('<span id="twdb_msd_mult_cc" title="#MSD_MULTIPLYPRICES#" style="background-image: url(&quot;/images/ranking/town_ranking_icons.png&quot;); display:inline-block; height:16px; width:16px; background-position:0px -80px; cursor:pointer;">&nbsp;</span>');
 			$("tr:last-child td:first-child", $t2).attr("colspan",3).before('<td id="twdb_msd_opt_cc">');
 			
