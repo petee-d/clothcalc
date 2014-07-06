@@ -7721,7 +7721,7 @@
 			// check if Inno's function has added all controls, otherwise retry with a tiny delay
 			if ($dc.find('#auction_item_slot', $dc).html() == "") return w.setTimeout(function(){MarketWindow.TWDB_touchUpSellDialog(dialog)},25);
 			
-			// allows access to windows, eg chat
+			// allows access to windows, eg chat, by making the framefix very tiny
 			$('div.tw2gui_dialog_framefix').css({left:"50%",top:"50%",width:"1px",height:"1px"});
 			
 			// only basic modifications, controls added later
