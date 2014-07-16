@@ -7490,6 +7490,26 @@
 					.click(function(){savePresets("duration", 1); $('span#market_days.tw2gui_combobox', $dc).guiElement().select(1);
 							  savePresets("rights", 2); $('span#market_rights.tw2gui_combobox', $dc).guiElement().select(2);}));
 			
+			// add icons to sell rights selectbox
+			var rights = $('span#market_rights.tw2gui_combobox', $dc).guiElement().items;
+			if (rights.length === 3) {	// just in case they change anything there..
+			    var ico = ["home","flag","world"];
+			    for (var i=0; i<rights.length; i++) {
+			    	rights[i].node[0].innerHTML = '<span class="tw2gui-iconset tw2gui-icon-' + ico[rights[i].value] + '" style="display: inline-block;position: relative;top: 4px;"></span>&nbsp;' + rights[i].node[0].innerHTML;
+				};
+			};
+			
+			// add toggle function for "other offers" if any
+			var $head = $('h4', $dc),
+			    $table = $('table#mps_otheroffers', $dc);
+			if ($('tr', $table).length > 2 || $('tr:nth-child(2) > td', $table).attr('colspan') != 4) {
+			    $head.html($head.html() + '&nbsp;(' + ($('tr', $table).length-1) + ')')
+				 .click(function(){$table.slideToggle()});
+			} else {
+			    $head.html($head.html() + '&nbsp;(0)');
+			    $table.hide();
+			};
+
 			loadPresets();
 		    };
                 };
