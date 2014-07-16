@@ -3637,99 +3637,23 @@
 
                     return total;
                 };
-                var calcItemBonusForJob = function (itemId, jobId) {
-
+                var calcItemBonusForJob = function(itemId, jobId) {
                     var itemObj = ItemManager.get(itemId);
-
                     if (!itemObj) {
-
-                        return 0
-                    }
-                    var bonus = itemObj.bonus;
-
+                        return 0;
+                    };
                     var jobObj = Jobs.getJobById(jobId);
-
                     if (!jobObj) {
-                        return 0
-                    }
-
-                    var total = 0;
-
-                    // Items level dependants
-                    if (isDefined(bonus.item)) {
-                        for (var w in bonus.item) {
-                            if (!bonus.item.hasOwnProperty(w))
-                                continue;
-
-                            var z = bonus.item[w];
-                            switch (z.type) {
-                            case 'character':
-
-                                if (z.key == 'level') {
-
-                                    if (z.bonus.type == 'job') {
-                                        if (z.bonus.job == "all") {
-                                            total += Math[z.roundingMethod]
-                                                (z.bonus.value * Character.level)
-                                        } else {
-
-                                            if (z.bonus.job[n]) {
-
-                                                total += z.bonus.job[n];
-                                            }
-                                        }
-                                    } else {
-                                        if (z.bonus.type == 'attribute') {
-
-                                            for (ee = 0; ee < skInNum[z.bonus.name].length; ee++) {
-                                                var idS = skInNum[z.bonus.name][ee];
-
-                                                if (isDefined(jobObj.skills[_id2skill[idS]])) {
-                                                    total += Math[z.roundingMethod]
-                                                        (z.bonus.value * Character.level)
-
-                                                }
-
-                                            }
-                                        } else if (isDefined(jobObj.skills[z.bonus.name])) {
-
-                                            total += Math[z.roundingMethod]
-                                                (z.bonus.value * Character.level)
-
-                                        }
-
-                                    }
-                                }
-                                break;
-
-                            }
-                        }
-
-                        for (var skil in jobObj.skills) {
-
-                            var job_skills = jobObj.skills[skil];
-
-                            var f = _id2skill[parseInt(_skill2id[skil] / 5)];
-
-                            if (isDefined(bonus.skills[skil])) {
-
-                                total += bonus.skills[skil] * job_skills
-                            }
-
-                            if (isDefined(bonus.attributes[f])) {
-
-                                total += bonus.attributes[f] * job_skills
-                            }
-
-                        }
-
-                    }
+                        return 0;
+                    };
+                    var total = itemObj.getValue(jobObj.skills, jobId);
+                    // After 50 minutes of working on that monstrosity I thought: Why not use Inno's function..?
+                    // That one should work even if new keys like "age of your grandma" are invented for calculating bonuses...
 
                     if (!isDefined(ccCache.items[itemId])) {
-                        ccCache.items[itemId] = {}
-                    }
+                        ccCache.items[itemId] = {};
+                    };
                     ccCache.items[itemId][jobId] = total;
-
                     return total;
                 };
                 // Debugger.ccCache = ccCache;
@@ -3737,6 +3661,8 @@
             }($);
             _base.Calc = Calc;
             Debugger.Calc = Calc;
+            
+            
             var Importer = function (e) {
                 var t = {};
                 var n = {};
