@@ -7398,6 +7398,10 @@
 			$("tr:nth-last-child(5) td:nth-child(2) span.tw2gui_textfield", $t2).after('<span id="twdb_msd_mult_cc" title="#MSD_MULTIPLYPRICES#" style="background-image: url(&quot;/images/ranking/town_ranking_icons.png&quot;); display:inline-block; height:16px; width:16px; background-position:0px -80px; cursor:pointer;">&nbsp;</span>');
 			$("tr:last-child td:first-child", $t2).attr("colspan",3).before('<td id="twdb_msd_opt_cc">');
 			
+			var dlgCenter = function() {
+			    dialog.divMain.css({"margin-top": "-" + (dialog.divMain.height() / 2) + "px",
+			    			"margin-left": "-" + (dialog.divMain.width() / 2) + "px"});
+			};
 			
 			var togglePresets = function() {
 			    var val, group = this.groupClass;
@@ -7504,12 +7508,14 @@
 			    $table = $('table#mps_otheroffers', $dc);
 			if ($('tr', $table).length > 2 || $('tr:nth-child(2) > td', $table).attr('colspan') != 4) {
 			    $head.html($head.html() + '&nbsp;(' + ($('tr', $table).length-1) + ')')
-				 .click(function(){$table.slideToggle()});
+				 .click(function() { $table.toggle(); dlgCenter(); })
+				 .css({"cursor": "pointer"});
 			} else {
 			    $head.html($head.html() + '&nbsp;(0)');
 			    $table.hide();
 			};
-
+			
+			dlgCenter();
 			loadPresets();
 		    };
                 };
