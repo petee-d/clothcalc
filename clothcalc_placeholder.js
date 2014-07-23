@@ -11,16 +11,18 @@
 // @downloadURL http://tw-db.info/cache/userscripts/clothcalc/dev_clothcalc_de.user.js
 // @updateURL http://tw-db.info/cache/userscripts/clothcalc/dev_clothcalc_de.meta.js
 // ==/UserScript==
+
 /**
  * News on this update :
- * - fix for buy tip in the new shop
- * - option to save your preferences in the market sell dialog
- * - duel motivation bar is replaced by a K.O. timer when you died
- * - reminder for the level 600 crafting recipe waiting periods
- * - added option to avoid nuggets as default payment in event games [must be explicitely enabled] 
- * - added option to skip the Premium dialog when using fetch all in the market [must be explicitely enabled] 
- * - tiny improvements to the TW-DB settings dialog
+ * - 
+ * - 
+ * - 
+ * - 
+ * - 
+ * -  
+ * - 
  * */
+ 
 (function (f) {
     var d = document,
         s = d.createElement('script');
@@ -34,10 +36,8 @@
     // if it exists, there is another cc/lang installed, so do not
     // start this one
 
-    if (isDefined(window.TWDB)) {
-        (new west.gui.Dialog(TWDB.script.name,
-            '<div class="txcenter"><b><br>' + "#CC_INSTALLED_TWICE#" + '</br></b></div>',
-            west.gui.Dialog.SYS_WARNING)).addButton("Ok").show();
+    if (isDefined(window.TWDB)) { (new west.gui.Dialog(TWDB.script.name, 
+    	    '<div class="txcenter"><b><br>#CC_INSTALLED_TWICE#</br></b></div>', west.gui.Dialog.SYS_WARNING)).addButton("OK").show();
     } else {
 
         TWDB = {};
@@ -51,9 +51,7 @@
             gameversion: 2.11,
             lang: "eng"
         });
-        try {
-            TWDB.script.notes = jQuery
-                .parseJSON('[{\"version\":\"31\",\"notes\":\"hotfix for game version 2.05\"},{\"version\":\"30\",\"notes\":\"script is now ready for gameversion 2.04\\r\\nthere are still some fields to fix, but the most parts should work \"},{\"version\":\"25\",\"notes\":\"[bonusjobs] security query before reset<br \\\/>\\r\\n[bonusjobs] sorting of the export<br \\\/>\\r\\n[chestanalyser] some stats for future drops of chests, bags & collector cards<br \\\/>\\r\\n[marketreminder] add reminder for market offers<br \\\/>\\r\\n[other] button for deposit money<br \\\/>\"},{\"version\":\"24\",\"notes\":\"[ClothCalc] Bugfix, Motivation was not included at Wages<br \\\/>\\r\\nFeatures listed below comes from an other Userscript \\\"stewues The West Tools\\\"<br \\\/>\\r\\nAs he decided to stop Offering his tool, he has asked me to include this Features into our Script.<br \\\/>\\r\\nFirst at this Point <b>Thanks a lot!<\\\/b> Stewue for your hard Work and your Decision to Offer this Features now through this Script.<br \\\/>\\r\\n- button for sleeping into best hotel room or fort barrack<br \\\/>\\r\\n- confirmation prompt before quest cancel<br \\\/>\\r\\n- hint to deposit cash<br \\\/>\\r\\n- button for last post on ingameforum threads<br \\\/>\\r\\n- moved button for new post on ingameforum to upper menu<br \\\/>\\r\\n- add duelmotivation into userinterface<br \\\/>\\r\\n- remove automation pa hints, like the nugget picture on work queue<br \\\/>\\r\\n- activate Fortrecruitment also for non generals and captains<br \\\/>\\r\\n- enhance the Fortrecruitment through some more Features<br \\\/>\\r\\n- the market map<br \\\/>\"},{\"version\":\"23\",\"notes\":\"[general] script is ready for version 2.03, all features should be working<br \\\/>\\r\\n[clothcalc] added the wages values, honour to petee for his great work to find out the wage formula<br \\\/>\"},{\"version\":\"22\",\"notes\":\"[clothcalc] fixed Bug with faulty Detection of corrupted Cache<br \\\/>\\r\\n[questwiki] Show tw-db Link on Questwindow<br \\\/>\\r\\n[questswiki] Show total Amount of Items at Inventory<br \\\/>\\r\\n[questswiki] Button for Open the ClothCalc Window<br \\\/>\\r\\n[buytip] added new sets<br \\\/>\\r\\n[buytip] fort boni of natty where wrong<br \\\/>\"},{\"version\":\"21\",\"notes\":\"[general] fixed failed script start at gameversion 2.02<br \\\/>\\r\\n[errorlog] fixed Error through new Notification-Bar Object at gameversion 2.02<br \\\/>\\r\\n[settings] added Group for the SellTip Settings<br \\\/>\\r\\n[SellTip] add Option for never sell Set-Items<br \\\/>\\r\\n[bonusjobs] discovered Bonus Jobs are now cached<br \\\/>\\r\\n[bonusjobs] add Export and Import for discovered Bonus Jobs<br \\\/>\\r\\n[other] Option to remove the Game-Hints on Notification Bar, which could not be disabled through Game-Settings<br \\\/>\\r\\n[other] Option for a Scroll-To Inpute Field on Minimap<br \\\/>\\r\\n[ClothCalc] fixed the Bug, that Joblist is sometime not clickable<br \\\/>\\r\\n[ClothCalc] fixed the Bug, missing fastes animal on bestwears without animal<br \\\/>\\r\\n[chat] fixed bug for missing smiley and color inject on chat windows, which are already opend on gameloading<br \\\/>\\r\\n[general] removed script parts for gameversion 1.36\"},{\"version\":\"20\",\"notes\":\"[general] reworked the Script for the-west Version 2.0 <br \\\/>\\r\\n[general] Release Notes for Script is added ingame <br \\\/>\\r\\n[Importer] the Import Userscript is now included in ClothCalc Userscript (for Gameversion 1.36 you will still need it) <br \\\/>\\r\\n[Importer] the Alliance Import Script is now directly available through the script <br \\\/>\\r\\n[ClothCalc] Basic Function is working (showing best cloth) <br \\\/>\\r\\n[ClothCalc] <b>Values for Wages and Danger when sorting the Joblist are wrong!<\\\/b> , so temporarly this feature this sorting is removed until our date is up2date<br \\\/>\\r\\n[ClothCalc] preselecting the selected Job on Minimap is ready for Version 2.0 <br \\\/>\\r\\n[ClothCalc] the sorted job List (experience, wages) could be changed from normal mode to value per minute to value per energy point <br \\\/>\\r\\n[ClothCalc] Joblist is reworked, jobs could now be searched and jobs have little popup with complete job data <br \\\/>\\r\\n[FavoriteJob] this Feature has been removed because it now emulates a premium feature <br \\\/>\\r\\n[SearchJob]the jobsearch is Version 2.0 ready, the direct start of one of the four shown job is a pa automation only feature (innos decision]<br \\\/>\\r\\n[ReportAnalyser] the basic function is reworked for game version 2.0 <br \\\/>\\r\\n[ReportAnalyser] detailed job report and detailed item report will be added later <br \\\/>\\r\\n[Chat] is ready for Version 2.0 <br \\\/>\\r\\n[BuyTip] is ready for Version 2.0<br \\\/>\\r\\n[BuyTip] set bonus is now also included here<br \\\/>\\r\\n[BuyTip] also shown on market now<br \\\/>\\r\\n[Collector] is ready for Version 2.0<br \\\/>\\r\\n[Collector] also shown on market now<br \\\/>\\r\\n[SellTip] is ready for Version 2.0<br \\\/>\\r\\n[BonusJobs]Bonus Jobs you\\u2019ve found are now shown on minimap<br \\\/>\"},{\"version\":\"10\",\"notes\":\"[ClothCalc] added Favorite Job Feature (petee)<br \\\/>disabled script for TW2.0\"},{\"version\":\"9\",\"notes\":\"[Chat] added popup on permanent whisper icon<br \\\/>\\r\\n[Chat] history ist now saved on localStorage (color, whisper)<br \\\/>\\r\\n[Chat] added permanent whisper to player menu<br \\\/>\\r\\n[Chat] added inputfield to direct input color number<br \\\/>\\r\\n[Chat] added bold and captialize options<br \\\/>\\r\\n[analyser] added table footer with overall values<br \\\/>\\r\\n[analyser] added statistics reset function<br \\\/>\\r\\n[analyser] exclude questitems from item statistic<br \\\/>\\r\\n[analyser] granular report for items (Item-Report), click on items at new table footer<br \\\/>\\r\\n[calc] added option to switch position of cloth calc window between left and right<br \\\/>\\r\\n[enhancements] added feature so you can hold the +\\\/- buttons in the skills window to change the value faster<br \\\/>\\r\\n\"},{\"version\":\"8\",\"notes\":\"added settings window<br \\\/>\\r\\nadded chat features (permanent wisper, color, smilies)<br \\\/>\\r\\nadded Report Analyser<br \\\/>\\r\\nadded second Buytip Icon if item gives bonus for current selected job<br \\\/>\\r\\nfixed with * marker for new items on market<br \\\/>\\r\\nfixed several small bugs on job search feature<br \\\/>\\r\\nfixed buyTip was not shown without calcdata update<br \\\/>\"},{\"version\":\"7\",\"notes\":\"add new feature jobsearch (petee)<br \\\/>\\r\\n\\\"new\\\" Icon will now also look at Wear Items (thx Inno optimizing your Wear Object)<br \\\/>\\r\\nchanged max gameversion to 1.36 for coming new gameversion (no problems found with new gameversion)<br \\\/>\\r\\nadded new Script Loader with Info on footer (next to servertime)<br \\\/>\"},{\"version\":\"6\",\"notes\":\"code cleaning and optimising<br \\\/>\\r\\nupdate minimap on jobchange if minimap is opend<br \\\/>\\r\\nset limit for custom jobs from 10 to 15<br \\\/>\\r\\nfixed several problems with attributes on customs<br \\\/>\\r\\nadded images for fort-customs and for attributes on customs<br \\\/>\\r\\nadded icon on Traders with tooltip for which jobs this item would give a better bonus<br \\\/>\\r\\nadded icon on Inventory with tooltip of bonus on selected job<br \\\/>\\r\\non rev. 59 added colored tooltip for better visibility<br \\\/>\\r\\non rev. 59 added icon for unused items on inventory<br \\\/>\"},{\"version\":\"5\",\"notes\":\"eleminating browser freezes<br \\\/>\\r\\nmaking custom section customisable<br \\\/>\\r\\nshowing best and current \\\"job\\\" values on custom section<br \\\/>\\r\\nchanges on cache system<br \\\/>\\r\\ncorrected code verification on rev. 34<br \\\/>\"},{\"version\":\"4\",\"notes\":\"fixed removed indexedDB.setVersion on Mozilla<br \\\/>\\r\\nbetter error handling of indexedDB, click on \\\"cache error\\\" icon will initiate a reset of indexedDB<br \\\/>\\r\\nsolution for Cache Problem on Scriptupdate with Chrome (not working on this update :( )<br \\\/>\\r\\nearlier button add, opacity to 50% until initializing isn\\u0027t finished<br \\\/>\\r\\nten second sleeper on initializing to handle chrome freezes<br \\\/>\\r\\nadded marker for items on traders which are not at own inventory<br \\\/>\\r\\nadded \\\"*\\\" prefix on market for all items which are not at own inveontory<br \\\/>\\r\\nfixed wrong levelbonus for soldiers<br \\\/>\\r\\nprevent script from be active in more than one language<br \\\/>\"},{\"version\":\"3\",\"notes\":\"fixed problem with need of cache update<br \\\/>\\r\\nfixed problem that inventory window was closed<br \\\/>\\r\\nadded best animal to every job<br \\\/>\\r\\nadded mark of weared items\"},{\"version\":\"2\",\"notes\":\"recreate the script as whole userscript without reloading javascript code (in combine with indexedDB the script will working also if tw-db is temporary down)<br \\\/>\\r\\nimplementation of an update system (user get a new Window with update link if new script version is available)<br \\\/>\\r\\ncustom section with static custom activities (is prepared for making it user adjustable later)<br \\\/>\\r\\ndisplay skill images for selected jobs<br \\\/>\\r\\nsome important internal management parts\"}]');
+        try { TWDB.script.notes = jQuery.parseJSON('[{\"version\":\"99\",\"notes\":\"DEV version\"}]');
         } catch (e) {};
 
         // START OF SCRIPT CODE THAT CAN BE EDITED IN A RELEASE
@@ -2711,14 +2709,14 @@
                             return
 
                         }
-                        if (window.TheWestApi.version < 2.04) {
-                            (new UserMessage(
-                                "TWDB-ClothCalc Script is deactivated until the Gameversion on your world is updated to 2.04. Sorry",
-                                UserMessage.TYPE_FATAL)).show();
+                        
+                        // Not needed at the moment, but we keep it for the case that there will be another incompatible version change
+                        /* if (window.TheWestApi.version < 2.04) {
+                            (new UserMessage("TWDB-ClothCalc Script is deactivated until the Gameversion on your world is updated to 2.04. Sorry!", UserMessage.TYPE_FATAL)).show();
                             p();
-                            return
+                            return;
+                        }; */
 
-                        }
                         h();
                         return
 
@@ -2805,47 +2803,48 @@
                 return t
             }($);
             Debugger.Loader = Loader;
-            var GameAPI = function (e) {
-                var t = {};
-                var n = {};
-                var r = function () {
-                    if (n.ready) {
-                        return
-
-                    }
-                    i();
-                    s();
-                    n.ready = true
+            
+            
+            
+  ///// complete ////////////////////////
+  //
+  //  Game API: Wrapper for TW API functions;  AVOID FURTHER USE, REPLACE CALLS BY ORIG. API CALLS STEP BY STEP
+  //
+  ///////////////////////////////////////
+            var GameAPI = function ($) {
+                var _self = {};
+                var loader = {};
+                var init = function() {
+                    if (loader.ready) { return; };
+                    guiWrap();
+                    wmanRef();
+                    loader.ready = true;
                 };
-                var i = function () {
+                var guiWrap = function() {
                     GameAPI.gui = {};
-                    var e = GameAPI.gui;
-                    if (w.TheWestApi.version > 2.03) {
-                        for (var t in w.west.gui) {
-                            if (!w.west.gui.hasOwnProperty(t)) {
-                                continue
-                            }
-                            newName = t.toLowerCase();
-                            e[newName] = w.west.gui[t]
-                        }
-                    } else {
-                        for (var t in w.tw2gui) {
-                            if (!w.tw2gui.hasOwnProperty(t)) {
-                                continue
-                            }
-                            newName = t.toLowerCase();
-                            e[newName] = w.tw2gui[t]
-                        }
-                    }
+                    var gui = GameAPI.gui;
+                    // if (w.TheWestApi.version > 2.03) {	// switch not needed atm
+                        for (var key in w.west.gui) {
+                            if (!w.west.gui.hasOwnProperty(key)) { continue; };
+                            newName = key.toLowerCase();
+                            gui[newName] = w.west.gui[key];
+                        };
+                    /* } else {
+                        for (var key in w.tw2gui) {
+                            if (!w.tw2gui.hasOwnProperty(key)) { continue; };
+                            newName = key.toLowerCase();
+                            gui[newName] = w.tw2gui[key];
+                        };
+                    }; */
                 };
-                var s = function () {
-                    GameAPI.wman = wman
-                };
-                n = Loader.add("GameAPI", "tw-db GameAPI", r, {});
-                return t
+                var wmanRef = function() { GameAPI.wman = wman };
+                loader = Loader.add("GameAPI", "tw-db GameAPI", init, {});
+                return _self;
             }($);
             _base.GameAPI = GameAPI;
             Debugger.GameAPI = GameAPI;
+            
+            
             var Cache = function (e) {
                 var t = {};
                 var n = {};
@@ -3894,96 +3893,87 @@
                 return t
             }($);
             Debugger.Tools = Tools;
-            var Updater = function (e) {
-                var t = {};
-                var n = {};
-                var r;
-                var i = false;
-                var s = function () {
-                    if (n.ready) {
-                        return
-
-                    }
-                    r = Window.addTab("notes", "Release Notes",
-                        "Release Notes", function () {
-                            u()
-                        });
-                    if (Cache.load("version") && Script.version + " " + Script.revision != Cache
-                        .load("version")) {
+            
+            
+  ///// complete ////////////////////////
+  //
+  //  Updater Object:   handle the Update Check for Script and the Release Notes
+  //  Init:             should be loader after Window Module and Cache Module
+  //  Methodes:         - query() // gets the update js snippet from tw-db
+  //                    - check(ver, rev, uid) // is called through the snippet to check if update is needed
+  //                        -> ver: version on tw-db server
+  //                        -> rev: revision on tw-db server
+  //                        -> uid: not used anymore
+  //                    - wasUpdated() // returns true/false if script was updated or not until last script start
+  //
+  ///////////////////////////////////////
+            var Updater = (function($) {
+                var _self = {};
+                var loader = {};
+                var div;
+                var updated = false;
+                
+                var init = function() {
+                    if (loader.ready) { return; };
+                    div = Window.addTab("notes", "Release Notes", "Release Notes", function() { open(); });
+                    if (Cache.load("version") && Script.version + " " + Script.revision != Cache.load("version")) {
                         Cache.save("version", Script.version + " " + Script.revision);
-                        i = true;
-                        var e = "#WAS_UPDATED#";
-                        var t = '<div class="txcenter">#OPEN_RELEASENOTES#</div>';
-                        t = t.replace("=1=", "<b>" + Script.name + "</b>");
-                        (new GameAPI.gui.dialog(e, t,
-                            GameAPI.gui.dialog.SYS_WARNING))
-                        .addButton("yes", function () {
-                            Window.open("notes")
-                        }).addButton("no").show()
-                    }
-                    n.ready = true
-                };
-                n = Loader.add("Updater", "tw-db Updater", s, {
-                    Cache: true,
-                    Window: true
-                });
-                var o = function (t, n) {
-                    var r = "#NEED_UPDATE#";
-                    var i = '<div class="txcenter">#MAKE_UPDATE#</div>';
-                    i = i.replace("=1=", "<b>" + Script.name + "</b>");
-                    i += "<div><br />current version: " + Script.version / 100 + " revision " + Script.revision + "<br />new version: " + t / 100 + " revision " + n + "</div>";
-                    var s = "http://" + Script.update;
-                    if (e.browser.webkit) {
-                        s += "?" + Script.version + Script.revision
-                    }
-                    var o = function () {
-                        try {
-                            location.href = s
-                        } catch (e) {}
+                        updated = true;
+                        var title = "#WAS_UPDATED#";
+                        var msg = '<div class="txcenter">#OPEN_RELEASENOTES#</div>';
+                        msg = msg.replace("=1=", "<b>" + Script.name + "</b>");
+                        (new GameAPI.gui.dialog(title, msg, GameAPI.gui.dialog.SYS_WARNING))
+			    .addButton("no").addButton("yes", function() { Window.open("notes"); }).show();
                     };
-                    (new GameAPI.gui.dialog(r, i,
-                        GameAPI.gui.dialog.SYS_WARNING)).addButton(
-                        "ok", o).show()
+                    loader.ready = true;
                 };
-                t.wasUpdated = function () {
-                    return i
+                loader = Loader.add("Updater", "tw-db Updater", init, {Cache: true, Window: true});
+                
+                var update = function(ver, rev) {
+		    var title = "#NEED_UPDATE#";
+                    var msg = '<div class="txcenter">#MAKE_UPDATE#</div>';
+                    msg = msg.replace("=1=", "<b>" + Script.name + "</b>");
+                    msg += "<div><br />current version: " + (Script.version / 100) + " revision " + Script.revision + "<br />new version: " + (ver / 100) + " revision " + rev + "</div>";
+                    var url = "http://" + Script.update;
+                    if ($.browser.webkit) { url += "?" + Script.version + Script.revision };
+                    var refresh = function() { try { location.href = url; } catch (e) {}; };
+                    (new GameAPI.gui.dialog(title, msg, GameAPI.gui.dialog.SYS_WARNING))
+			.addButton("#NOTNOW#").addButton("ok", refresh).show();
                 };
-                var u = function () {
-                    r.children().remove();
-                    var t = new GameAPI.gui.scrollpane;
-                    e(t.getMainDiv()).css("height", "335px");
-                    var n = false;
+                _self.wasUpdated = function() { return updated; };
+                
+                var open = function() {
+                    div.children().remove();
+                    var bodyscroll = new GameAPI.gui.scrollpane;
+                    $(bodyscroll.getMainDiv()).css("height", "335px");
+                    var hidden = false;
                     for (var i = 0; i < Script.notes.length; i++) {
-                        var s = e(
-                                "<h3><a>Version " + String(Script.notes[i].version / 100) + "</a></h3>").css(
-                                "border-bottom", "1px solid #000000")
-                            .click(function () {
-                                e(this).next().toggle()
-                            });
-                        var o = e("<div>" + Script.notes[i].notes + "</div>");
-                        t.appendContent(s).appendContent(o);
-                        if (n) {
-                            o.hide()
-                        }
-                        n = true
-                    }
-                    r.append(t.getMainDiv());
-                    Window.hideLoader()
+                        var head = $("<h3><a>Version " + String(Script.notes[i].version / 100) + "</a></h3>")
+			    .css("border-bottom", "1px solid black")
+                            .click(function() { $(this).next().toggle(); });
+                        var body = $("<div>" + Script.notes[i].notes + "</div>");
+                        bodyscroll.appendContent(head).appendContent(body);
+                        if (hidden) { body.hide(); };
+                        hidden = true;
+                    };
+                    div.append(bodyscroll.getMainDiv());
+                    Window.hideLoader();
                 };
-                t.query = function () {
-                    setTimeout(function () {
-                        e.getScript("http://" + Script.check + "?" + (new Date).getTime())
-                    }, 500)
-                };
-                t.check = function (e, t, n) {
-                    if (Script.version != e || Script.revision != t) {
-                        o(e, t)
-                    }
-                };
-                return t
-            }($);
+                
+                _self.query = function() { setTimeout(function() {
+                    $.getScript("http://" + Script.check + "?" + (new Date).getTime());
+                    }, 500); };
+                
+		// never touch this without adjust serverside component
+		_self.check = function (ver, rev, uid) {
+		    if (Script.version != ver || Script.revision != rev) { update(ver, rev); };
+		};
+                return _self;
+            })($);
             _base.Updater = Updater;
             Debugger.Updater = Updater;
+            
+            
             var Sleep = function (e) {
                 var t = {};
                 var n = null;
@@ -4063,7 +4053,7 @@
                         }
                     }
                     // Dun - Add auto vertical scollbar
-                    $(s.elContent).css({
+                    $(s.elContent).css({	// Bluep {max-height: 650px!important; overflow-y: auto;}
                         "max-height": "270px",
                         "width": "250px",
                         "overflow-y": 'auto'
@@ -7507,7 +7497,7 @@
 				    found: false,
 				    date:  null,
 				    });
-				    // todo: add question if feature should be disabled
+				    /**TODO: add question if feature should be disabled **/
 			    });
 			}	// ##  weeklyCraftingGet
 		
@@ -7519,7 +7509,18 @@
             }($);
             Debugger.Snippets = Snippets;
 
-            var GameInject = function ($) {
+            
+  /////////////////////////////
+  //
+  //  GameInject Object: through this Object should be done all Game Manipulation, like injects into Userinterface
+  //  Methodes: - addTabOnMessagesWindow(name,shortname,callback)   -> adds a new tab to the messagewindow, callback the function which is called when the tab is clicked
+  //            - injectItem(type,name,callback)                    -> adds a ui element to item divs, callback is function which gets the item element as parameter, name should be unique, type is the item type like Inventory or Trader
+  //            - injectMarket(name,callback)                       -> adds a string into getClearName Function at Market, callback is function which returns a string, name should be unique
+  //            - injectChatLayoutTab(name,callback)                -> adds function into every ChatLayoutTab which is automaticialy called on ChatLayoutTab init
+  //            - ChatLayoutTabsend(name,callback)                  -> adds function into every send-Process at Chat
+  //
+  /////////////////////////////
+            var GameInject = (function($) {
                 var _self = {};
                 var save = {};
                 var minimap = [];
@@ -7529,198 +7530,203 @@
                 var ready = false;
                 var timeout = null;
                 var interval = null;
-                var _duelmoti = [];
                 var _position = [];
                 var _reportreceived = [];
-                _self.CharacterButton = function (e) {
-                    var t = {};
-                    var n = 0;
-                    var r = null;
-                    t.add = function (t) {
-                        if (n == 0) {
-                            r = e('<div style="width:35px;height:35px;position:absolute;left:141px;top:131px;background: url(' + Game.cdnURL + '/images/interface/character/character.png?3) no-repeat -141px -105px transparent;" />');
-                            e("#ui_character_container").prepend(r)
-                        }
-                        n++;
-                        r.css({
-                            height: 10 + 26 * n + "px",
-                            "background-position": "-141px " + (26 * n - 131) + "px"
-                        });
-                        var i = e('<div class="char_links" style="top:' + (6 + (n - 1) * 26) + "px;left:6px;background:url(" + t + ')no-repeat 0px 0px transparent;"/>');
-                        i.hover(function () {
-                            e(this).css("background-position",
-                                "-25px 0px")
-                        }, function () {
-                            e(this).css("background-position",
-                                "0px 0px")
-                        });
-                        r.append(i);
-                        return i
+                
+		/**
+		 * Adds a new image button to the right of the character / avatar GUI element.
+		 *
+		 * @param {String} URI of the button image (50x25px, right half = highlight state).
+		 * @return {jQuery} The new button.
+		 */
+		_self.CharacterButton = (function ($) {
+		    var _that = {};
+		    var count = 0;
+		    var $container = null;
+		    
+		    _that.add = function(image) {
+			if (count == 0) {
+			    var bgCss = "div#twdb_characbut {width:36px; height:35px; position:absolute; left:141px; top:131px; border-bottom-left-radius:8px;"
+				      + "background:url(" + Game.cdnURL + "/images/interface/character/character.png?3) no-repeat -141px -105px transparent;}";
+				    TWDB.Util.addCss(bgCss);
+			    $container = $('<div id="twdb_characbut" />');
+			    $('#ui_character_container').prepend($container);
+			};
+			count++;
+			$container.css({ 'height': (10 + 26*count) + 'px',
+					'background-position': '-141px ' + (26*count - 131) + 'px' });
+			var $button = $('<div class="char_links" style="top:' + (6 + (count-1)*26) + 'px;left:6px;background:url(' + image + ')no-repeat 0px 0px transparent;"/>');
+			$button.hover(function() { $(this).css('background-position','-25px 0px'); },	// mouse over
+				      function() { $(this).css('background-position','0px 0px'); });	// mouse out
+			$container.append($button);
+			return $button;
                     };
-                    return t
-                }($);
-                _self.ChatLayout = function (e) {
-                    var t = [];
-                    return function (e) {
-                        if (t.length == 0) {
+                    return _that;
+                })($);
+                
+                /* ============================== Chat ============================== */
+                _self.ChatLayout = (function($) {
+		    var callbacks = [];
+		    return function(callback) {
+			if (callbacks.length == 0) {
+				try {
+				    save["window.Chat.Layout.Tab.prototype.getMainDiv"] = window.Chat.Layout.Tab.prototype.getMainDiv;
+				    window.Chat.Layout.Tab.prototype.getMainDiv = function() {
+					for (var i=0; i<callbacks.length; i++) {
+					    try { callbacks[i](this); }
+					    catch (e) { Error.report(e, 'callbacks on Chat Layout'); };
+					};
+					return this.mainDiv;
+				    };
+				} catch(e) {
+				    Error.report(e, 'manipulate Chat Layout');
+				    window.Chat.Layout.Tab.prototype.getMainDiv = save["window.Chat.Layout.Tab.prototype.getMainDiv"];
+				};
+			};
+			callbacks.push(callback);	// this line was accidentially in the if-block above, allowing only one callback. Error didn't show up since we only have on callback by now.
+		    };
+                })($);
+                
+                _self.ChatSend = (function($) {
+		    var callbacks = [];
+		    return function(callback) {
+			if (callbacks.length == 0) {
                             try {
-                                var n = window.Chat.Layout.Tab.prototype.getMainDiv;
-                                window.Chat.Layout.Tab.prototype.getMainDiv = function () {
-                                    for (var e = 0; e < t.length; e++) {
-                                        try {
-                                            t[e](this)
-                                        } catch (n) {
-                                            Error
-                                                .report(n,
-                                                    "callbacks on Chat Layout")
-                                        }
-                                    }
-                                    return this.mainDiv
-                                }
-                            } catch (r) {
-                                Error.report(r,
-                                    "manipulate Chat Layout")
-                            }
-                            t.push(e)
-                        }
-                    }
-                }($);
-                _self.ChatSend = function (e) {
-                    var t = [];
-                    return function (e) {
-                        if (t.length == 0) {
-                            try {
-                                window.Chat.Layout.Tab.prototype._send = window.Chat.Layout.Tab.prototype.send;
-                                window.Chat.Layout.Tab.prototype.send = function () {
-                                    for (var e = 0; e < t.length; e++) {
-                                        try {
-                                            t[e](this)
-                                        } catch (n) {
-                                            Error
-                                                .report(n,
-                                                    "callbacks on Chat Send")
-                                        }
-                                    }
-                                    this._send()
-                                }
-                            } catch (n) {
-                                Error.report(n, "manipulate Chat Send")
-                            }
-                            t.push(e)
-                        }
-                    }
-                }($);
-                _self.MarketOfferTable = function (e) {
-                    var t = [];
-                    return function (e) {
-                        if (t.length == 0) {
-                            try {
-                                var n = MarketWindow.Offer.updateTable;
-                                MarketWindow.Offer.updateTable = function (
-                                    e) {
-                                    n(e);
-                                    for (var r = 0; r < t.length; r++) {
-                                        try {
-                                            t[r](e)
-                                        } catch (i) {
-                                            Error
-                                                .report(i,
-                                                    "callbacks MarketOfferTable")
-                                        }
-                                    }
-                                }
-                            } catch (r) {
-                                Error.report(r,
-                                    "manipulate MarketOfferTable")
-                            }
-                            t.push(e)
-                        }
-                    }
-                }($);
-                _self.MarketWatchlistTable = function (e) {
-                    var t = [];
-                    return function (e) {
-                        if (t.length == 0) {
-                            try {
-                                var n = MarketWindow.Watchlist.updateTable;
-                                MarketWindow.Watchlist.updateTable = function (
-                                    e) {
-                                    n(e);
-                                    for (var r = 0; r < t.length; r++) {
-                                        try {
-                                            t[r](e)
-                                        } catch (i) {
-                                            Error
-                                                .report(i,
-                                                    "callbacks MarketWatchlistTable")
-                                        }
-                                    }
-                                }
-                            } catch (r) {
-                                Error
-                                    .report(r,
-                                        "manipulate MarketWatchlistTable")
-                            }
-                            t.push(e)
-                        }
-                    }
-                }($);
-                _self.ItemUse = function ($) {
-                    var callbacks = [];
-                    return function (callback) {
-                        if (callbacks.length == 0) {
-                            ItemUse.twdb = function (e, t) {
-                                try {
-                                    for (var n = 0; n < callbacks.length; n++) {
-                                        callbacks[n](e, t)
-                                    }
-                                } catch (r) {
-                                    Error.report(r,
-                                        "callbacks on ItemUse")
-                                }
+                                window.Chat.Layout.Tab.prototype.twdb_send = window.Chat.Layout.Tab.prototype.send;
+                                window.Chat.Layout.Tab.prototype.send = function() {
+                                    for (var i=0; i<callbacks.length; i++) {
+                                        try { callbacks[i](this); }
+                                        catch (e) { Error.report(e, 'callbacks on Chat Send'); };
+				    };
+				    this.twdb_send();
+				};
+                            } catch (e) {
+                                Error.report(e, "manipulate Chat Send");
+                                window.Chat.Layout.Tab.prototype.send = window.Chat.Layout.Tab.prototype.twdb_send;
                             };
-                            var org = ItemUse.doIt;
+                        };
+			callbacks.push(callback);	// same as above
+                    };
+                })($);
+                
+                /* ============================== Market ============================== */
+                _self.MarketOfferTable = (function($) {
+		    var callbacks = [];
+		    return function(callback) {
+			if (callbacks.length == 0) {
+				try {
+				    save["MarketWindow.Offer.updateTable"] = MarketWindow.Offer.updateTable;
+				    MarketWindow.Offer.updateTable = function(data) {
+					save["MarketWindow.Offer.updateTable"](data);
+					for (var i=0; i<callbacks.length; i++) {
+					    try { callbacks[i](data); }
+					    catch (e) { Error.report(e, 'callbacks MarketOfferTable'); };
+					};
+				    };
+				} catch(e) {
+				    Error.report(e, 'manipulate MarketOfferTable');
+				    MarketWindow.Offer.updateTable = save["MarketWindow.Offer.updateTable"];
+				};
+			};
+			callbacks.push(callback);	// same as above
+		    };
+                })($);
+                
+                _self.MarketWatchlistTable = (function($) {
+		    var callbacks = [];
+		    return function(callback) {
+			if (callbacks.length == 0) {
+				try {
+				    save["MarketWindow.Watchlist.updateTable"] = MarketWindow.Watchlist.updateTable;
+				    MarketWindow.Watchlist.updateTable = function(data) {
+					save["MarketWindow.Watchlist.updateTable"](data);
+					for (var i=0; i<callbacks.length; i++) {
+					    try { callbacks[i](data); }
+					    catch (e) { Error.report(e, 'callbacks MarketWatchlistTable'); };
+					};
+				    };
+				} catch(e) {
+				    Error.report(e, 'manipulate MarketWatchlistTable');
+				    MarketWindow.Watchlist.updateTable = save["MarketWindow.Watchlist.updateTable"];
+				};
+			};
+			callbacks.push(callback);	// same as above
+		    };
+                })($);
+                
+                _self.MarketWhatIsHotTable = (function($) {
+		    var callbacks = [];
+		    return function(callback) {
+			if (callbacks.length == 0) {
+				try {
+				    save["MarketWindow.WhatIsHot.updateTable"] = MarketWindow.WhatIsHot.updateTable;
+				    MarketWindow.WhatIsHot.updateTable = function(data) {
+					save["MarketWindow.WhatIsHot.updateTable"](data);
+					for (var i=0; i<callbacks.length; i++) {
+					    try { callbacks[i](data); }
+					    catch (e) { Error.report(e, 'callbacks MarketWhatIsHotTable'); };
+					};
+				    };
+				} catch(e) {
+				    Error.report(e, 'manipulate MarketWhatIsHotTable');
+				    MarketWindow.WhatIsHot.updateTable = save["MarketWindow.WhatIsHot.updateTable"];
+				};
+			};
+			callbacks.push(callback);
+		    };
+                })($);
+                
+                /* ============================== ItemUse ============================== */
+                _self.ItemUse = (function ($) {
+		    var callbacks = [];
+		    return function(callback) {
+			if (callbacks.length == 0) {
+			    ItemUse.twdb = function (item, data) {
+				for (var i=0; i < callbacks.length; i++) {
+				    try { callbacks[i](item, data); }
+				    catch(e) { Error.report(e, 'callbacks on ItemUse'); };
+				};
+			    };
+			    
+                            save["ItemUse.doIt"] = ItemUse.doIt;
                             try {
                                 var str = ItemUse.doIt.toString();
-                                var pos = str
-                                    .indexOf("EventHandler.signal('item_used'");
+                                var pos = str.indexOf("EventHandler.signal('item_used'");
                                 var inject = str.substr(0, pos) + "ItemUse.twdb(itemId,res);" + str.substr(pos);
-                                eval("ItemUse.doIt = " + inject)
+                                eval("ItemUse.doIt = " + inject);
                             } catch (e) {
-                                ItemUse.doIt = org;
+                                ItemUse.doIt = save["ItemUse.doIt"];
                                 Error.report(e, "manipulate ItemUse")
-                            }
-                        }
-                        callbacks.push(callback)
-                    }
-                }($);
-                _self.injectSetDuelMotivation = function (e) {
-                    try {
-                        if (!window.Character._setDuelMotivation) {
-                            window.Character._setDuelMotivation = window.Character.setDuelMotivation;
-                            window.Character.setDuelMotivation = function (
-                                e) {
-                                try {
-                                    this._setDuelMotivation(e);
-                                    for (var t = 0; t < _duelmoti.length; t++) {
-                                        _duelmoti[t](e)
-                                    }
-                                } catch (n) {
-                                    Error
-                                        .report(n,
-                                            "Character.setDuelMotivation")
-                                }
-                            }
-                        }
-                    } catch (t) {
-                        Error
-                            .report(t,
-                                "manipulate Character.setDuelMotivation")
-                    }
-                    _duelmoti.push(function (t) {
-                        e(t)
-                    })
-                };
+                            };
+                        };
+                        callbacks.push(callback);
+                    };
+                })($);
+                
+                /* ============================== DuelMotivation ============================== */
+                _self.injectSetDuelMotivation = (function($) {
+		    var callbacks = [];
+		    return function(callback) {
+			if (callbacks.length == 0) {
+			    try {
+				Character.twdb_setDuelMotivation = Character.setDuelMotivation;
+				Character.setDuelMotivation = function(data) {
+				    this.twdb_setDuelMotivation(data);
+				    for (var i=0; i<callbacks.length; i++) {
+					try { callbacks[i](data); }
+					catch (e) { Error.report(e, 'callbacks setDuelMotivation'); };
+				    };
+				};
+			    } catch(e) {
+				Error.report(e, 'manipulate setDuelMotivation');
+				Character.setDuelMotivation = twdb_Character.setDuelMotivation;
+			    };
+			};
+			callbacks.push(callback);
+		    };
+                })($);
+                
+                
                 _self.injectItem = function (type, name, callback) {
                     var item = type + "Item";
                     if (typeof save[item] == "undefined") {
@@ -8108,8 +8114,10 @@
                     })
                 };
                 return _self
-            }($);
+            })($);
             Debugger.GameInject = GameInject;
+            
+            
             var DataManager = function (e) {
                 var t = {};
                 var n = false;
