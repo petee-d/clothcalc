@@ -131,7 +131,7 @@
             var _public = {};
             
 	    /**
-	     * Adds a new image button to the right of the character / avatar GUI element.
+	     * Appends CSS style definitions to the document's head.
 	     *
 	     * @param {String} cssString Standard CSS definition(s) "selector {style;}".
 	     * @param {String} optionalId Optional ID to create multiple <style> elements.
@@ -148,7 +148,7 @@
 	    return _public;
         })(jQuery);
             
-        TWDB.ClothCalc = new Object({
+        TWDB.ClothCalc = {
             uid: "twdb_clothcalc",
             _sk4attr: {
                 'strength': [5, 6, 7, 8, 9],
@@ -239,13 +239,7 @@
                 worker: 4,
                 soldier: 5
             },
-            ready: false,
-            data: {
-                skills: {},
-                items: {},
-                jobs: {},
-                custom: {}
-            },
+            data: { skills: {}, items: {}, jobs: {}, custom: {} },
             calcdata: {
                 skills: {},
                 items: {},
@@ -257,17 +251,13 @@
                 used: {},
                 loaded: false
             },
+            ready: false,
             loaded: false,
             up2date: true,
-            gui: {
-                job: {},
-                custom: {}
-            },
-            init: function () {
-                if (this.ready) {
-                    return
-
-                }
+            gui: { job: {}, custom: {} },
+            
+            init: function() {
+                if (this.ready) { return; };
                 var e = this;
                 this.jobs.setParent(this);
                 this.joblist.parent = this;
@@ -393,6 +383,7 @@
                     }
                 }
             },
+            
             finishInit: function () {
                 if (typeof this.BagInt == "undefined") {
                     return
@@ -406,6 +397,7 @@
                     this.addButton()
                 }
             },
+            
             addButton: function () {
                 if (this.ready === false) {
                     return
@@ -443,6 +435,7 @@
                 // />').append(t).append('<div
                 // class="menucontainer_bottom" />'))
             },
+            
             isBetterItem: function (e) {
                 // Dun verify if item can improve job lp or is
                 // set part
@@ -494,6 +487,7 @@
                 }
                 return false;
             },
+            
             checkSkill: function () {
                 for (var e in this.data.skills) {
                     if (typeof this.calcdata.skills[e] == "undefined") {
@@ -505,6 +499,7 @@
                 }
                 return false
             },
+            
             checkItems: function () {
                 for (var e in this.data.items) {
                     if (typeof this.calcdata.items[e] == "undefined") {
@@ -525,6 +520,7 @@
                 }
                 return false
             },
+            
             checkCustom: function () {
                 var e = 0;
                 for (var e in this.data.custom) {
@@ -548,6 +544,7 @@
                 }
                 return false
             },
+            
             checkCache: function () {
                 var e = this.checkItems();
                 var t = false; // this.checkSkill(); Dun
@@ -577,6 +574,7 @@
                     TWDB.DataManager.loadData(true)
                 })
             },
+            
             open: function (e, t) {
                 var n = this;
                 if (this.ready == false) {
@@ -733,6 +731,7 @@
                 this.gui.window.restoreAppearance({h: 410, w: 310, x: l.x, y: l.y});
                 return;
             },
+            
             finishOpening: function() {
                 this.jobs.mode(2);
                 this.joblist.init(this);
@@ -746,6 +745,7 @@
                     this.gui.window.hideLoader();
                 };
             },
+            
             showTab: function(e, t) {
                 this.gui.window.activateTab(t);
                 this.gui.window.showLoader();
@@ -764,6 +764,7 @@
                 };
                 this.gui.window.hideLoader();
             },
+            
             getGameData: function(e) {
                 var t = this;
                 if (typeof e == "undefined") {
@@ -787,6 +788,7 @@
                     };
                 };
             },
+            
             getSkill: function(e) {
                 if (typeof e == "undefined") {
                     var t = this;
@@ -801,6 +803,7 @@
                     TWDB.Eventer.trigger("getSkill");
                 };
             },
+            
             getItems: function(e) {
                 if (typeof e == "undefined") {
                     var t = this;
@@ -833,6 +836,7 @@
                     TWDB.Eventer.trigger("getItems")
                 }
             },
+            
             getJobs: function (e) {
                 if (typeof e == "undefined") {
                     var t = this;
@@ -847,6 +851,7 @@
                     TWDB.Eventer.trigger("getJobs")
                 }
             },
+            
             isItemUsable: function (e, t) {
                 var n = ItemManager.get(e);
                 if (typeof n == "undefined") {
@@ -871,6 +876,7 @@
                 }
                 return true
             },
+            
             itemHasBonus: function (e) {
                 if (e.type == "left_arm" || e.type == "right_arm") {
                     return true
@@ -924,6 +930,7 @@
                 }
                 return false
             },
+            
             handleTWDBData: function () {
                 var e = TWDB.DataManager.getData("twdb");
                 var t = this;
@@ -963,7 +970,8 @@
                 TWDB.Cache.save("calcdata", this.calcdata);
                 this.finishOpening()
             },
-            jobs: new Object({
+            
+            jobs: {
                 selected: 0,
                 base: 1,
                 basetime: 1,
@@ -1283,7 +1291,8 @@
 			+ '<tr><td><img src="' + TWDB.images.iconMoti + '" title=" #MOTIVATION# "  height="15px" width="15px" /></td><td style="font-size:10px;vertical-align:bottom;">' + t.resmotivation * 100 + ' (' + Math.round(t.motivation * 100) + ")%</td><td></td><td></td></tr>" + "</table>";
                     return n;
                 }
-            }),
+            },
+            
             joblist: {
                 ready: false,
                 gui: {},
@@ -1618,7 +1627,8 @@
                     this.gui.main.hide()
                 }
             },
-            customs: new Object({
+            
+            customs: {
                 selected: 0,
                 setParent: function (e) {
                     this.parent = e
@@ -2137,7 +2147,8 @@
                                 this.parent.data.custom)
                     }
                 }
-            }),
+            },
+            
             getSkillImg: function (e, t) {
                 var n = 1;
                 var r = 1;
@@ -2272,7 +2283,8 @@
                 u = jQuery(u);
                 return u.append(s)
             },
-            bag: new Object({
+            
+            bag: {
                 stack: {},
                 interval: false,
                 setParent: function (e) {
@@ -2395,7 +2407,8 @@
                         }
                     }
                 }
-            }),
+            },
+            
             setUsedItems: function () {
                 for (var e in this.calcdata.jobs) {
                     for (var t in this.calcdata.jobs[e].cloth) {
@@ -2418,6 +2431,7 @@
                     }
                 }
             },
+            
             jobSearch: function() {
                 var _this = this;
                 if (this.jobs.selected == 0) {
@@ -2468,6 +2482,7 @@
                 this.gui.job.searchDiv.append($dom);
                 this.gui.bag.append(this.gui.job.searchDiv);
             },
+            
             isUsedItem: function (e) {
                 if (this.calcdata.used[e]) {
                     return true
@@ -2475,12 +2490,14 @@
                     return false
                 }
             },
+            
             getClothForJob: function (e) {
                 if (!isDefined(this.calcdata.jobs[e]) || !isDefined(this.calcdata.jobs[e].cloth)) {
                     return null
                 }
                 return this.calcdata.jobs[e].cloth
             },
+            
             getLPForJob: function (e) {
 
                 if (!isDefined(this.calcdata.jobs[e]) || !isDefined(this.calcdata.jobs[e].laborpoints)) {
@@ -2488,16 +2505,18 @@
                 }
                 return this.calcdata.jobs[e].laborpoints
             },
+            
             getSelectedJob: function () {
                 return this.jobs.selected
             },
+            
             isLoaded: function () {
                 if (isDefined(this.calcdata.loaded)) {
                     return this.calcdata.loaded
                 }
                 return false
             }
-        });
+        };
         (function ($) {
             var _base = TWDB;
             var w = window;
