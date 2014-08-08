@@ -3384,7 +3384,7 @@
                     'strength': [5, 6, 7, 8, 9],
                     'flexibility': [10, 11, 12, 13, 14],
                     'dexterity': [15, 16, 17, 18, 19],
-                    'charisma': [20, 21, 22, 23, 24, 25]
+                    'charisma': [20, 21, 22, 23, 24]
                 };
                 var _self = {};
                 var bReady = false;
@@ -3492,25 +3492,31 @@
                                             skills[idQ] += Math[roundingType]
                                                 (Character.level * obj.bonus.value);
                                             bonuss[level]['skills'][idQ] = skills[idQ];
-                                        } else {
-
+                                            
+                                        } else if(obj.bonus.type == 'attribute') {
                                             for (iT = 0; iT < skInNum[obj.bonus.name].length; iT++) {
                                                 var idS = skInNum[obj.bonus.name][iT];
-
                                                 if (!isDefined(skills[idS]))
                                                     skills[idS] = 0;
                                                 skills[idS] += Math[roundingType]
                                                     (Character.level * obj.bonus.value);
                                                 bonuss[level]['skills'][idS] = skills[idS];
-
                                             }
+                                            
+                                        } else if(obj.bonus.type == 'job') {
+                                            if (!isDefined(bonuss[level]['jobs'][obj.bonus.job]))
+                                                bonuss[level]['jobs'][obj.bonus.job] = 0;
+                                            bonuss[level]['jobs'][obj.bonus.job] += Math[roundingType]
+                                                (Character.level * obj.bonus.value);
+                                        
                                         }
+                                        // we ignore other bonuses for purposes of this calculation
                                     }
+                                    
                                     break;
                                 default:
 
                                     break;
-
                                 }
 
                             }
