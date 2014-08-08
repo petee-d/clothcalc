@@ -436,55 +436,31 @@
                 // class="menucontainer_bottom" />'))
             },
             
-            isBetterItem: function (e) {
-                // Dun verify if item can improve job lp or is
-                // set part
-
-                var t = ItemManager.get(e);
-                if (isDefined(t) && isDefined(t.set)) {
-                    return true; // item better is set parts,
-                    // don't calculate and
-                    // update
-                }
-
-                var n = this.calcdata.jobs;
-
-                for (var iU in n) {
-                    var jobid = iU;
-
-                    var o = this.getClothForJob(jobid);
-
-                    if (!isDefined(o)) {
-
-                        continue
-                    }
-
-                    var total = 0;
-
-                    var bonusItem = TWDB.Calc
-                        .getItemBonusForJob(e, jobid);
-
-                    if (isDefined(o[this._type2id[t.type]])) {
-
-                        var f = ItemManager
-                            .get(o[this._type2id[t.type]].id);
-                        if (isDefined(f) && isDefined(f.set)) {
-
-                            continue; // item from betters is
-                            // set part, don't
-                            // calculate
-                        }
-                        total += TWDB.Calc.getItemBonusForJob(
-                            f.item_id, jobid)
-
-                    }
-
-                    if (bonusItem > total) {
-
-                        return true; // Found a job where
-                        // item is better
-                    }
-                }
+            isBetterItem: function (itemId) {
+                // Dun verify if item can improve job lp or is set part
+                var item = ItemManager.get(itemId);
+                if (isDefined(item) && isDefined(item.set)) {
+                    return true; // item better is set parts, don't calculate; update
+                };
+                for (var jobId in this.calcdata.jobs) {
+                    var currentBestClothes = this.getClothForJob(jobId);
+                    if (!isDefined(currentBestClothes)) {
+                        return true; // Found a job where we have no items at all, calculate!
+                    };
+                    
+                    var bonusCurrentItem = 0;
+                    var bonusNewItem = TWDB.Calc.getItemBonusForJob(itemId, jobId);
+                    if (isDefined(currentBestClothes[this._type2id[item.type]])) {
+                        var currentBestItem = ItemManager.get(currentBestClothes[this._type2id[item.type]].id);
+                        if (isDefined(currentBestItem) && isDefined(currentBestItem.set)) {
+                            continue; // item from betters is set part, don't calculate
+                        };
+                        bonusCurrentItem = TWDB.Calc.getItemBonusForJob(currentBestItem.item_id, jobId);
+                    };
+                    if (bonusNewItem > bonusCurrentItem) {
+                        return true; // Found a job where item is better
+                    };
+                };
                 return false;
             },
             
@@ -500,25 +476,23 @@
                 return false
             },
             
-            checkItems: function () {
-                for (var e in this.data.items) {
-                    if (typeof this.calcdata.items[e] == "undefined") {
-                        if (this
-                            .isBetterItem(this.data.items[e].id)) {
+            checkItems: function() {
+                for (var key in this.data.items) {
+                    if (typeof this.calcdata.items[key] == "undefined") {
+                        if (this.isBetterItem(this.data.items[key].id)) {
                             return true;
-                        }
-
-                    }
-                }
-                for (var e in this.calcdata.items) {
-                    if (typeof this.data.items[e] == "undefined") {
-                        if (this
-                            .isBetterItem(this.calcdata.items[e].id)) {
-                            return true
-                        }
-                    }
-                }
-                return false
+                        };
+                    };
+                };
+                for (var key in this.calcdata.items) {
+                    if (typeof this.data.items[key] == "undefined") {
+			if (!isDefined(ItemManager.get(key))) { console.log("Item ID="+key+" seems to be no more defined..."); }; // rare case that an item that was previously best for a job got removed from TW .. I'm curious
+                        // if (this.isBetterItem(this.calcdata.items[key].id)) {	// check doesn't make sense - if our previous best item is gone, we need to update!
+                            return true;
+                        // };
+                    };
+                };
+                return false;
             },
             
             checkCustom: function () {
@@ -7677,11 +7651,12 @@
                     };
                 })($);
                 
+                /** TODO: create callback array instead of individual functions **/
                 _self.injectItem = function(type, name, callback) {
                     var item = type + "Item";
                     if (typeof save[item] == "undefined") {
                         save[item] = tw2widget[item].prototype.getMainDiv;
-                    }
+                    };
                     try {
                         tw2widget[item].prototype["TWDB" + name] = function(item) {
                             try { return callback(item); }
@@ -7699,21 +7674,18 @@
                     };
                 };
 
+                /** TODO: create callback array instead of individual functions **/
                 _self.injectTrader = function(name, callback) {
                     if (typeof save["west.game.shop.item.view.prototype.render"] == "undefined") {
-                        save["Trader"] = west.game.shop.item.view.prototype.render.toString()
+                        save["west.game.shop.item.view.prototype.render"] = west.game.shop.item.view.prototype.render;
                     }
                     try {
-                        west.game.shop.item.view.prototype["TWDB" + name] = function(e) {
-                            try {
-                                return callback(e)
-                            } catch (t) {
-                                Error.report(t, "injected " + e + " function: " + name)
-                            }
-                            return ""
+                        west.game.shop.item.view.prototype["TWDB" + name] = function(item) {
+                            try { return callback(item); }
+			    catch (e) { Error.report(e, "callback on injectTrader, function: " + name); return ""; };
                         }
                     } catch (e) {
-                        Error.report(e, "inject " + item + " function: " + name)
+                        Error.report(e, "injectTrader, creating callback function: " + name)
                     }
                     try {
                         var str = west.game.shop.item.view.prototype.render.toString();
@@ -7722,11 +7694,12 @@
                         var newfunction = str.replace("return $item", inject + "\n return $item");
                         eval("west.game.shop.item.view.prototype.render = " + newfunction)
                     } catch (e) {
-                        Error.report(e, "west.game.shop.item.view.prototype.render");
-                        eval("west.game.shop.item.view.prototype.render = " + save["Trader"])
+                        Error.report(e, "manipulate west.game.shop.item.view.prototype.render");
+                        west.game.shop.item.view.prototype.render = save["west.game.shop.item.view.prototype.render"];
                     }
                 };
                 
+                /** TODO: create callback array instead of individual functions **/
                 _self.injectMarket = function (name, callback) {
                     if (typeof save.MarketWindow == "undefined") {
                         save.MarketWindow = MarketWindow.getClearName
