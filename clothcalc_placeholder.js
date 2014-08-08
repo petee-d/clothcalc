@@ -11,16 +11,18 @@
 // @downloadURL http://tw-db.info/cache/userscripts/clothcalc/dev_clothcalc_de.user.js
 // @updateURL http://tw-db.info/cache/userscripts/clothcalc/dev_clothcalc_de.meta.js
 // ==/UserScript==
+
 /**
  * News on this update :
- * - fix for buy tip in the new shop
- * - option to save your preferences in the market sell dialog
- * - duel motivation bar is replaced by a K.O. timer when you died
- * - reminder for the level 600 crafting recipe waiting periods
- * - added option to avoid nuggets as default payment in event games [must be explicitely enabled] 
- * - added option to skip the Premium dialog when using fetch all in the market [must be explicitely enabled] 
- * - tiny improvements to the TW-DB settings dialog
+ * - 
+ * - 
+ * - 
+ * - 
+ * - 
+ * -  
+ * - 
  * */
+ 
 (function (f) {
     var d = document,
         s = d.createElement('script');
@@ -34,10 +36,8 @@
     // if it exists, there is another cc/lang installed, so do not
     // start this one
 
-    if (isDefined(window.TWDB)) {
-        (new west.gui.Dialog(TWDB.script.name,
-            '<div class="txcenter"><b><br>' + "#CC_INSTALLED_TWICE#" + '</br></b></div>',
-            west.gui.Dialog.SYS_WARNING)).addButton("Ok").show();
+    if (isDefined(window.TWDB)) { (new west.gui.Dialog(TWDB.script.name, 
+    	    '<div class="txcenter"><b><br>#CC_INSTALLED_TWICE#</br></b></div>', west.gui.Dialog.SYS_WARNING)).addButton("OK").show();
     } else {
 
         TWDB = {};
@@ -51,9 +51,7 @@
             gameversion: 2.11,
             lang: "eng"
         });
-        try {
-            TWDB.script.notes = jQuery
-                .parseJSON('[{\"version\":\"31\",\"notes\":\"hotfix for game version 2.05\"},{\"version\":\"30\",\"notes\":\"script is now ready for gameversion 2.04\\r\\nthere are still some fields to fix, but the most parts should work \"},{\"version\":\"25\",\"notes\":\"[bonusjobs] security query before reset<br \\\/>\\r\\n[bonusjobs] sorting of the export<br \\\/>\\r\\n[chestanalyser] some stats for future drops of chests, bags & collector cards<br \\\/>\\r\\n[marketreminder] add reminder for market offers<br \\\/>\\r\\n[other] button for deposit money<br \\\/>\"},{\"version\":\"24\",\"notes\":\"[ClothCalc] Bugfix, Motivation was not included at Wages<br \\\/>\\r\\nFeatures listed below comes from an other Userscript \\\"stewues The West Tools\\\"<br \\\/>\\r\\nAs he decided to stop Offering his tool, he has asked me to include this Features into our Script.<br \\\/>\\r\\nFirst at this Point <b>Thanks a lot!<\\\/b> Stewue for your hard Work and your Decision to Offer this Features now through this Script.<br \\\/>\\r\\n- button for sleeping into best hotel room or fort barrack<br \\\/>\\r\\n- confirmation prompt before quest cancel<br \\\/>\\r\\n- hint to deposit cash<br \\\/>\\r\\n- button for last post on ingameforum threads<br \\\/>\\r\\n- moved button for new post on ingameforum to upper menu<br \\\/>\\r\\n- add duelmotivation into userinterface<br \\\/>\\r\\n- remove automation pa hints, like the nugget picture on work queue<br \\\/>\\r\\n- activate Fortrecruitment also for non generals and captains<br \\\/>\\r\\n- enhance the Fortrecruitment through some more Features<br \\\/>\\r\\n- the market map<br \\\/>\"},{\"version\":\"23\",\"notes\":\"[general] script is ready for version 2.03, all features should be working<br \\\/>\\r\\n[clothcalc] added the wages values, honour to petee for his great work to find out the wage formula<br \\\/>\"},{\"version\":\"22\",\"notes\":\"[clothcalc] fixed Bug with faulty Detection of corrupted Cache<br \\\/>\\r\\n[questwiki] Show tw-db Link on Questwindow<br \\\/>\\r\\n[questswiki] Show total Amount of Items at Inventory<br \\\/>\\r\\n[questswiki] Button for Open the ClothCalc Window<br \\\/>\\r\\n[buytip] added new sets<br \\\/>\\r\\n[buytip] fort boni of natty where wrong<br \\\/>\"},{\"version\":\"21\",\"notes\":\"[general] fixed failed script start at gameversion 2.02<br \\\/>\\r\\n[errorlog] fixed Error through new Notification-Bar Object at gameversion 2.02<br \\\/>\\r\\n[settings] added Group for the SellTip Settings<br \\\/>\\r\\n[SellTip] add Option for never sell Set-Items<br \\\/>\\r\\n[bonusjobs] discovered Bonus Jobs are now cached<br \\\/>\\r\\n[bonusjobs] add Export and Import for discovered Bonus Jobs<br \\\/>\\r\\n[other] Option to remove the Game-Hints on Notification Bar, which could not be disabled through Game-Settings<br \\\/>\\r\\n[other] Option for a Scroll-To Inpute Field on Minimap<br \\\/>\\r\\n[ClothCalc] fixed the Bug, that Joblist is sometime not clickable<br \\\/>\\r\\n[ClothCalc] fixed the Bug, missing fastes animal on bestwears without animal<br \\\/>\\r\\n[chat] fixed bug for missing smiley and color inject on chat windows, which are already opend on gameloading<br \\\/>\\r\\n[general] removed script parts for gameversion 1.36\"},{\"version\":\"20\",\"notes\":\"[general] reworked the Script for the-west Version 2.0 <br \\\/>\\r\\n[general] Release Notes for Script is added ingame <br \\\/>\\r\\n[Importer] the Import Userscript is now included in ClothCalc Userscript (for Gameversion 1.36 you will still need it) <br \\\/>\\r\\n[Importer] the Alliance Import Script is now directly available through the script <br \\\/>\\r\\n[ClothCalc] Basic Function is working (showing best cloth) <br \\\/>\\r\\n[ClothCalc] <b>Values for Wages and Danger when sorting the Joblist are wrong!<\\\/b> , so temporarly this feature this sorting is removed until our date is up2date<br \\\/>\\r\\n[ClothCalc] preselecting the selected Job on Minimap is ready for Version 2.0 <br \\\/>\\r\\n[ClothCalc] the sorted job List (experience, wages) could be changed from normal mode to value per minute to value per energy point <br \\\/>\\r\\n[ClothCalc] Joblist is reworked, jobs could now be searched and jobs have little popup with complete job data <br \\\/>\\r\\n[FavoriteJob] this Feature has been removed because it now emulates a premium feature <br \\\/>\\r\\n[SearchJob]the jobsearch is Version 2.0 ready, the direct start of one of the four shown job is a pa automation only feature (innos decision]<br \\\/>\\r\\n[ReportAnalyser] the basic function is reworked for game version 2.0 <br \\\/>\\r\\n[ReportAnalyser] detailed job report and detailed item report will be added later <br \\\/>\\r\\n[Chat] is ready for Version 2.0 <br \\\/>\\r\\n[BuyTip] is ready for Version 2.0<br \\\/>\\r\\n[BuyTip] set bonus is now also included here<br \\\/>\\r\\n[BuyTip] also shown on market now<br \\\/>\\r\\n[Collector] is ready for Version 2.0<br \\\/>\\r\\n[Collector] also shown on market now<br \\\/>\\r\\n[SellTip] is ready for Version 2.0<br \\\/>\\r\\n[BonusJobs]Bonus Jobs you\\u2019ve found are now shown on minimap<br \\\/>\"},{\"version\":\"10\",\"notes\":\"[ClothCalc] added Favorite Job Feature (petee)<br \\\/>disabled script for TW2.0\"},{\"version\":\"9\",\"notes\":\"[Chat] added popup on permanent whisper icon<br \\\/>\\r\\n[Chat] history ist now saved on localStorage (color, whisper)<br \\\/>\\r\\n[Chat] added permanent whisper to player menu<br \\\/>\\r\\n[Chat] added inputfield to direct input color number<br \\\/>\\r\\n[Chat] added bold and captialize options<br \\\/>\\r\\n[analyser] added table footer with overall values<br \\\/>\\r\\n[analyser] added statistics reset function<br \\\/>\\r\\n[analyser] exclude questitems from item statistic<br \\\/>\\r\\n[analyser] granular report for items (Item-Report), click on items at new table footer<br \\\/>\\r\\n[calc] added option to switch position of cloth calc window between left and right<br \\\/>\\r\\n[enhancements] added feature so you can hold the +\\\/- buttons in the skills window to change the value faster<br \\\/>\\r\\n\"},{\"version\":\"8\",\"notes\":\"added settings window<br \\\/>\\r\\nadded chat features (permanent wisper, color, smilies)<br \\\/>\\r\\nadded Report Analyser<br \\\/>\\r\\nadded second Buytip Icon if item gives bonus for current selected job<br \\\/>\\r\\nfixed with * marker for new items on market<br \\\/>\\r\\nfixed several small bugs on job search feature<br \\\/>\\r\\nfixed buyTip was not shown without calcdata update<br \\\/>\"},{\"version\":\"7\",\"notes\":\"add new feature jobsearch (petee)<br \\\/>\\r\\n\\\"new\\\" Icon will now also look at Wear Items (thx Inno optimizing your Wear Object)<br \\\/>\\r\\nchanged max gameversion to 1.36 for coming new gameversion (no problems found with new gameversion)<br \\\/>\\r\\nadded new Script Loader with Info on footer (next to servertime)<br \\\/>\"},{\"version\":\"6\",\"notes\":\"code cleaning and optimising<br \\\/>\\r\\nupdate minimap on jobchange if minimap is opend<br \\\/>\\r\\nset limit for custom jobs from 10 to 15<br \\\/>\\r\\nfixed several problems with attributes on customs<br \\\/>\\r\\nadded images for fort-customs and for attributes on customs<br \\\/>\\r\\nadded icon on Traders with tooltip for which jobs this item would give a better bonus<br \\\/>\\r\\nadded icon on Inventory with tooltip of bonus on selected job<br \\\/>\\r\\non rev. 59 added colored tooltip for better visibility<br \\\/>\\r\\non rev. 59 added icon for unused items on inventory<br \\\/>\"},{\"version\":\"5\",\"notes\":\"eleminating browser freezes<br \\\/>\\r\\nmaking custom section customisable<br \\\/>\\r\\nshowing best and current \\\"job\\\" values on custom section<br \\\/>\\r\\nchanges on cache system<br \\\/>\\r\\ncorrected code verification on rev. 34<br \\\/>\"},{\"version\":\"4\",\"notes\":\"fixed removed indexedDB.setVersion on Mozilla<br \\\/>\\r\\nbetter error handling of indexedDB, click on \\\"cache error\\\" icon will initiate a reset of indexedDB<br \\\/>\\r\\nsolution for Cache Problem on Scriptupdate with Chrome (not working on this update :( )<br \\\/>\\r\\nearlier button add, opacity to 50% until initializing isn\\u0027t finished<br \\\/>\\r\\nten second sleeper on initializing to handle chrome freezes<br \\\/>\\r\\nadded marker for items on traders which are not at own inventory<br \\\/>\\r\\nadded \\\"*\\\" prefix on market for all items which are not at own inveontory<br \\\/>\\r\\nfixed wrong levelbonus for soldiers<br \\\/>\\r\\nprevent script from be active in more than one language<br \\\/>\"},{\"version\":\"3\",\"notes\":\"fixed problem with need of cache update<br \\\/>\\r\\nfixed problem that inventory window was closed<br \\\/>\\r\\nadded best animal to every job<br \\\/>\\r\\nadded mark of weared items\"},{\"version\":\"2\",\"notes\":\"recreate the script as whole userscript without reloading javascript code (in combine with indexedDB the script will working also if tw-db is temporary down)<br \\\/>\\r\\nimplementation of an update system (user get a new Window with update link if new script version is available)<br \\\/>\\r\\ncustom section with static custom activities (is prepared for making it user adjustable later)<br \\\/>\\r\\ndisplay skill images for selected jobs<br \\\/>\\r\\nsome important internal management parts\"}]');
+        try { TWDB.script.notes = jQuery.parseJSON('[{\"version\":\"99\",\"notes\":\"DEV version\"}]');
         } catch (e) {};
 
         // START OF SCRIPT CODE THAT CAN BE EDITED IN A RELEASE
@@ -129,16 +127,28 @@
             notiBell: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACwAAAAsCAYAAAAehFoBAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDpDMjhFNDI0QzYyOURFMjExOEQwMUUwQkVBMzJBREI2MiIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDo4N0EzMEJDMDlENjIxMUUyODhFNUM1MTdFQzA2NTAwQiIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo4N0EzMEJCRjlENjIxMUUyODhFNUM1MTdFQzA2NTAwQiIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M2IChXaW5kb3dzKSI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkMzOEU0MjRDNjI5REUyMTE4RDAxRTBCRUEzMkFEQjYyIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOkMyOEU0MjRDNjI5REUyMTE4RDAxRTBCRUEzMkFEQjYyIi8+IDwvcmRmOkRlc2NyaXB0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",
             jobTime: "data:image/png;base64,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"
         });
-        TWDB.Util = function($) {
+        TWDB.Util = (function($) {
             var _public = {};
-            var _addCss = function(cssString) {
-		$('head').append($('<style type="text/css">').text(cssString));
-	    };
-	    _public.addCss = _addCss;
-	    return _public;
-        }(jQuery);
             
-        TWDB.ClothCalc = new Object({
+	    /**
+	     * Appends CSS style definitions to the document's head.
+	     *
+	     * @param {String} cssString Standard CSS definition(s) "selector {style;}".
+	     * @param {String} optionalId Optional ID to create multiple <style> elements.
+	     *				  Standard ID is twdb_css, if param is present it's twdb_css_optionalId.
+	     */            
+            var _addCss = function(cssString, optionalId) {
+            	var id = "twdb_css";
+            	if (typeof optionalId != "undefined" && typeof optionalId == "string") { id += "_" + optionalId.replace(/\w+/g, "")};
+            	if ($("head style#" + id).append(cssString).length == 1) { return; }
+		else { $("head").append($('<style type="text/css" id="' + id +'">').text(cssString)) };
+	    };
+	    _public.addCss = function(cssString, optionalId) { return _addCss(cssString, optionalId); };
+	    
+	    return _public;
+        })(jQuery);
+            
+        TWDB.ClothCalc = {
             uid: "twdb_clothcalc",
             _sk4attr: {
                 'strength': [5, 6, 7, 8, 9],
@@ -229,13 +239,7 @@
                 worker: 4,
                 soldier: 5
             },
-            ready: false,
-            data: {
-                skills: {},
-                items: {},
-                jobs: {},
-                custom: {}
-            },
+            data: { skills: {}, items: {}, jobs: {}, custom: {} },
             calcdata: {
                 skills: {},
                 items: {},
@@ -247,17 +251,13 @@
                 used: {},
                 loaded: false
             },
+            ready: false,
             loaded: false,
             up2date: true,
-            gui: {
-                job: {},
-                custom: {}
-            },
-            init: function () {
-                if (this.ready) {
-                    return
-
-                }
+            gui: { job: {}, custom: {} },
+            
+            init: function() {
+                if (this.ready) { return; };
                 var e = this;
                 this.jobs.setParent(this);
                 this.joblist.parent = this;
@@ -383,6 +383,7 @@
                     }
                 }
             },
+            
             finishInit: function () {
                 if (typeof this.BagInt == "undefined") {
                     return
@@ -396,6 +397,7 @@
                     this.addButton()
                 }
             },
+            
             addButton: function () {
                 if (this.ready === false) {
                     return
@@ -433,57 +435,35 @@
                 // />').append(t).append('<div
                 // class="menucontainer_bottom" />'))
             },
-            isBetterItem: function (e) {
-                // Dun verify if item can improve job lp or is
-                // set part
-
-                var t = ItemManager.get(e);
-                if (isDefined(t) && isDefined(t.set)) {
-                    return true; // item better is set parts,
-                    // don't calculate and
-                    // update
-                }
-
-                var n = this.calcdata.jobs;
-
-                for (var iU in n) {
-                    var jobid = iU;
-
-                    var o = this.getClothForJob(jobid);
-
-                    if (!isDefined(o)) {
-
-                        continue
-                    }
-
-                    var total = 0;
-
-                    var bonusItem = TWDB.Calc
-                        .getItemBonusForJob(e, jobid);
-
-                    if (isDefined(o[this._type2id[t.type]])) {
-
-                        var f = ItemManager
-                            .get(o[this._type2id[t.type]].id);
-                        if (isDefined(f) && isDefined(f.set)) {
-
-                            continue; // item from betters is
-                            // set part, don't
-                            // calculate
-                        }
-                        total += TWDB.Calc.getItemBonusForJob(
-                            f.item_id, jobid)
-
-                    }
-
-                    if (bonusItem > total) {
-
-                        return true; // Found a job where
-                        // item is better
-                    }
-                }
+            
+            isBetterItem: function (itemId) {
+                // Dun verify if item can improve job lp or is set part
+                var item = ItemManager.get(itemId);
+                if (isDefined(item) && isDefined(item.set)) {
+                    return true; // item better is set parts, don't calculate; update
+                };
+                for (var jobId in this.calcdata.jobs) {
+                    var currentBestClothes = this.getClothForJob(jobId);
+                    if (!isDefined(currentBestClothes)) {
+                        return true; // Found a job where we have no items at all, calculate!
+                    };
+                    
+                    var bonusCurrentItem = 0;
+                    var bonusNewItem = TWDB.Calc.getItemBonusForJob(itemId, jobId);
+                    if (isDefined(currentBestClothes[this._type2id[item.type]])) {
+                        var currentBestItem = ItemManager.get(currentBestClothes[this._type2id[item.type]].id);
+                        if (isDefined(currentBestItem) && isDefined(currentBestItem.set)) {
+                            continue; // item from betters is set part, don't calculate
+                        };
+                        bonusCurrentItem = TWDB.Calc.getItemBonusForJob(currentBestItem.item_id, jobId);
+                    };
+                    if (bonusNewItem > bonusCurrentItem) {
+                        return true; // Found a job where item is better
+                    };
+                };
                 return false;
             },
+            
             checkSkill: function () {
                 for (var e in this.data.skills) {
                     if (typeof this.calcdata.skills[e] == "undefined") {
@@ -495,26 +475,26 @@
                 }
                 return false
             },
-            checkItems: function () {
-                for (var e in this.data.items) {
-                    if (typeof this.calcdata.items[e] == "undefined") {
-                        if (this
-                            .isBetterItem(this.data.items[e].id)) {
+            
+            checkItems: function() {
+                for (var key in this.data.items) {
+                    if (typeof this.calcdata.items[key] == "undefined") {
+                        if (this.isBetterItem(this.data.items[key].id)) {
                             return true;
-                        }
-
-                    }
-                }
-                for (var e in this.calcdata.items) {
-                    if (typeof this.data.items[e] == "undefined") {
-                        if (this
-                            .isBetterItem(this.calcdata.items[e].id)) {
-                            return true
-                        }
-                    }
-                }
-                return false
+                        };
+                    };
+                };
+                for (var key in this.calcdata.items) {
+                    if (typeof this.data.items[key] == "undefined") {
+			if (!isDefined(ItemManager.get(key))) { console.log("Item ID="+key+" seems to be no more defined..."); }; // rare case that an item that was previously best for a job got removed from TW .. I'm curious
+                        // if (this.isBetterItem(this.calcdata.items[key].id)) {	// check doesn't make sense - if our previous best item is gone, we need to update!
+                            return true;
+                        // };
+                    };
+                };
+                return false;
             },
+            
             checkCustom: function () {
                 var e = 0;
                 for (var e in this.data.custom) {
@@ -538,6 +518,7 @@
                 }
                 return false
             },
+            
             checkCache: function () {
                 var e = this.checkItems();
                 var t = false; // this.checkSkill(); Dun
@@ -567,6 +548,7 @@
                     TWDB.DataManager.loadData(true)
                 })
             },
+            
             open: function (e, t) {
                 var n = this;
                 if (this.ready == false) {
@@ -723,6 +705,7 @@
                 this.gui.window.restoreAppearance({h: 410, w: 310, x: l.x, y: l.y});
                 return;
             },
+            
             finishOpening: function() {
                 this.jobs.mode(2);
                 this.joblist.init(this);
@@ -736,6 +719,7 @@
                     this.gui.window.hideLoader();
                 };
             },
+            
             showTab: function(e, t) {
                 this.gui.window.activateTab(t);
                 this.gui.window.showLoader();
@@ -754,6 +738,7 @@
                 };
                 this.gui.window.hideLoader();
             },
+            
             getGameData: function(e) {
                 var t = this;
                 if (typeof e == "undefined") {
@@ -777,6 +762,7 @@
                     };
                 };
             },
+            
             getSkill: function(e) {
                 if (typeof e == "undefined") {
                     var t = this;
@@ -791,6 +777,7 @@
                     TWDB.Eventer.trigger("getSkill");
                 };
             },
+            
             getItems: function(e) {
                 if (typeof e == "undefined") {
                     var t = this;
@@ -823,6 +810,7 @@
                     TWDB.Eventer.trigger("getItems")
                 }
             },
+            
             getJobs: function (e) {
                 if (typeof e == "undefined") {
                     var t = this;
@@ -837,6 +825,7 @@
                     TWDB.Eventer.trigger("getJobs")
                 }
             },
+            
             isItemUsable: function (e, t) {
                 var n = ItemManager.get(e);
                 if (typeof n == "undefined") {
@@ -861,6 +850,7 @@
                 }
                 return true
             },
+            
             itemHasBonus: function (e) {
                 if (e.type == "left_arm" || e.type == "right_arm") {
                     return true
@@ -914,6 +904,7 @@
                 }
                 return false
             },
+            
             handleTWDBData: function () {
                 var e = TWDB.DataManager.getData("twdb");
                 var t = this;
@@ -953,7 +944,8 @@
                 TWDB.Cache.save("calcdata", this.calcdata);
                 this.finishOpening()
             },
-            jobs: new Object({
+            
+            jobs: {
                 selected: 0,
                 base: 1,
                 basetime: 1,
@@ -1273,7 +1265,8 @@
 			+ '<tr><td><img src="' + TWDB.images.iconMoti + '" title=" #MOTIVATION# "  height="15px" width="15px" /></td><td style="font-size:10px;vertical-align:bottom;">' + t.resmotivation * 100 + ' (' + Math.round(t.motivation * 100) + ")%</td><td></td><td></td></tr>" + "</table>";
                     return n;
                 }
-            }),
+            },
+            
             joblist: {
                 ready: false,
                 gui: {},
@@ -1608,7 +1601,8 @@
                     this.gui.main.hide()
                 }
             },
-            customs: new Object({
+            
+            customs: {
                 selected: 0,
                 setParent: function (e) {
                     this.parent = e
@@ -2127,7 +2121,8 @@
                                 this.parent.data.custom)
                     }
                 }
-            }),
+            },
+            
             getSkillImg: function (e, t) {
                 var n = 1;
                 var r = 1;
@@ -2262,7 +2257,8 @@
                 u = jQuery(u);
                 return u.append(s)
             },
-            bag: new Object({
+            
+            bag: {
                 stack: {},
                 interval: false,
                 setParent: function (e) {
@@ -2385,7 +2381,8 @@
                         }
                     }
                 }
-            }),
+            },
+            
             setUsedItems: function () {
                 for (var e in this.calcdata.jobs) {
                     for (var t in this.calcdata.jobs[e].cloth) {
@@ -2408,6 +2405,7 @@
                     }
                 }
             },
+            
             jobSearch: function() {
                 var _this = this;
                 if (this.jobs.selected == 0) {
@@ -2458,6 +2456,7 @@
                 this.gui.job.searchDiv.append($dom);
                 this.gui.bag.append(this.gui.job.searchDiv);
             },
+            
             isUsedItem: function (e) {
                 if (this.calcdata.used[e]) {
                     return true
@@ -2465,12 +2464,14 @@
                     return false
                 }
             },
+            
             getClothForJob: function (e) {
                 if (!isDefined(this.calcdata.jobs[e]) || !isDefined(this.calcdata.jobs[e].cloth)) {
                     return null
                 }
                 return this.calcdata.jobs[e].cloth
             },
+            
             getLPForJob: function (e) {
 
                 if (!isDefined(this.calcdata.jobs[e]) || !isDefined(this.calcdata.jobs[e].laborpoints)) {
@@ -2478,16 +2479,18 @@
                 }
                 return this.calcdata.jobs[e].laborpoints
             },
+            
             getSelectedJob: function () {
                 return this.jobs.selected
             },
+            
             isLoaded: function () {
                 if (isDefined(this.calcdata.loaded)) {
                     return this.calcdata.loaded
                 }
                 return false
             }
-        });
+        };
         (function ($) {
             var _base = TWDB;
             var w = window;
@@ -2711,14 +2714,14 @@
                             return
 
                         }
-                        if (window.TheWestApi.version < 2.04) {
-                            (new UserMessage(
-                                "TWDB-ClothCalc Script is deactivated until the Gameversion on your world is updated to 2.04. Sorry",
-                                UserMessage.TYPE_FATAL)).show();
+                        
+                        // Not needed at the moment, but we keep it for the case that there will be another incompatible version change
+                        /* if (window.TheWestApi.version < 2.04) {
+                            (new UserMessage("TWDB-ClothCalc Script is deactivated until the Gameversion on your world is updated to 2.04. Sorry!", UserMessage.TYPE_FATAL)).show();
                             p();
-                            return
+                            return;
+                        }; */
 
-                        }
                         h();
                         return
 
@@ -2805,47 +2808,48 @@
                 return t
             }($);
             Debugger.Loader = Loader;
-            var GameAPI = function (e) {
-                var t = {};
-                var n = {};
-                var r = function () {
-                    if (n.ready) {
-                        return
-
-                    }
-                    i();
-                    s();
-                    n.ready = true
+            
+            
+            
+  ///// complete ////////////////////////
+  //
+  //  Game API: Wrapper for TW API functions;  AVOID FURTHER USE, REPLACE CALLS BY ORIG. API CALLS STEP BY STEP
+  //
+  ///////////////////////////////////////
+            var GameAPI = function ($) {
+                var _self = {};
+                var loader = {};
+                var init = function() {
+                    if (loader.ready) { return; };
+                    guiWrap();
+                    wmanRef();
+                    loader.ready = true;
                 };
-                var i = function () {
+                var guiWrap = function() {
                     GameAPI.gui = {};
-                    var e = GameAPI.gui;
-                    if (w.TheWestApi.version > 2.03) {
-                        for (var t in w.west.gui) {
-                            if (!w.west.gui.hasOwnProperty(t)) {
-                                continue
-                            }
-                            newName = t.toLowerCase();
-                            e[newName] = w.west.gui[t]
-                        }
-                    } else {
-                        for (var t in w.tw2gui) {
-                            if (!w.tw2gui.hasOwnProperty(t)) {
-                                continue
-                            }
-                            newName = t.toLowerCase();
-                            e[newName] = w.tw2gui[t]
-                        }
-                    }
+                    var gui = GameAPI.gui;
+                    // if (w.TheWestApi.version > 2.03) {	// switch not needed atm
+                        for (var key in w.west.gui) {
+                            if (!w.west.gui.hasOwnProperty(key)) { continue; };
+                            newName = key.toLowerCase();
+                            gui[newName] = w.west.gui[key];
+                        };
+                    /* } else {
+                        for (var key in w.tw2gui) {
+                            if (!w.tw2gui.hasOwnProperty(key)) { continue; };
+                            newName = key.toLowerCase();
+                            gui[newName] = w.tw2gui[key];
+                        };
+                    }; */
                 };
-                var s = function () {
-                    GameAPI.wman = wman
-                };
-                n = Loader.add("GameAPI", "tw-db GameAPI", r, {});
-                return t
+                var wmanRef = function() { GameAPI.wman = wman };
+                loader = Loader.add("GameAPI", "tw-db GameAPI", init, {});
+                return _self;
             }($);
             _base.GameAPI = GameAPI;
             Debugger.GameAPI = GameAPI;
+            
+            
             var Cache = function (e) {
                 var t = {};
                 var n = {};
@@ -3900,304 +3904,212 @@
                 return t
             }($);
             Debugger.Tools = Tools;
-            var Updater = function (e) {
-                var t = {};
-                var n = {};
-                var r;
-                var i = false;
-                var s = function () {
-                    if (n.ready) {
-                        return
-
-                    }
-                    r = Window.addTab("notes", "Release Notes",
-                        "Release Notes", function () {
-                            u()
-                        });
-                    if (Cache.load("version") && Script.version + " " + Script.revision != Cache
-                        .load("version")) {
+            
+            
+  ///// complete ////////////////////////
+  //
+  //  Updater Object:   handle the Update Check for Script and the Release Notes
+  //  Init:             should be loader after Window Module and Cache Module
+  //  Methodes:         - query() // gets the update js snippet from tw-db
+  //                    - check(ver, rev, uid) // is called through the snippet to check if update is needed
+  //                        -> ver: version on tw-db server
+  //                        -> rev: revision on tw-db server
+  //                        -> uid: not used anymore
+  //                    - wasUpdated() // returns true/false if script was updated or not until last script start
+  //
+  ///////////////////////////////////////
+            var Updater = (function($) {
+                var _self = {};
+                var loader = {};
+                var div;
+                var updated = false;
+                
+                var init = function() {
+                    if (loader.ready) { return; };
+                    div = Window.addTab("notes", "Release Notes", "Release Notes", function() { open(); });
+                    if (Cache.load("version") && Script.version + " " + Script.revision != Cache.load("version")) {
                         Cache.save("version", Script.version + " " + Script.revision);
-                        i = true;
-                        var e = "#WAS_UPDATED#";
-                        var t = '<div class="txcenter">#OPEN_RELEASENOTES#</div>';
-                        t = t.replace("=1=", "<b>" + Script.name + "</b>");
-                        (new GameAPI.gui.dialog(e, t,
-                            GameAPI.gui.dialog.SYS_WARNING))
-                        .addButton("yes", function () {
-                            Window.open("notes")
-                        }).addButton("no").show()
-                    }
-                    n.ready = true
-                };
-                n = Loader.add("Updater", "tw-db Updater", s, {
-                    Cache: true,
-                    Window: true
-                });
-                var o = function (t, n) {
-                    var r = "#NEED_UPDATE#";
-                    var i = '<div class="txcenter">#MAKE_UPDATE#</div>';
-                    i = i.replace("=1=", "<b>" + Script.name + "</b>");
-                    i += "<div><br />current version: " + Script.version / 100 + " revision " + Script.revision + "<br />new version: " + t / 100 + " revision " + n + "</div>";
-                    var s = "http://" + Script.update;
-                    if (e.browser.webkit) {
-                        s += "?" + Script.version + Script.revision
-                    }
-                    var o = function () {
-                        try {
-                            location.href = s
-                        } catch (e) {}
+                        updated = true;
+                        var title = "#WAS_UPDATED#";
+                        var msg = '<div class="txcenter">#OPEN_RELEASENOTES#</div>';
+                        msg = msg.replace("=1=", "<b>" + Script.name + "</b>");
+                        (new GameAPI.gui.dialog(title, msg, GameAPI.gui.dialog.SYS_WARNING))
+			    .addButton("no").addButton("yes", function() { Window.open("notes"); }).show();
                     };
-                    (new GameAPI.gui.dialog(r, i,
-                        GameAPI.gui.dialog.SYS_WARNING)).addButton(
-                        "ok", o).show()
+                    loader.ready = true;
                 };
-                t.wasUpdated = function () {
-                    return i
+                loader = Loader.add("Updater", "tw-db Updater", init, {Cache: true, Window: true});
+                
+                var update = function(ver, rev) {
+		    var title = "#NEED_UPDATE#";
+                    var msg = '<div class="txcenter">#MAKE_UPDATE#</div>';
+                    msg = msg.replace("=1=", "<b>" + Script.name + "</b>");
+                    msg += "<div><br />current version: " + (Script.version / 100) + " revision " + Script.revision + "<br />new version: " + (ver / 100) + " revision " + rev + "</div>";
+                    var url = "http://" + Script.update;
+                    if ($.browser.webkit) { url += "?" + Script.version + Script.revision };
+                    var refresh = function() { try { location.href = url; } catch (e) {}; };
+                    (new GameAPI.gui.dialog(title, msg, GameAPI.gui.dialog.SYS_WARNING))
+			.addButton("#NOTNOW#").addButton("ok", refresh).show();
                 };
-                var u = function () {
-                    r.children().remove();
-                    var t = new GameAPI.gui.scrollpane;
-                    e(t.getMainDiv()).css("height", "335px");
-                    var n = false;
+                _self.wasUpdated = function() { return updated; };
+                
+                var open = function() {
+                    div.children().remove();
+                    var bodyscroll = new GameAPI.gui.scrollpane;
+                    $(bodyscroll.getMainDiv()).css("height", "335px");
+                    var hidden = false;
                     for (var i = 0; i < Script.notes.length; i++) {
-                        var s = e(
-                                "<h3><a>Version " + String(Script.notes[i].version / 100) + "</a></h3>").css(
-                                "border-bottom", "1px solid #000000")
-                            .click(function () {
-                                e(this).next().toggle()
-                            });
-                        var o = e("<div>" + Script.notes[i].notes + "</div>");
-                        t.appendContent(s).appendContent(o);
-                        if (n) {
-                            o.hide()
-                        }
-                        n = true
-                    }
-                    r.append(t.getMainDiv());
-                    Window.hideLoader()
+                        var head = $("<h3><a>Version " + String(Script.notes[i].version / 100) + "</a></h3>")
+			    .css("border-bottom", "1px solid black")
+                            .click(function() { $(this).next().toggle(); });
+                        var body = $("<div>" + Script.notes[i].notes + "</div>");
+                        bodyscroll.appendContent(head).appendContent(body);
+                        if (hidden) { body.hide(); };
+                        hidden = true;
+                    };
+                    div.append(bodyscroll.getMainDiv());
+                    Window.hideLoader();
                 };
-                t.query = function () {
-                    setTimeout(function () {
-                        e.getScript("http://" + Script.check + "?" + (new Date).getTime())
-                    }, 500)
-                };
-                t.check = function (e, t, n) {
-                    if (Script.version != e || Script.revision != t) {
-                        o(e, t)
-                    }
-                };
-                return t
-            }($);
+                
+                _self.query = function() { setTimeout(function() {
+                    $.getScript("http://" + Script.check + "?" + (new Date).getTime());
+                    }, 500); };
+                
+		// never touch this without adjust serverside component
+		_self.check = function (ver, rev, uid) {
+		    if (Script.version != ver || Script.revision != rev) { update(ver, rev); };
+		};
+                return _self;
+            })($);
             _base.Updater = Updater;
             Debugger.Updater = Updater;
-            var Sleep = function (e) {
-                var t = {};
-                var n = null;
-                var r = [];
-                var i = [];
-                var s = {};
-                var o = 1;
-                var u = false;
-                var a = {};
-                var f = function () {
-                    if (a.ready) {
-                        return
-
-                    }
-                    if (Settings.get("directsleep", true)) {
-                        s = Cache.load("barracks");
-                        if (s == null || typeof s != "object") {
-                            s = {}
-                        }
-                        if (Character.homeTown.town_id != 0) {
-                            l();
-                            d()
-                        }
-                    }
-                    a.ready = true
+            
+            
+  ///// complete - 2.03////////////////////////
+  //
+  //  Sleep Object:   add Button for direct Access to Sleep Possibilities
+  //  Init:           should be loader after Settings Module and Cache Module
+  //  Methodes:
+  //
+  ///////////////////////////////////////
+            var Sleep = (function($) {
+		var _self = {};
+		var btn = null;
+		var forts = [];
+		var tmp = [];
+		var cache = {};
+		var days = 1;
+		var opened = false;
+		var loader = {};
+		var init = function() {
+		    if (loader.ready) { return; };
+		    // Settings.addOption( '#INTERFACE#' , 'directsleep', 0 ,'#HELP_DIRECTSLEEP#');	// for new settings system only
+		    if (Settings.get('directsleep', true)) {
+			var sleepCss = "ul.tw2gui_selectbox_content.twdb_sleepmenu {max-width: 320px!important; white-space: nowrap; overflow-y: auto; overflow-x: hidden;}"
+				     + "ul.tw2gui_selectbox_content.twdb_sleepmenu > li {padding-right: 20px!important;}";
+			TWDB.Util.addCss(sleepCss);
+			cache = Cache.load('barracks');
+			if (cache == null || typeof(cache) != 'object') { cache = {}; };
+			if (Character.homeTown.town_id != 0) { addButton(); getForts(); };
+		    };
+		    loader.ready = true;
+		};
+		loader = Loader.add('Sleep', 'tw-db DirectSleep', init , {'Cache':true, 'Settings':true});
+      
+                var addButton = function() {
+                    btn = GameInject.CharacterButton.add(Images.buttonSleep);
+                    btn.addMousePopup('#SLEEP#').click(function(e) {
+                    	    if (w.Character.homeTown.town_id != 0 && forts.length == 0) { sleepHotel(); }
+                    	    else { createMenu(e); }; });
                 };
-                a = Loader.add("Sleep", "tw-db DirectSleep", f, {
-                    Cache: true,
-                    Settings: true
-                });
-                var l = function () {
-                    n = GameInject.CharacterButton
-                        .add(Images.buttonSleep);
-                    n.click(
-                        function (e) {
-                            if (w.Character.homeTown.town_id != 0 && r.length == 0) {
-                                h()
-                            } else {
-                                c(e)
-                            }
-                        }).addMousePopup("#SLEEP#")
-                };
-                var c = function (e) {
-                    if (r.length == 0) {
-                        return
-
-                    }
-                    var t = Map.getLastPosition();
-                    t.x = t[0];
-                    t.y = t[1];
-                    for (var n = 0; n < r.length; n++) {
-                        var i = r[n];
-                        i.distance = w.Map.calcWayTime(t, i)
-                    }
-                    r.sort(function (e, t) {
-                        return e.distance == t.distance ? 0 : e.distance > t.distance ? 1 : -1
-                    });
-                    var s = (new GameAPI.gui.selectbox(true)).addItem(
-                            0,
-                            "#HOTEL# " + w.Map.calcWayTime(t,
-                                w.Character.homeTown)
-                            .formatDuration())
-                        .addListener(function (e) {
-                            switch (e) {
-                            case 0:
-                                h();
-                                break;
-                            default:
-                                p(e);
-                                break
-                            }
-                        });
-                    for (var n = 0; n < r.length; n++) {
-                        var i = r[n];
-                        if (i.stage != 0) {
-                            s.addItem(i.id, "#STAGE# " + i.stage + " " + i.distance.formatDuration() + " | " + i.name)
-                        }
-                    }
+                
+                var createMenu = function(e) {
+                    if (forts.length == 0) { return; };
+                    var pos = Map.getLastPosition();
+                    pos.x = pos[0];
+                    pos.y = pos[1];
+                    for (var i=0; i < forts.length; i++) {
+                    	forts[i].distance = w.Map.calcWayTime(pos,forts[i]);
+                    };
+                    forts.sort(function(a, b){ return(a.distance==b.distance)?0:(a.distance>b.distance)?1:-1;});
+                    var selectbox = (new GameAPI.gui.selectbox(true))
+			.addListener(function (key) { switch (key) { case 0: sleepHotel(); break;
+								    default: sleepFort(key); break; }; })
+                    	.addItem(0, '#HOTEL#&nbsp;' + w.Map.calcWayTime(pos, w.Character.homeTown).formatDuration());
+                    for (var i=0; i < forts.length; i++) {
+                    	if (forts[i].stage != 0) {
+                    	    selectbox.addItem(forts[i].id, '#STAGE#&nbsp;' + forts[i].stage + '&nbsp;' + forts[i].distance.formatDuration() + '&nbsp;|&nbsp;' + forts[i].name);
+                    	};
+                    };
                     // Dun - Add auto vertical scollbar
-                    $(s.elContent).css({
-                        "max-height": "270px",
-                        "width": "250px",
-                        "overflow-y": 'auto'
+                    // $(selectbox.elContent).css({"max-height": "270px", "width": "250px", "overflow-y": 'auto'});
+
+                    // Bluep thinks that's better...{max-width: 320px!important; overflow-y: auto; overflow-x: hidden; white-space: nowrap;}
+                    // > <li> padding-right: 20px!important;
+                    $(selectbox.elContent).addClass("twdb_sleepmenu");
+                    selectbox.show(e);
+                };
+
+                var sleepHotel = function() {
+                    Ajax.remoteCallMode("building_hotel", "get_data", {town_id: w.Character.homeTown.town_id}, function(resp) {
+                    	if (resp.error) {
+                    	    new UserMessage(resp.error, UserMessage.TYPE_ERROR).show(); return;
+                    	};
+                    	var room = "";
+                    	for (var key in resp.rooms) {
+                    	    if (resp.rooms[key].available) { room = key; };
+                    	};
+                    	w.TaskQueue.add(new TaskSleep(w.Character.homeTown.town_id, room));
                     });
-                    s.show(e)
                 };
-                var h = function () {
-                    Ajax.remoteCallMode("building_hotel", "get_data", {
-                        town_id: w.Character.homeTown.town_id
-                    }, function (e) {
-                        if (e.error) {
-                            (new UserMessage(e.error,
-                                UserMessage.TYPE_ERROR)).show();
-                            return
-
-                        }
-                        var t = "";
-                        for (var n in e.rooms) {
-                            if (e.rooms[n].available) {
-                                t = n
-                            }
-                        }
-                        w.TaskQueue.add(new TaskSleep(
-                            w.Character.homeTown.town_id, t))
-                    })
+                
+                var sleepFort = function(id) {
+                    if (isDefined(cache[id])) { w.TaskQueue.add(new TaskFortSleep(id, cache[id].x, cache[id].y)); };
                 };
-                var p = function (e) {
-                    if (isDefined(s[e])) {
-                        w.TaskQueue.add(new TaskFortSleep(e, s[e].x,
-                            s[e].y))
-                    }
+                
+                var getForts = function() {
+                    if (w.Character.homeTown.alliance_id == 0) { return; };
+                    Ajax.remoteCallMode("alliance", "get_data", {alliance_id: w.Character.homeTown.alliance_id}, function(resp) {
+                    	if (resp.error) {
+                    	    new UserMessage(resp.error, UserMessage.TYPE_ERROR).show(); return;
+                    	};
+                    	tmp = resp.data.forts;
+                    	if (tmp.length > 0) {
+                    	    w.setTimeout(function(){ getFort(); }, Timer.getTimeout());
+                    	};
+                    });
                 };
-                var d = function () {
-                    if (w.Character.homeTown.alliance_id == 0) {
-                        return
-
-                    }
-                    Ajax.remoteCallMode("alliance", "get_data", {
-                        alliance_id: w.Character.homeTown.alliance_id
-                    }, function (e) {
-                        if (e.error) {
-                            (new UserMessage(e.error,
-                                UserMessage.TYPE_ERROR)).show();
-                            return
-
-                        }
-                        i = e.data.forts;
-                        if (i.length > 0) {
-                            w.setTimeout(function () {
-                                v()
-                            }, Timer.getTimeout())
-                        }
-                    })
-                };
-                var v = function () {
+                
+                var getFort = function() {
                     try {
-                        if (i.length <= 0) {
-                            return
-
-                        }
-                        var e = i.pop();
-                        var t = e.fort_id;
-                        if (!isDefined(s[t])) {
-                            s[t] = {
-                                time: 0,
-                                stage: 0
-                            }
-                        }
-                        s[t].id = t;
-                        s[t].x = e.x;
-                        s[t].y = e.y;
-                        s[t].name = e.name;
-                        s[t].type = e.type;
-                        if (s[t].stage != 5 && s[t].time + 60 * 60 * 24 * o > (new Date)
-                            .getTime() / 1e3) {
-                            r.push(s[t]);
-                            if (i.length > 0) {
-                                w.setTimeout(function () {
-                                    v()
-                                }, Timer.getTimeout())
-                            } else {
-                                Cache.save("barracks", s)
-                            }
-                            return
-
-                        }
-                        Ajax
-                            .remoteCallMode(
-                                "fort_building_barracks",
-                                "index", {
-                                    fort_id: t
-                                },
-                                function (e) {
-                                    if (e.error) {
-                                        (new UserMessage(
-                                            e.error,
-                                            UserMessage.TYPE_ERROR))
-                                        .show()
-                                    } else {
-                                        s[t].time = Number(
-                                                (new Date)
-                                                .getTime() / 1e3)
-                                            .round(0);
-                                        if (isDefined(e.barrackStage)) {
-                                            s[t].stage = e.barrackStage
-                                        }
-                                    }
-                                    r.push(s[t]);
-                                    if (i.length > 0) {
-                                        w
-                                            .setTimeout(
-                                                function () {
-                                                    v()
-                                                },
-                                                Timer
-                                                .getTimeout())
-                                    } else {
-                                        Cache.save("barracks",
-                                            s)
-                                    }
-                                })
-                    } catch (n) {
-                        Error.report(n, "getFortData")
-                    }
+                    	if (tmp.length <= 0) { return; };
+                    	var fort = tmp.pop();
+                    	var id = fort.fort_id;
+                    	if (!isDefined(cache[id])) { cache[id] = {'time': 0, 'stage': 0}; };
+                    	$.extend(cache[id], {'id': id, 'x': fort.x, 'y': fort.y, 'name': fort.name, 'type': fort.type});                    	
+                    	if (cache[id].stage != 5 && (cache[id].time + days*86400) > (new Date().getTime()/1000)) {
+                    	    forts.push(cache[id]);
+                    	    if (tmp.length > 0) { w.setTimeout(function(){ getFort(); }, Timer.getTimeout()); }
+                    	    else { Cache.save('barracks',cache); };
+                    	    return;
+                    	};
+                    	Ajax.remoteCallMode('fort_building_barracks', 'index', {fort_id: id}, function(resp) {
+                    	    if (resp.error) { new UserMessage(resp.error, UserMessage.TYPE_ERROR).show();}
+                    	    else {
+                    	    	cache[id].time = Number(new Date().getTime()/1000).round(0);
+                    	    	if (isDefined(resp.barrackStage)) { cache[id].stage = resp.barrackStage; };
+                    	    };
+                    	    forts.push(cache[id]);
+                    	    if (tmp.length > 0) { w.setTimeout(function(){ getFort(); }, Timer.getTimeout()); }
+                    	    else { Cache.save('barracks',cache); };
+                    	});
+                    } catch (e) { Error.report(e,'getFortData'); };
                 };
-                return t
-            }($);
+                return _self;
+            })($);
             Debugger.Sleep = Sleep;
+            
+            
             var Analyser = function ($) {
                 var _self = {};
                 var ready = false;
@@ -6066,6 +5978,8 @@
                             }
                             s = e
                         }
+                        // Bluep: Dirty way to get chat controls into already existing windows...
+                        $("div.tw2gui_window.chat.nominimize div.tw2gui_window_buttons_close").click();ChatWindow.open();
                     }
                     o.ready = true
                 };
@@ -7513,7 +7427,7 @@
 				    found: false,
 				    date:  null,
 				    });
-				    // todo: add question if feature should be disabled
+				    /**TODO: add question if feature should be disabled **/
 			    });
 			}	// ##  weeklyCraftingGet
 		
@@ -7525,7 +7439,18 @@
             }($);
             Debugger.Snippets = Snippets;
 
-            var GameInject = function ($) {
+            
+  /////////////////////////////
+  //
+  //  GameInject Object: through this Object should be done all Game Manipulation, like injects into Userinterface
+  //  Methodes: - addTabOnMessagesWindow(name,shortname,callback)   -> adds a new tab to the messagewindow, callback the function which is called when the tab is clicked
+  //            - injectItem(type,name,callback)                    -> adds a ui element to item divs, callback is function which gets the item element as parameter, name should be unique, type is the item type like Inventory or Trader
+  //            - injectMarket(name,callback)                       -> adds a string into getClearName Function at Market, callback is function which returns a string, name should be unique
+  //            - injectChatLayoutTab(name,callback)                -> adds function into every ChatLayoutTab which is automaticialy called on ChatLayoutTab init
+  //            - ChatLayoutTabsend(name,callback)                  -> adds function into every send-Process at Chat
+  //
+  /////////////////////////////
+            var GameInject = (function($) {
                 var _self = {};
                 var save = {};
                 var minimap = [];
@@ -7535,245 +7460,238 @@
                 var ready = false;
                 var timeout = null;
                 var interval = null;
-                var _duelmoti = [];
                 var _position = [];
                 var _reportreceived = [];
-                _self.CharacterButton = function (e) {
-                    var t = {};
-                    var n = 0;
-                    var r = null;
-                    t.add = function (t) {
-                        if (n == 0) {
-                            r = e('<div style="width:35px;height:35px;position:absolute;left:141px;top:131px;background: url(' + Game.cdnURL + '/images/interface/character/character.png?3) no-repeat -141px -105px transparent;" />');
-                            e("#ui_character_container").prepend(r)
-                        }
-                        n++;
-                        r.css({
-                            height: 10 + 26 * n + "px",
-                            "background-position": "-141px " + (26 * n - 131) + "px"
-                        });
-                        var i = e('<div class="char_links" style="top:' + (6 + (n - 1) * 26) + "px;left:6px;background:url(" + t + ')no-repeat 0px 0px transparent;"/>');
-                        i.hover(function () {
-                            e(this).css("background-position",
-                                "-25px 0px")
-                        }, function () {
-                            e(this).css("background-position",
-                                "0px 0px")
-                        });
-                        r.append(i);
-                        return i
+                
+		/**
+		 * Adds a new image button to the right of the character / avatar GUI element.
+		 *
+		 * @param {String} image URI of the button image (50x25px, right half = highlight state).
+		 * @return {jQuery} The new button.
+		 */
+		_self.CharacterButton = (function ($) {
+		    var _that = {};
+		    var count = 0;
+		    var $container = null;
+		    
+		    _that.add = function(image) {
+			if (count == 0) {
+			    var bgCss = "div#twdb_characbut {width:36px; height:35px; position:absolute; left:141px; top:131px; border-bottom-left-radius:8px;"
+				      + "background:url(" + Game.cdnURL + "/images/interface/character/character.png?3) no-repeat -141px -105px transparent;}";
+				    TWDB.Util.addCss(bgCss);
+			    $container = $('<div id="twdb_characbut" />');
+			    $('#ui_character_container').prepend($container);
+			};
+			count++;
+			$container.css({ 'height': (10 + 26*count) + 'px',
+					'background-position': '-141px ' + (26*count - 131) + 'px' });
+			var $button = $('<div class="char_links" style="top:' + (6 + (count-1)*26) + 'px;left:6px;background:url(' + image + ')no-repeat 0px 0px transparent;"/>');
+			$button.hover(function() { $(this).css('background-position','-25px 0px'); },	// mouse over
+				      function() { $(this).css('background-position','0px 0px'); });	// mouse out
+			$container.append($button);
+			return $button;
                     };
-                    return t
-                }($);
-                _self.ChatLayout = function (e) {
-                    var t = [];
-                    return function (e) {
-                        if (t.length == 0) {
+                    return _that;
+                })($);
+                
+                /* ============================== Chat ============================== */
+                _self.ChatLayout = (function($) {
+		    var callbacks = [];
+		    return function(callback) {
+			if (callbacks.length == 0) {
+				try {
+				    save["window.Chat.Layout.Tab.prototype.getMainDiv"] = window.Chat.Layout.Tab.prototype.getMainDiv;
+				    window.Chat.Layout.Tab.prototype.getMainDiv = function() {
+					for (var i=0; i<callbacks.length; i++) {
+					    try { callbacks[i](this); }
+					    catch (e) { Error.report(e, 'callbacks on Chat Layout'); };
+					};
+					return this.mainDiv;
+				    };
+				} catch(e) {
+				    Error.report(e, 'manipulate Chat Layout');
+				    window.Chat.Layout.Tab.prototype.getMainDiv = save["window.Chat.Layout.Tab.prototype.getMainDiv"];
+				};
+			};
+			callbacks.push(callback);	// this line was accidentially in the if-block above, allowing only one callback. Error didn't show up since we only have on callback by now.
+		    };
+                })($);
+                
+                _self.ChatSend = (function($) {
+		    var callbacks = [];
+		    return function(callback) {
+			if (callbacks.length == 0) {
                             try {
-                                var n = window.Chat.Layout.Tab.prototype.getMainDiv;
-                                window.Chat.Layout.Tab.prototype.getMainDiv = function () {
-                                    for (var e = 0; e < t.length; e++) {
-                                        try {
-                                            t[e](this)
-                                        } catch (n) {
-                                            Error
-                                                .report(n,
-                                                    "callbacks on Chat Layout")
-                                        }
-                                    }
-                                    return this.mainDiv
-                                }
-                            } catch (r) {
-                                Error.report(r,
-                                    "manipulate Chat Layout")
-                            }
-                            t.push(e)
-                        }
-                    }
-                }($);
-                _self.ChatSend = function (e) {
-                    var t = [];
-                    return function (e) {
-                        if (t.length == 0) {
-                            try {
-                                window.Chat.Layout.Tab.prototype._send = window.Chat.Layout.Tab.prototype.send;
-                                window.Chat.Layout.Tab.prototype.send = function () {
-                                    for (var e = 0; e < t.length; e++) {
-                                        try {
-                                            t[e](this)
-                                        } catch (n) {
-                                            Error
-                                                .report(n,
-                                                    "callbacks on Chat Send")
-                                        }
-                                    }
-                                    this._send()
-                                }
-                            } catch (n) {
-                                Error.report(n, "manipulate Chat Send")
-                            }
-                            t.push(e)
-                        }
-                    }
-                }($);
-                _self.MarketOfferTable = function (e) {
-                    var t = [];
-                    return function (e) {
-                        if (t.length == 0) {
-                            try {
-                                var n = MarketWindow.Offer.updateTable;
-                                MarketWindow.Offer.updateTable = function (
-                                    e) {
-                                    n(e);
-                                    for (var r = 0; r < t.length; r++) {
-                                        try {
-                                            t[r](e)
-                                        } catch (i) {
-                                            Error
-                                                .report(i,
-                                                    "callbacks MarketOfferTable")
-                                        }
-                                    }
-                                }
-                            } catch (r) {
-                                Error.report(r,
-                                    "manipulate MarketOfferTable")
-                            }
-                            t.push(e)
-                        }
-                    }
-                }($);
-                _self.MarketWatchlistTable = function (e) {
-                    var t = [];
-                    return function (e) {
-                        if (t.length == 0) {
-                            try {
-                                var n = MarketWindow.Watchlist.updateTable;
-                                MarketWindow.Watchlist.updateTable = function (
-                                    e) {
-                                    n(e);
-                                    for (var r = 0; r < t.length; r++) {
-                                        try {
-                                            t[r](e)
-                                        } catch (i) {
-                                            Error
-                                                .report(i,
-                                                    "callbacks MarketWatchlistTable")
-                                        }
-                                    }
-                                }
-                            } catch (r) {
-                                Error
-                                    .report(r,
-                                        "manipulate MarketWatchlistTable")
-                            }
-                            t.push(e)
-                        }
-                    }
-                }($);
-                _self.ItemUse = function ($) {
-                    var callbacks = [];
-                    return function (callback) {
-                        if (callbacks.length == 0) {
-                            ItemUse.twdb = function (e, t) {
-                                try {
-                                    for (var n = 0; n < callbacks.length; n++) {
-                                        callbacks[n](e, t)
-                                    }
-                                } catch (r) {
-                                    Error.report(r,
-                                        "callbacks on ItemUse")
-                                }
+                                window.Chat.Layout.Tab.prototype.twdb_send = window.Chat.Layout.Tab.prototype.send;
+                                window.Chat.Layout.Tab.prototype.send = function() {
+                                    for (var i=0; i<callbacks.length; i++) {
+                                        try { callbacks[i](this); }
+                                        catch (e) { Error.report(e, 'callbacks on Chat Send'); };
+				    };
+				    this.twdb_send();
+				};
+                            } catch (e) {
+                                Error.report(e, "manipulate Chat Send");
+                                window.Chat.Layout.Tab.prototype.send = window.Chat.Layout.Tab.prototype.twdb_send;
                             };
-                            var org = ItemUse.doIt;
+                        };
+			callbacks.push(callback);	// same as above
+                    };
+                })($);
+                
+                /* ============================== Market ============================== */
+                _self.MarketOfferTable = (function($) {
+		    var callbacks = [];
+		    return function(callback) {
+			if (callbacks.length == 0) {
+				try {
+				    save["MarketWindow.Offer.updateTable"] = MarketWindow.Offer.updateTable;
+				    MarketWindow.Offer.updateTable = function(data) {
+					save["MarketWindow.Offer.updateTable"](data);
+					for (var i=0; i<callbacks.length; i++) {
+					    try { callbacks[i](data); }
+					    catch (e) { Error.report(e, 'callbacks MarketOfferTable'); };
+					};
+				    };
+				} catch(e) {
+				    Error.report(e, 'manipulate MarketOfferTable');
+				    MarketWindow.Offer.updateTable = save["MarketWindow.Offer.updateTable"];
+				};
+			};
+			callbacks.push(callback);	// same as above
+		    };
+                })($);
+                
+                _self.MarketWatchlistTable = (function($) {
+		    var callbacks = [];
+		    return function(callback) {
+			if (callbacks.length == 0) {
+				try {
+				    save["MarketWindow.Watchlist.updateTable"] = MarketWindow.Watchlist.updateTable;
+				    MarketWindow.Watchlist.updateTable = function(data) {
+					save["MarketWindow.Watchlist.updateTable"](data);
+					for (var i=0; i<callbacks.length; i++) {
+					    try { callbacks[i](data); }
+					    catch (e) { Error.report(e, 'callbacks MarketWatchlistTable'); };
+					};
+				    };
+				} catch(e) {
+				    Error.report(e, 'manipulate MarketWatchlistTable');
+				    MarketWindow.Watchlist.updateTable = save["MarketWindow.Watchlist.updateTable"];
+				};
+			};
+			callbacks.push(callback);	// same as above
+		    };
+                })($);
+                
+                _self.MarketWhatIsHotTable = (function($) {
+		    var callbacks = [];
+		    return function(callback) {
+			if (callbacks.length == 0) {
+				try {
+				    save["MarketWindow.WhatIsHot.updateTable"] = MarketWindow.WhatIsHot.updateTable;
+				    MarketWindow.WhatIsHot.updateTable = function(data) {
+					save["MarketWindow.WhatIsHot.updateTable"](data);
+					for (var i=0; i<callbacks.length; i++) {
+					    try { callbacks[i](data); }
+					    catch (e) { Error.report(e, 'callbacks MarketWhatIsHotTable'); };
+					};
+				    };
+				} catch(e) {
+				    Error.report(e, 'manipulate MarketWhatIsHotTable');
+				    MarketWindow.WhatIsHot.updateTable = save["MarketWindow.WhatIsHot.updateTable"];
+				};
+			};
+			callbacks.push(callback);
+		    };
+                })($);
+                
+                /* ============================== DuelMotivation ============================== */
+                _self.injectSetDuelMotivation = (function($) {
+		    var callbacks = [];
+		    return function(callback) {
+			if (callbacks.length == 0) {
+			    try {
+				Character.twdb_setDuelMotivation = Character.setDuelMotivation;
+				Character.setDuelMotivation = function(data) {
+				    this.twdb_setDuelMotivation(data);
+				    for (var i=0; i<callbacks.length; i++) {
+					try { callbacks[i](data); }
+					catch (e) { Error.report(e, 'callbacks setDuelMotivation'); };
+				    };
+				};
+			    } catch(e) {
+				Error.report(e, 'manipulate setDuelMotivation');
+				Character.setDuelMotivation = twdb_Character.setDuelMotivation;
+			    };
+			};
+			callbacks.push(callback);
+		    };
+                })($);
+                
+                
+                /* ============================== ItemUse ============================== */
+                _self.ItemUse = (function($) {
+		    var callbacks = [];
+		    return function(callback) {
+			if (callbacks.length == 0) {
+			    ItemUse.twdb = function (item, data) {
+				for (var i=0; i < callbacks.length; i++) {
+				    try { callbacks[i](item, data); }
+				    catch(e) { Error.report(e, 'callbacks on ItemUse'); };
+				};
+			    };
+			    
+                            save["ItemUse.doIt"] = ItemUse.doIt;
                             try {
                                 var str = ItemUse.doIt.toString();
-                                var pos = str
-                                    .indexOf("EventHandler.signal('item_used'");
+                                var pos = str.indexOf("EventHandler.signal('item_used'");
                                 var inject = str.substr(0, pos) + "ItemUse.twdb(itemId,res);" + str.substr(pos);
-                                eval("ItemUse.doIt = " + inject)
+                                eval("ItemUse.doIt = " + inject);
                             } catch (e) {
-                                ItemUse.doIt = org;
+                                ItemUse.doIt = save["ItemUse.doIt"];
                                 Error.report(e, "manipulate ItemUse")
-                            }
-                        }
-                        callbacks.push(callback)
-                    }
-                }($);
-                _self.injectSetDuelMotivation = function (e) {
-                    try {
-                        if (!window.Character._setDuelMotivation) {
-                            window.Character._setDuelMotivation = window.Character.setDuelMotivation;
-                            window.Character.setDuelMotivation = function (
-                                e) {
-                                try {
-                                    this._setDuelMotivation(e);
-                                    for (var t = 0; t < _duelmoti.length; t++) {
-                                        _duelmoti[t](e)
-                                    }
-                                } catch (n) {
-                                    Error
-                                        .report(n,
-                                            "Character.setDuelMotivation")
-                                }
-                            }
-                        }
-                    } catch (t) {
-                        Error
-                            .report(t,
-                                "manipulate Character.setDuelMotivation")
-                    }
-                    _duelmoti.push(function (t) {
-                        e(t)
-                    })
-                };
-                _self.injectItem = function (type, name, callback) {
+                            };
+                        };
+                        callbacks.push(callback);
+                    };
+                })($);
+                
+                /** TODO: create callback array instead of individual functions **/
+                _self.injectItem = function(type, name, callback) {
                     var item = type + "Item";
                     if (typeof save[item] == "undefined") {
-                        save[item] = tw2widget[item].prototype.getMainDiv
-                            .toString()
-                    }
+                        save[item] = tw2widget[item].prototype.getMainDiv;
+                    };
                     try {
-                        tw2widget[item].prototype["TWDB" + name] = function (
-                            e) {
-                            try {
-                                return callback(e)
-                            } catch (t) {
-                                Error.report(t, "injected " + e + " function: " + name)
-                            }
-                            return ""
-                        }
-                    } catch (e) {
-                        Error.report(e, "inject " + item + " function: " + name)
-                    }
+                        tw2widget[item].prototype["TWDB" + name] = function(item) {
+                            try { return callback(item); }
+                            catch (e) { Error.report(e, "injected " + item + " function: " + name); return ""; };
+                        };
+                    } catch (e) { Error.report(e, "inject " + item + " function: " + name); };
                     try {
                         var inject = "this.TWDB" + name + "(this);";
                         inject.replace(/ /g, "");
-                        var newfunction = tw2widget[item].prototype.getMainDiv
-                            .toString().replace("return",
-                                inject + "\n return");
-                        eval("tw2widget['" + item + "'].prototype.getMainDiv = " + newfunction)
+                        var newfunction = tw2widget[item].prototype.getMainDiv.toString().replace("return", inject + "\n return");
+                        eval("tw2widget['" + item + "'].prototype.getMainDiv = " + newfunction);
                     } catch (e) {
                         Error.report(e, "manipulate " + item + ".prototype.getMainDiv");
-                        eval(item + ".prototype.getMainDiv = " + save[item])
-                    }
+                        tw2widget[item].prototype.getMainDiv = save[item];
+                    };
                 };
 
+                /** TODO: create callback array instead of individual functions **/
                 _self.injectTrader = function(name, callback) {
                     if (typeof save["west.game.shop.item.view.prototype.render"] == "undefined") {
-                        save["Trader"] = west.game.shop.item.view.prototype.render.toString()
+                        save["west.game.shop.item.view.prototype.render"] = west.game.shop.item.view.prototype.render;
                     }
                     try {
-                        west.game.shop.item.view.prototype["TWDB" + name] = function(e) {
-                            try {
-                                return callback(e)
-                            } catch (t) {
-                                Error.report(t, "injected " + e + " function: " + name)
-                            }
-                            return ""
+                        west.game.shop.item.view.prototype["TWDB" + name] = function(item) {
+                            try { return callback(item); }
+			    catch (e) { Error.report(e, "callback on injectTrader, function: " + name); return ""; };
                         }
                     } catch (e) {
-                        Error.report(e, "inject " + item + " function: " + name)
+                        Error.report(e, "injectTrader, creating callback function: " + name)
                     }
                     try {
                         var str = west.game.shop.item.view.prototype.render.toString();
@@ -7782,11 +7700,12 @@
                         var newfunction = str.replace("return $item", inject + "\n return $item");
                         eval("west.game.shop.item.view.prototype.render = " + newfunction)
                     } catch (e) {
-                        Error.report(e, "west.game.shop.item.view.prototype.render");
-                        eval("west.game.shop.item.view.prototype.render = " + save["Trader"])
+                        Error.report(e, "manipulate west.game.shop.item.view.prototype.render");
+                        west.game.shop.item.view.prototype.render = save["west.game.shop.item.view.prototype.render"];
                     }
                 };
                 
+                /** TODO: create callback array instead of individual functions **/
                 _self.injectMarket = function (name, callback) {
                     if (typeof save.MarketWindow == "undefined") {
                         save.MarketWindow = MarketWindow.getClearName
@@ -8114,8 +8033,10 @@
                     })
                 };
                 return _self
-            }($);
+            })($);
             Debugger.GameInject = GameInject;
+            
+            
             var DataManager = function (e) {
                 var t = {};
                 var n = false;
