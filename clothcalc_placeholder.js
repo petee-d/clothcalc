@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name dev The West - tw-db.info Cloth Calc
-// @version 0.37 Rev. 5
+// @version 0.37 Rev. 7
 // @description The West Script: Cloth Calculation for game version 1.34 or higher
 // @author scoobydoo, Dun, Bluep, stewue, Petee [tw-db.info]
 // @namespace http://tw-db.info
@@ -8,8 +8,8 @@
 // @website http://tw-db.info
 // @include http://*.the-west.*/game.php*
 // @include http://*.tw.innogames.*/game.php*
-// @downloadURL http://tw-db.info/cache/userscripts/clothcalc/dev_clothcalc_de.user.js
-// @updateURL http://tw-db.info/cache/userscripts/clothcalc/dev_clothcalc_de.meta.js
+// @downloadURL http://tw-db.info/cache/userscripts/clothcalc/dev_clothcalc_eng.user.js
+// @updateURL http://tw-db.info/cache/userscripts/clothcalc/dev_clothcalc_eng.meta.js
 // ==/UserScript==
 
 /**
@@ -43,7 +43,7 @@
         TWDB = {};
         TWDB.script = new Object({
             version: 37,
-            revision: 5,
+            revision: 7,
             name: "The West - tw-db.info Cloth Calc",
             update: "tw-db.info/cache/userscripts/clothcalc/dev_clothcalc_eng.user.js",
             check: "tw-db.info/cache/userscripts/clothcalc/dev_version",
@@ -154,7 +154,7 @@
                 'strength': [5, 6, 7, 8, 9],
                 'flexibility': [10, 11, 12, 13, 14],
                 'dexterity': [15, 16, 17, 18, 19],
-                'charisma': [20, 21, 22, 23, 24, 25]
+                'charisma': [20, 21, 22, 23, 24]
             },
             _type2id: {
                 animal: 1,
@@ -450,8 +450,8 @@
                     
                     var bonusCurrentItem = 0;
                     var bonusNewItem = TWDB.Calc.getItemBonusForJob(itemId, jobId);
-                    if (isDefined(currentBestClothes[this._type2id[item.type]])) {
-                        var currentBestItem = ItemManager.get(currentBestClothes[this._type2id[item.type]].id);
+                    if (isDefined(currentBestClothes[TWDB.ClothCalc._type2id[item.type]])) {
+                        var currentBestItem = ItemManager.get(currentBestClothes[TWDB.ClothCalc._type2id[item.type]].id);
                         if (isDefined(currentBestItem) && isDefined(currentBestItem.set)) {
                             continue; // item from betters is set part, don't calculate
                         };
@@ -771,7 +771,7 @@
                 } else {
                     this.data.skills = {};
                     for (var n in e) {
-                        var r = this._skill2id[n];
+                        var r = TWDB.ClothCalc._skill2id[n];
                         this.data.skills[r] = {id: r, val: e[n].points};
                     };
                     TWDB.Eventer.trigger("getSkill");
@@ -1710,13 +1710,13 @@
                                     if (typeof t.boni.skill[u] != "undefined") {
                                         s += t.boni.skill[u]
                                     }
-                                    if (typeof this.parent._id2skill[o] != "undefined") {
+                                    if (typeof TWDB.ClothCalc._id2skill[o] != "undefined") {
                                         t.skills
-                                            .push(this.parent._id2skill[o]);
-                                        if (typeof CharacterSkills.skills[this.parent._id2skill[o]] != "undefined") {
-                                            s += CharacterSkills.skills[this.parent._id2skill[o]].points
-                                        } else if (typeof CharacterSkills.attributes[this.parent._id2skill[o]] != "undefined") {
-                                            s += CharacterSkills.attributes[this.parent._id2skill[o]].points
+                                            .push(TWDB.ClothCalc._id2skill[o]);
+                                        if (typeof CharacterSkills.skills[TWDB.ClothCalc._id2skill[o]] != "undefined") {
+                                            s += CharacterSkills.skills[TWDB.ClothCalc._id2skill[o]].points
+                                        } else if (typeof CharacterSkills.attributes[TWDB.ClothCalc._id2skill[o]] != "undefined") {
+                                            s += CharacterSkills.attributes[TWDB.ClothCalc._id2skill[o]].points
                                         }
                                     }
                                 }
@@ -1735,13 +1735,13 @@
                                     if (typeof t.boni.skill[u] != "undefined") {
                                         s += t.boni.skill[u]
                                     }
-                                    if (typeof this.parent._id2skill[o] != "undefined") {
+                                    if (typeof TWDB.ClothCalc._id2skill[o] != "undefined") {
                                         t.skills
-                                            .push(this.parent._id2skill[o]);
-                                        if (typeof CharacterSkills.skills[this.parent._id2skill[o]] != "undefined") {
-                                            s += CharacterSkills.skills[this.parent._id2skill[o]].points
-                                        } else if (typeof CharacterSkills.attributes[this.parent._id2skill[o]] != "undefined") {
-                                            s += CharacterSkills.attributes[this.parent._id2skill[o]].points
+                                            .push(TWDB.ClothCalc._id2skill[o]);
+                                        if (typeof CharacterSkills.skills[TWDB.ClothCalc._id2skill[o]] != "undefined") {
+                                            s += CharacterSkills.skills[TWDB.ClothCalc._id2skill[o]].points
+                                        } else if (typeof CharacterSkills.attributes[TWDB.ClothCalc._id2skill[o]] != "undefined") {
+                                            s += CharacterSkills.attributes[TWDB.ClothCalc._id2skill[o]].points
                                         }
                                     }
                                 }
@@ -2494,7 +2494,7 @@
         (function ($) {
             var _base = TWDB;
             var w = window;
-            var _skill2id = {
+            /* var _skill2id = {
                 strength: 1,
                 flexibility: 2,
                 dexterity: 3,
@@ -2576,7 +2576,7 @@
                 duelist: 3,
                 worker: 4,
                 soldier: 5
-            };
+            }; */
             var Images = _base.images;
             var Script = _base.script;
             var ClothCalc = _base.ClothCalc;
@@ -3384,12 +3384,6 @@
             _base.Eventer = Eventer;
             Debugger.Eventer = Eventer;
             var Calc = function (e) {
-                var skInNum = {
-                    'strength': [5, 6, 7, 8, 9],
-                    'flexibility': [10, 11, 12, 13, 14],
-                    'dexterity': [15, 16, 17, 18, 19],
-                    'charisma': [20, 21, 22, 23, 24]
-                };
                 var _self = {};
                 var bReady = false;
                 var setCache = {
@@ -3449,7 +3443,7 @@
 
                                 var obj = setM.bonus[level][bonus];
 
-                                var id = _skill2id[obj.name];
+                                var id = TWDB.ClothCalc._skill2id[obj.name];
 
                                 switch (obj.type) {
                                 case 'job':
@@ -3466,9 +3460,9 @@
                                     attr[id] += obj.value
                                     bonuss[level]['attributes'][id] = attr[id];
 
-                                    for (iT = 0; iT < ClothCalc._sk4attr[obj.name].length; iT++) {
+                                    for (iT = 0; iT < TWDB.ClothCalc._sk4attr[obj.name].length; iT++) {
 
-                                        var idS = ClothCalc._sk4attr[obj.name][iT];
+                                        var idS = TWDB.ClothCalc._sk4attr[obj.name][iT];
 
                                         if (!isDefined(skills[idS]))
                                             skills[idS] = 0;
@@ -3490,7 +3484,7 @@
                                     if (obj.bonus && obj.key === 'level') {
                                         var roundingType = obj.roundingMethod;
                                         if (obj.bonus.type === 'skill') {
-                                            var idQ = ClothCalc._skill2id[obj.bonus.name];
+                                            var idQ = TWDB.ClothCalc._skill2id[obj.bonus.name];
                                             if (!isDefined(skills[idQ]))
                                                 skills[idQ] = 0;
                                             skills[idQ] += Math[roundingType]
@@ -3498,8 +3492,8 @@
                                             bonuss[level]['skills'][idQ] = skills[idQ];
                                             
                                         } else if(obj.bonus.type == 'attribute') {
-                                            for (iT = 0; iT < skInNum[obj.bonus.name].length; iT++) {
-                                                var idS = skInNum[obj.bonus.name][iT];
+                                            for (iT = 0; iT < TWDB.ClothCalc._sk4attr[obj.bonus.name].length; iT++) {
+                                                var idS = TWDB.ClothCalc._sk4attr[obj.bonus.name][iT];
                                                 if (!isDefined(skills[idS]))
                                                     skills[idS] = 0;
                                                 skills[idS] += Math[roundingType]
@@ -3632,9 +3626,9 @@
                     for (var a in jobObj.skills) {
                         var f = jobObj.skills[a];
 
-                        if (isDefined(bonus.skills[_skill2id[a]])) {
+                        if (isDefined(bonus.skills[TWDB.ClothCalc._skill2id[a]])) {
 
-                            total += bonus.skills[_skill2id[a]] * f;
+                            total += bonus.skills[TWDB.ClothCalc._skill2id[a]] * f;
                         }
                     }
                     if (!isDefined(ccCache.sets[setId])) {
@@ -5979,7 +5973,9 @@
                             s = e
                         }
                         // Bluep: Dirty way to get chat controls into already existing windows...
-                        $("div.tw2gui_window.chat.nominimize div.tw2gui_window_buttons_close").click();ChatWindow.open();
+                        if ($("div.tw2gui_window.chat.nominimize div.tw2gui_window_buttons_close").click().length > 0) {
+                            ChatWindow.open();
+                        }
                     }
                     o.ready = true
                 };
@@ -6794,10 +6790,10 @@
                         var bonusItem = Calc.getItemBonusForJob(e,
                             jobid);
 
-                        if (isDefined(o[ClothCalc._type2id[t.type]])) {
+                        if (isDefined(o[TWDB.ClothCalc._type2id[t.type]])) {
 
                             var f = ItemManager
-                                .get(o[ClothCalc._type2id[t.type]].id);
+                                .get(o[TWDB.ClothCalc._type2id[t.type]].id);
                             total += Calc.getItemBonusForJob(f.item_id,
                                 jobid)
 
@@ -8146,7 +8142,7 @@
                         var t = e.extend(true, {}, a.skills);
                         s = {};
                         for (var n in CharacterSkills.skills) {
-                            var r = ClothCalc._skill2id[n];
+                            var r = TWDB.ClothCalc._skill2id[n];
                             var i = CharacterSkills.skills[n].points;
                             s[r] = i;
                             if (isDefined(t[r])) {
@@ -8236,7 +8232,7 @@
                         var n = {};
                         for (var r in i) {
                             var o = ItemManager.get(r);
-                            var u = Number(_type2id[o.type]);
+                            var u = Number(TWDB.ClothCalc._type2id[o.type]);
                             if (!isDefined(t[u])) {
                                 t[u] = []
                             }
@@ -8259,7 +8255,7 @@
                         f += '<input style="display:none" type="text" name="version" value="' + TheWestApi.version + '" />';
                         f += '<input style="display:none" type="text" name="nick" value="' + Character.name + '" />';
                         f += '<input style="display:none" type="text" name="level" value="' + Number(Character.level) + '" />';
-                        f += '<input style="display:none" type="text" name="class" value="' + Number(_class2id[Character.charClass]) + '" />';
+                        f += '<input style="display:none" type="text" name="class" value="' + Number(TWDB.ClothCalc._class2id[Character.charClass]) + '" />';
                         f += '<input style="display:none" type="text" name="premium" value=\'' + JSON.stringify(a)
                             .replace(/'/g, "\\'") + "' />";
                         f += '<input style="display:none" type="text" name="items" value=\'' + JSON.stringify(t)
@@ -8285,7 +8281,7 @@
                             .addKey("level",
                                 Number(Character.level));
                         Support.addKey("class",
-                            Number(_class2id[Character.charClass]));
+                            Number(TWDB.ClothCalc._class2id[Character.charClass]));
                         Support.addKey("premium", JSON.stringify(a)
                             .replace(/'/g, "\\'"));
                         Support.addKey("items", JSON.stringify(t)
@@ -8745,12 +8741,12 @@
                                     var h = Math.floor(c / 5);
                                     l += r.boni && r.boni.skill && r.boni.skill[c] || 0;
                                     l += r.boni && r.boni.skill && r.boni.skill[h] || 0;
-                                    if (isDefined(_id2skill[c])) {
-                                        r.skills.push(_id2skill[c]);
-                                        if (isDefined(CharacterSkills.skills[_id2skill[c]])) {
-                                            l += CharacterSkills.skills[_id2skill[c]].points
-                                        } else if (isDefined(CharacterSkills.attributes[_id2skill[c]])) {
-                                            l += CharacterSkills.attributes[_id2skill[c]].points
+                                    if (isDefined(TWDB.ClothCalc._id2skill[c])) {
+                                        r.skills.push(TWDB.ClothCalc._id2skill[c]);
+                                        if (isDefined(CharacterSkills.skills[TWDB.ClothCalc._id2skill[c]])) {
+                                            l += CharacterSkills.skills[TWDB.ClothCalc._id2skill[c]].points
+                                        } else if (isDefined(CharacterSkills.attributes[TWDB.ClothCalc._id2skill[c]])) {
+                                            l += CharacterSkills.attributes[TWDB.ClothCalc._id2skill[c]].points
                                         }
                                     }
                                 }
@@ -8763,12 +8759,12 @@
                                     var h = Math.floor(c / 5);
                                     l += r.boni && r.boni.skill && r.boni.skill[c] || 0;
                                     l += r.boni && r.boni.skill && r.boni.skill[h] || 0;
-                                    if (isDefined(_id2skill[c])) {
-                                        r.skills.push(_id2skill[c]);
-                                        if (isDefined(CharacterSkills.skills[_id2skill[c]])) {
-                                            l += CharacterSkills.skills[_id2skill[c]].points
-                                        } else if (isDefined(CharacterSkills.attributes[_id2skill[c]])) {
-                                            l += CharacterSkills.attributes[_id2skill[c]].points
+                                    if (isDefined(TWDB.ClothCalc._id2skill[c])) {
+                                        r.skills.push(TWDB.ClothCalc._id2skill[c]);
+                                        if (isDefined(CharacterSkills.skills[TWDB.ClothCalc._id2skill[c]])) {
+                                            l += CharacterSkills.skills[TWDB.ClothCalc._id2skill[c]].points
+                                        } else if (isDefined(CharacterSkills.attributes[TWDB.ClothCalc._id2skill[c]])) {
+                                            l += CharacterSkills.attributes[TWDB.ClothCalc._id2skill[c]].points
                                         }
                                     }
                                 }
