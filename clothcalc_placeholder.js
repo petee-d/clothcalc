@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name dev The West - tw-db.info Cloth Calc
-// @version 0.37 Rev. 7
+// @version 0.37 Rev. 8
 // @description The West Script: Cloth Calculation for game version 1.34 or higher
 // @author scoobydoo, Dun, Bluep, stewue, Petee [tw-db.info]
 // @namespace http://tw-db.info
@@ -43,7 +43,7 @@
         TWDB = {};
         TWDB.script = new Object({
             version: 37,
-            revision: 7,
+            revision: 8,
             name: "The West - tw-db.info Cloth Calc",
             update: "tw-db.info/cache/userscripts/clothcalc/dev_clothcalc_eng.user.js",
             check: "tw-db.info/cache/userscripts/clothcalc/dev_version",
