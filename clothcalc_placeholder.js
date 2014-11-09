@@ -8048,7 +8048,9 @@
                                     })
                                 );
                                 // TW Collections compatibility fix
-                                $('#bagFilterIsCollect').css('margin-left', '+=50px')
+                                setTimeout(function () {
+                                    $('#bagFilterIsCollect').css('margin-left', '+=50px');
+                                }, 0);
                             }
                             $('#CC_pin_items').off('click').click(function () {
                                 TWDB.Settings.itemPinningMode ^= true;
