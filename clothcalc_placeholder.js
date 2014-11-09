@@ -42,13 +42,13 @@
 
         TWDB = {};
         TWDB.script = new Object({
-            version: 37,
-            revision: 8,
+            version: 38,
+            revision: 1,
             name: "The West - tw-db.info Cloth Calc",
             update: "tw-db.info/cache/userscripts/clothcalc/dev_clothcalc_eng.user.js",
             check: "tw-db.info/cache/userscripts/clothcalc/dev_version",
             url: "tw-db.info",
-            gameversion: 2.11,
+            gameversion: 2.16,
             lang: "eng"
         });
         try { TWDB.script.notes = jQuery.parseJSON('[{\"version\":\"99\",\"notes\":\"DEV version\"}]');
@@ -3763,6 +3763,7 @@
                         [0, "fastskillchange", "#HELP_FASTSKILLCHANGE#", false],
                         [0, "fortrecruitment", "#HELP_FORTRECRUITMENT#", false],
                         [0, "enhancedfortrecruitment", "#HELP_ENHANCEDFORTRECRUITMENT#", false],
+                        [0, "pinitems", "#HELP_PIN_ITEMS#", false],
 
                         [0, "noworkqueuepa", "#HELP_NOWORKQUEUEPA#", "#PREMIUM_SETTINGS#"],
                         [0, "nofetchallpa", "#HELP_NOFETCHALLPA#", "#PREMIUM_SETTINGS#"],
@@ -7023,6 +7024,10 @@
                     if (Settings.get("weeklycrafting", false)) {
                         weeklyCrafting()
                     }
+                    if (Settings.get("pinitems", true)) {
+                        GameInject.injectInventoryAddItemsPinItems();
+                        GameInject.injectInventoryAddItemDivToInvPinItems();
+                    }
                     loader.ready = true
                 };
                 loader = Loader.add("LpInfo", "tw-db LpInfo", init, {
@@ -8110,9 +8115,7 @@
                                     $item.appendTo($('#bag', Inventory.DOM))
                             }
                         }
-                        $("body").append('<style>' + 
-                                '#bag > .pinned > .item { background: rgba(125, 125, 125, 0.4); border-radius: 4px; }'
-                            + '</style>');
+                        TWDB.Util.addCss('#bag > .pinned > .item { background: rgba(125, 125, 125, 0.4); border-radius: 4px; }');
                     } catch (t) {
                         Error.report(t, "manipulate Inventory.addItemDivToInv (pin items)")
                     }
