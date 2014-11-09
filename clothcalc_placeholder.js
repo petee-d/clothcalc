@@ -1,16 +1,4 @@
-// ==UserScript==
-// @name dev The West - tw-db.info Cloth Calc
-// @version 0.37 Rev. 8
-// @description The West Script: Cloth Calculation for game version 1.34 or higher
-// @author scoobydoo, Dun, Bluep, stewue, Petee [tw-db.info]
-// @namespace http://tw-db.info
-// @grant none
-// @website http://tw-db.info
-// @include http://*.the-west.*/game.php*
-// @include http://*.tw.innogames.*/game.php*
-// @downloadURL http://tw-db.info/cache/userscripts/clothcalc/dev_clothcalc_eng.user.js
-// @updateURL http://tw-db.info/cache/userscripts/clothcalc/dev_clothcalc_eng.meta.js
-// ==/UserScript==
+// be aware that the script release system ignores everything before // START OF ...
 
 /**
  * News on this update :
@@ -8044,7 +8032,7 @@
                         Inventory.addItems = function (category, page) {
                             Inventory.__CCPI__addItems.apply(this, arguments);
                             // add the button if doesn't exist already
-                            if (!$('#CC_pin_items').length)
+                            if (!$('#CC_pin_items').length) {
                                 Inventory.DOM.append(
                                     $('<div id="CC_pin_items">')
                                     .attr({ title: "#TOGGLE_ITEM_PINNING_MODE#".twdb_twiceHTMLUnescape() /**TODO: get rid of unescape */ })
@@ -8059,8 +8047,14 @@
                                         cursor: 'pointer'
                                     })
                                 );
+                                // TW Collections compatibility fix
+                                $('#bagFilterIsCollect').css('margin-left', '+=50px')
+                            }
                             $('#CC_pin_items').off('click').click(function () {
                                 TWDB.Settings.itemPinningMode ^= true;
+                                $(this).css({
+                                    backgroundPosition: TWDB.Settings.itemPinningMode ? '0 -23px' : '0 0'
+                                });
                                 Inventory.addItems(category, page);
                             });
                             // if in new, add pinned items
