@@ -8087,10 +8087,11 @@
                                 $item.find('img').off('click').click(
                                     TWDB.Settings.itemPinningMode ?
                                     function (e) {
-                                        if (pinnedItems.length >= Inventory.latestSize) return;
                                         var index = pinnedItems.indexOf(id);
-                                        if (index < 0) pinnedItems.push(id);
-                                        else           pinnedItems.splice(index, 1);
+                                        if (index < 0) {
+                                            if (pinnedItems.length >= Inventory.latestSize) return;
+                                            pinnedItems.push(id);
+                                        } else pinnedItems.splice(index, 1);
                                         $(this).parent().parent().toggleClass('opacity05');
                                         TWDB.Settings.set('pinnedItems', pinnedItems);
                                     } :
