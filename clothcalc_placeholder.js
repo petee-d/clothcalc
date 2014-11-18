@@ -6453,77 +6453,96 @@
                 return t
             }(jQuery);
             Debugger.Chat = Chat;
-            var SellTip = function (e) {
-                var t = {};
-                var n = false;
-                var r = {};
-                var i = function () {
-                    if (r.ready) {
-                        return
-
-                    }
-                    if (Settings.get("sellTip", true)) {
-                        GameInject.injectItem("Inventory", "sellTip",
-                            function (e) {
-                                return s(e)
-                            })
-                    }
-                    r.ready = true
+            
+            
+            ///////////////////////////////////////
+            //
+            //  sell Tip Object:  handles Information about Item should be sold or not
+            //  Init:             should be loader after Settings and ClothCalc Module
+            //  Methodes:
+            //
+            ///////////////////////////////////////
+            var SellTip = (function ($) {
+                var _self = {};
+                var ready = false;
+                var loader = {};
+                var init = function () {
+                    if ( loader.ready ) {
+                        return;
+                    };
+                    if ( Settings.get('sellTip',true) ) {
+                        GameInject.injectItem('Inventory' , 'sellTip' , function(item){
+                            setTimeout(function () { return getDiv(item); }, 0);
+                        });
+                    };
+                    loader.ready = true;
                 };
-                r = Loader.add("sellTip", "tw-db sellTip", i, {
-                    Settings: true,
-                    ClothCalc: true
-                });
-                var s = function (e) {
-                    var t = e.obj.item_id;
-                    var n = w.ItemManager.get(t);
-                    var r = false;
-                    var i = "";
-                    if (!n.sellable && !n.auctionable) {
-                        return
-
+                loader = Loader.add ( 'sellTip' , 'tw-db sellTip' , init , {'Settings':true,'ClothCalc':true} );
+                var getDiv = function (el) {
+                    var id = el.obj.item_id
+                    var item = w.ItemManager.get(id);
+                    var sell = false;
+                    var title = '';
+                    
+                    if ( !item.sellable && !item.auctionable) {
+                        return;
                     }
-                    if (Settings.get("sellTip1", true)) {
-                        var s = w.Bag.getItemByItemId(n.item_id);
-                        var o = w.Wear.wear[n.type];
-                        if (s || o && o.obj.item_id == n.item_id) {
-                            var u = (s != undefined ? s.count : 0) + (o != undefined && o.obj.item_id == n.item_id ? 1 : 0);
-                            if (u > 1) {
-                                r = true;
-                                i = "#DOUBLEITEM#".escapeHTML()
-                            }
-                        }
-                    }
-                    if (Settings.get("sellTip2", true) && ClothCalc.isLoaded()) {
-                        if (!ClothCalc.isUsedItem(n.item_id)) {
-                            r = true;
-                            i = "#NOTUSED#".escapeHTML()
-                        }
-                    }
-                    if (Settings.get("sellTip3", true)) {
-                        if (n.named) {
-                            r = false
-                        }
-                    }
-                    if (Settings.get("sellTip4", true)) {
-                        if (n.traderlevel === null || n.traderlevel > 15) {
-                            r = false
-                        }
-                    }
-                    if (Settings.get("sellTip5", true)) {
-                        if (n.set) {
-                            r = false
-                        }
-                    }
-                    e.divMain.find(".TWDBsellTip").remove();
-                    if (r) {
-                        e.divMain
-                            .append('<img src="' + Images.iconSell + '" class="TWDBsellTip" title="' + i + '" title=" #NOTATINV# " style="position:absolute;bottom:4px;right:0px;width:19px;height:19px;padding:0px;border:0px;margin:0px;" />')
-                    }
+                    
+                    /////
+                    // - doppelte Items -> 1
+                    // - nutzlose Items -> 2
+                    // - named Items behalten -> 3
+                    // - nicht kaufbare Items behalten -> 4
+                    // - set Items behalten -> 5
+                
+                    if ( Settings.get('sellTip1',true) ) {
+                        var bagItem = w.Bag.getItemByItemId(item.item_id);
+                        var wearItem = w.Wear.wear[item.type];
+                        if (bagItem || (wearItem && wearItem.obj.item_id == item.item_id)) {
+                        var count = (bagItem != undefined ? bagItem.count : 0)
+                                  + (wearItem != undefined && wearItem.obj.item_id == item.item_id ? 1 : 0);
+                        if ( count > 1 ) {
+                            sell = true;
+                            title = ('#DOUBLEITEM#').escapeHTML();
+                        };
+                        };
+                    };
+                
+                    if ( Settings.get('sellTip2',true) && ClothCalc.isLoaded() ) {
+                        if ( !ClothCalc.isUsedItem(item.item_id) ) {
+                        sell = true;
+                        title = ('#NOTUSED#').escapeHTML();
+                        };
+                    };
+                            
+                    if ( Settings.get('sellTip3',true) ) {
+                        if ( item.named ) {
+                        sell = false;
+                        };
+                    };
+                
+                    if ( Settings.get('sellTip4',true) ) {
+                        if ( item.traderlevel === null || item.traderlevel > 15 ) {
+                        sell = false;
+                        };
+                    };
+                
+                    if ( Settings.get('sellTip5',true) ) {
+                        if ( item.set ) {
+                        sell = false;
+                        };
+                    };
+                    
+                    el.divMain.find('.TWDBsellTip').remove();
+                    if ( sell ) {
+                        el.divMain.append('<img src="' + Images.iconSell + '" class="TWDBsellTip" title="' + title + '" title=" #NOTATINV# " style="position:absolute;bottom:4px;right:0px;width:19px;height:19px;padding:0px;border:0px;margin:0px;" />');
+                    };
                 };
-                return t
-            }($);
+                return _self;
+            })($);
             Debugger.SellTip = SellTip;
+            
+            
             var Collector = function (e) {
                 var t = {};
                 var n = false;
