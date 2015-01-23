@@ -4094,7 +4094,7 @@
             Debugger.Sleep = Sleep;
             
             
-            var Analyser = function ($) {
+            var Analyser = (function ($) {
                 var _self = {};
                 var ready = false;
                 var statistic = null;
@@ -4107,917 +4107,944 @@
                 var sorting = {};
                 _self.extra = false;
                 var loader = {};
-                var init = function () {
-                    if (loader.ready) {
-                        return
-
-                    }
-                    var e = Cache.load("statistic");
-                    if (typeof e == "object" && e != null) {
-                        statistic = e
-                    } else {
-                        reset("all", true)
-                    }
-                    if (!statistic.ver) {
-                        reset("all", true)
-                    }
-                    switch (statistic.ver) {
-                    case 1:
-                        reset("job", true, 1);
-                        reset("duel", true, 1);
-                        statistic.ver = 2;
-                    case 2:
-                        reset("job", true, 1);
-                        reset("duel", true, 1);
-                        statistic.ver = 3;
-                    case 3:
-                        reset("chest", true, 1);
-                        statistic.ver = 4
-                    }
-                    backup = $.extend(true, {}, statistic);
-                    GameInject.addTabOnMessagesWindow("#JOBANALYSER#",
-                        "analyser-job", function () {
-                            show("job")
-                        });
-                    if (Settings.get("chestanalyser", true)) {
-                        GameInject.ItemUse(Chest.add);
-                        GameInject.addTabOnMessagesWindow(
-                            "#CHESTANALYSER#", "analyser-chest",
-                            function () {
-                                Chest.show()
-                            })
-                    }
-                    loader.ready = true
+                var init = function ( ) {
+                  if ( loader.ready ) {
+                    return;
+                  };
+                  
+                  TWDB.Util.addCss(
+                      ".messages-analyser-job .item img.tw_item { width: 30px; height: 27px; }"
+                    + ".messages-analyser-job .item .count { bottom: -4px; }"
+                    + ".messages-analyser-job .item span.usable { display: none; }"
+                    + "div.tw2gui_window .messages-analyser-job div.fancytable .row > div { display: none; vertical-align: top; }"
+                    + ".messages-analyser-job.view-rewards div.fancytable .row > div.view-rewards { display: inline-block; }"
+                    + ".messages-analyser-job.view-items div.fancytable .row > div.view-items { display: inline-block; }"
+                    + "div.tw2gui_window .messages-analyser-job div.fancytable div.trows div.tbody div.row { height: auto; }"
+                  );
+                  
+                  var tmp = Cache.load('statistic');
+                  if ( typeof(tmp) == 'object' && tmp != null ) {
+                    statistic = tmp;
+                  } 
+                  else {
+                    reset('all',true);
+                  };
+                  
+                  if ( !statistic.ver ) {
+                    reset('all',true);
+                  }
+                  
+                  switch(statistic.ver) {
+                    case 1 :  reset('job',true,1);
+                              reset('duel',true,1);
+                              statistic.ver = 2;
+                    case 2 :  reset('job',true,1);
+                              reset('duel',true,1);
+                              statistic.ver = 3;
+                    case 3 :  reset('chest',true,1);
+                              statistic.ver = 4;
+                  };
+                  
+                  backup = $.extend(true, {}, statistic);
+            
+                  GameInject.addTabOnMessagesWindow( '#JOBANALYSER#' , 'analyser-job' , function(){show('job');} );
+                  
+                  if ( Settings.get('chestanalyser',true) ) {
+                    GameInject.ItemUse(Chest.add);
+                    GameInject.addTabOnMessagesWindow( '#CHESTANALYSER#' , 'analyser-chest' , function(){Chest.show();} );
+                  }
+                  
+                  loader.ready = true;
                 };
-                loader = Loader.add("Analyser", "tw-db Job-Analyser",
-                    init, {
-                        Cache: true,
-                        Settings: true,
-                        Jobs: true
-                    });
-                _self.restore = function () {
-                    statistic = $.extend(true, {}, backup)
+                loader = Loader.add ( 'Analyser' , 'tw-db Job-Analyser' , init , {'Cache':true,'Settings':true,'Jobs':true} );
+                _self.restore = function() {
+                  statistic = $.extend(true, {}, backup);
                 };
-                _self.debug = function () {
-                    console.log(statistic);
-                    console.log(sorting)
+                _self.debug = function() {
+                  console.log(statistic);
+                  console.log(sorting);
                 };
-                var reset = function (e, t, n) {
-                    if (t == true) {
-                        if (!n) {
-                            var n = 0
-                        } else {
-                            var r = /\[report=([0-9]+)([A-Fa-f0-9]{10})\]/;
-                            var i = String(n).match(r);
-                            if (i) {
-                                var n = i[1]
-                            }
-                        }
-                        if (isNaN(parseInt(n))) {
-                            var s = 0
-                        } else {
-                            var s = parseInt(n) - 1
-                        }
-                        switch (e) {
-                        case "job":
-                            statistic[e] = {
-                                last: s,
-                                items: {
-                                    last: 0
-                                }
-                            };
-                            break;
-                        case "duel":
-                            statistic[e] = {
-                                last: s
-                            };
-                            break;
-                        case "chest":
-                            statistic[e] = {};
-                            break;
-                        case "all":
-                            statistic = {
-                                ver: 4
-                            };
-                            reset("job", true, s + 1);
-                            reset("duel", true, s + 1);
-                            reset("chest", true, s + 1);
-                            break
-                        }
-                    } else {
-                        var o = $('<div><h2>Do you really want to reset the ReportAnalyser statistics?</h2><span style="font-size:12px"><br />Give Report-Link of first Report which should be read after Reset</span></div>');
-                        var u = (new GameAPI.gui.textfield(
-                            "twdb_analyser_last")).setSize(40);
-                        u.setLabel("Report-Link:");
-                        o.append(u.getMainDiv());
-                        var a = new GameAPI.gui.checkbox(
-                            "or use all reports  ");
-                        var f = new GameAPI.gui.checkbox(
-                            "or use only future reports");
-                        a.setCallback(function (e) {
-                            if (e) {
-                                f.setSelected(false);
-                                u.setValue("")
-                            }
-                        });
-                        f.setCallback(function (e) {
-                            if (e) {
-                                a.setSelected(false);
-                                u.setValue("")
-                            }
-                        });
-                        $(u.getMainDiv()).find("span").css("font-size",
-                            "12px");
-                        $(u.getMainDiv()).find("input").keyup(
-                            function () {
-                                a.setSelected(false);
-                                f.setSelected(false)
-                            });
-                        o.append($('<div style="display:block;" />')
-                            .append(a.getMainDiv()).append(
-                                f.getMainDiv()));
-                        var l = new GameAPI.gui.dialog(
-                            "ReportAnalyser - #RESET#", o);
-                        l.addButton("ok", function () {
-                            if (a.isSelected()) {
-                                reset(e, true)
-                            } else if (f.isSelected()) {
-                                reset(e, true, statistic[e].last + 1)
-                            } else {
-                                reset(e, true, u.getValue())
-                            }
-                            l.hide();
-                            MessagesWindow.open("analyser-" + e)
-                        });
-                        l.addButton("cancel");
-                        l.show()
+                var reset = function(type , confirm , last) {
+                  if ( confirm == true ) {
+                    if ( !last ) {
+                      var last = 0;
                     }
-                };
-                var Chest = function (e) {
-                    var t = {};
-                    t.add = function (e, t) {
-                        var n = false;
-                        for (i = 0; i < t.msg.effects.length; i += 1) {
-                            var r = t.msg.effects[i];
-                            if (r.type == "lottery" || r.type == "content") {
-                                if (!isDefined(statistic.chest[e])) {
-                                    statistic.chest[e] = {
-                                        count: 0,
-                                        items: {}
-                                    }
-                                }
-                                var s = statistic.chest[e];
-                                if (!n) {
-                                    s.count++;
-                                    n = true
-                                }
-                                r.items
-                                    .each(function (e) {
-                                        if (!isDefined(s.items[e.item_id])) {
-                                            s.items[e.item_id] = 0
-                                        }
-                                        s.items[e.item_id] += e.count
-                                    })
-                            }
-                        }
-                        Cache.save("statistic", statistic)
+                    else {
+                      var rep = /\[report=([0-9]+)([A-Fa-f0-9]{10})\]/;
+                      var matches = String(last).match(rep)
+                      if ( matches ) {
+                        var last = matches[1];
+                      };
                     };
-                    t.show = function () {
-                        if (!MessagesWindow.window) {
-                            return
-
-                        }
-                        var t = e(
-                                MessagesWindow.window.getContentPane())
-                            .find(".messages-analyser-chest");
-                        MessagesWindow.window.showLoader();
-                        t.children().remove();
-                        var n = new GameAPI.gui.scrollpane;
-                        e(n.getMainDiv()).css("height", "385px");
-                        t.append(n.getMainDiv());
-                        for (var r in statistic.chest) {
-                            var i = statistic.chest[r];
-                            var s = (new tw2widget.Item(ItemManager
-                                    .get(r), "item_inventory"))
-                                .setCount(i.count);
-                            s.getImgEl().addClass("item_inventory_img");
-                            n
-                                .appendContent(e(
-                                        '<div style="float:left;position:relative;height:61px;width:60px;margin:5px" />')
-                                    .append(s.getMainDiv()));
-                            var o = 0;
-                            var u = e('<div style="float:left;position:relative;width:590px;margin:5px" />');
-                            for (var a in i.items) {
-                                o++;
-                                var s = (new tw2widget.Item(ItemManager
-                                        .get(a), "item_inventory"))
-                                    .setCount(i.items[a]);
-                                s.getImgEl().addClass(
-                                    "item_inventory_img");
-                                u.append(s.getMainDiv())
-                            }
-                            u.css("heigth", (parseInt(o / 10) + 1) * 61 + "px");
-                            n
-                                .appendContent('<div style="float:left;position:relative;width:10px;height:' + String((parseInt(o / 10) + 1) * 61 + 10) + "px;background: url(" + Game.cdnURL + '/images/window/report/devider_report.png) repeat-x scroll 0 0 transparent;" />');
-                            n.appendContent(u);
-                            n
-                                .appendContent('<div style="clear:both;position:relative;width:100%;height:10px;display:block;background: url(' + Game.cdnURL + '/images/window/dailyactivity/wood_devider_horiz.png) repeat-x scroll 0 0 transparent;" />')
-                        }
-                        MessagesWindow.window.hideLoader()
+                    
+                    if ( isNaN(parseInt(last)) ) {
+                      var id = 0;
+                    } 
+                    else {
+                      var id = parseInt(last)-1;
                     };
-                    return t
-                }($);
-                var analyse = function (e) {
-                    if (locked) {
-                        return
-
-                    }
-                    locked = true;
-                    reports = [];
-                    queryReports(e)
-                };
-                var queryReports = function (e, t) {
-                    if (!t) {
-                        t = 1
-                    }
-                    lastPage = t;
-                    Ajax.remoteCall("reports", "get_reports", {
-                        page: t,
-                        folder: e
-                    }, function (t) {
-                        readReports(e, t)
-                    })
-                };
-                var readReports = function (e, t) {
-                    var n = true;
-                    if (typeof t.reports != "object") {
-                        t.reports = [];
-                        n = false
-                    }
-                    if (typeof t.page == "undefined" || lastPage != t.page) {
-                        t.reports = [];
-                        n = false
-                    }
-                    for (var r = 0; r < t.reports.length; r++) {
-                        var i = t.reports[r];
-                        if (i.report_id <= statistic[e].last) {
-                            n = false;
-                            break
-                        }
-                        reports.push({
-                            id: i.report_id,
-                            hash: i.hash,
-                            type: e
-                        })
-                    }
-                    gui.bar.setMaxValue(reports.length);
-                    if (n) {
-                        window.setTimeout(function () {
-                            queryReports(e, lastPage + 1)
-                        }, Timer.getTimeout())
-                    } else {
-                        analyseReports(e)
-                    }
-                };
-                var analyseReports = function (e) {
-                    if (reports.length > 0) {
-                        gui.bar.setValue(gui.bar.getValue() + 1);
-                        queryReport(reports.pop())
-                    } else {
-                        Cache.save("statistic", statistic);
-                        locked = false;
-                        show(e, true)
-                    }
-                };
-                var queryReport = function (e) {
-                    $.post("game.php?window=reports&mode=show_report", {
-                        flash: null,
-                        hash: e.hash,
-                        report_id: e.id
-                    }, function (t) {
-                        readReport(e.type, t)
-                    }, "json")
-                };
-                var readReport = function (e, t) {
-                    if (!t || !t.report_id || !t.publishHash) {
-                        (new UserMessage("empty Server Response",
-                            UserMessage.TYPE_ERROR)).show();
-                        return false
-                    }
-                    if (typeof t.page != "string" || typeof t.title != "string" || typeof t.js != "string") {
-                        failedReports.push(t.report_id)
-                    } else {
-                        switch (e) {
-                        case "job":
-                            analyseJobReport(t);
-                            break;
-                        case "duel":
-                            analyseDuelReport(t);
-                            break
-                        }
-                        statistic[e].last = t.report_id
-                    }
-                    window.setTimeout(function () {
-                        analyseReports(e)
-                    }, Timer.getTimeout())
-                };
-                var analyseDuelReport = function (e) {};
-                var analyseJobReport = function (json) {
-                    try {
-                        data = {
-                            id: null,
-                            hash: null,
-                            job: null,
-                            motivation: null,
-                            duration: null,
-                            wage: null,
-                            bond: null,
-                            experience: null,
-                            injury: 0,
-                            killed: false,
-                            date_received: null,
-                            items: {}
-                        };
-                        data.id = json.report_id;
-                        data.hash = json.publishHash;
-                        var job = Jobs.getJobByName(json.title
-                            .slice(json.title.indexOf(":") + 1));
-                        if (!job) {
-                            failedReports.push(data.id);
-                            return false
-                        }
-                        data.job = job.id;
-                        data.date_received = json.date_received;
-                        var tmp = $(json.page);
-                        tmp
-                            .find(".rp_row_jobdata")
-                            .each(
-                                function (index) {
-                                    var str = $
-                                        .trim($(this)
-                                            .children(
-                                                "span:last-child")
-                                            .html());
-                                    str = str.split(" ").join(
-                                        " ");
-                                    switch (index) {
-                                    case 0:
-                                        data.motivation = parseInt(str
-                                            .slice(
-                                                0,
-                                                str
-                                                .indexOf(" ")));
-                                        break;
-                                    case 1:
-                                        var tmp = str.replace(
-                                            "h",
-                                            " * 3600 + ");
-                                        tmp = tmp.replace("m",
-                                            " * 60 + ");
-                                        tmp = tmp.replace("s",
-                                            " * 1 + ");
-                                        tmp += "0";
-                                        try {
-                                            data.duration = parseInt(eval(tmp))
-                                        } catch (e) {
-                                            throw {
-                                                message: "unrecognized time on report: " + str
-                                            }
-                                        }
-                                        break;
-                                    case 2:
-                                        data.wage = parseInt(str
-                                            .slice(str
-                                                .indexOf(" ") + 1));
-                                        break;
-                                    case 3:
-                                        data.bond = parseInt(str);
-                                        break;
-                                    case 4:
-                                        data.experience = parseInt(str
-                                            .slice(
-                                                0,
-                                                str
-                                                .indexOf(" ")));
-                                        break
-                                    }
-                                });
-                        tmp.find(".rp_hurtmessage_text").each(
-                            function () {
-                                var e = new RegExp("[0-9]+");
-                                data.injury = Number(e.exec($(this)
-                                    .html()))
-                            });
-                        tmp.find(".rp_row_killmessage").each(
-                            function () {
-                                data.killed = true
-                            });
-                        var tmp = json.js.split(";");
-                        $(tmp)
-                            .each(
-                                function () {
-                                    var e = new RegExp(
-                                        /\s*ItemManager\.get\(([0-9]+)\)\s*\)\.setCount\(([0-9]+)\)/m);
-                                    var t = e.exec(this);
-                                    if (t) {
-                                        data.items[Number(t[1])] = Number(t[2])
-                                    }
-                                });
-                        if (!statistic.job[data.job]) {
-                            statistic.job[data.job] = {
-                                count: 0,
-                                products: {}
-                            }
-                        }
-                        var jobstats = statistic.job[data.job];
-                        jobstats.count++;
-                        if (!jobstats[data.motivation]) {
-                            jobstats[data.motivation] = {
-                                count: 0,
-                                duration: 0,
-                                wage: 0,
-                                bond: 0,
-                                experience: 0,
-                                injury: {},
-                                killed: 0,
-                                items: {},
-                                extraitems: {}
-                            }
-                        }
-                        var stats = jobstats[data.motivation];
-                        if (!isDefined(stats.duration)) {
-                            stats.duration = 0
-                        }
-                        stats.count++;
-                        stats.duration += data.duration;
-                        stats.wage += data.wage;
-                        stats.bond += data.bond;
-                        stats.experience += data.experience;
-                        if (!stats.injury[data.injury]) {
-                            stats.injury[data.injury] = 0
-                        }
-                        stats.injury[data.injury]++;
-                        if (data.killed) {
-                            stats.killed++
-                        }
-                        for (var key in data.items) {
-                            var id = Number(key);
-                            if (id === 138) {
-                                if (!isDefined(statistic.extra)) {
-                                    statistic.extra = {
-                                        count: 0
-                                    };
-                                    _self.extra = true
-                                }
-                                statistic.extra.count++;
-                                statistic.extra[statistic.extra.count] = data
-                            }
-                            var count = data.items[id];
-                            var item = ItemManager.get(id);
-                            if (Jobs.isProduct(id) !== -1) {
-                                if (!jobstats.products[id]) {
-                                    jobstats.products[id] = {
-                                        last: 0
-                                    }
-                                }
-                                var tmp = jobstats.products[id];
-                                for (var i = 0; i < count; i++) {
-                                    var last = jobstats.count - tmp.last;
-                                    tmp.last = jobstats.count;
-                                    if (!tmp[last]) {
-                                        tmp[last] = 0
-                                    }
-                                    tmp[last]++
-                                }
-                            } else if (item.price == 0) {
-                                if (!stats.extraitems[id]) {
-                                    stats.extraitems[id] = 0
-                                }
-                                stats.extraitems[id]++
-                            } else {
-                                luck = true;
-                                if (!stats.items[id]) {
-                                    stats.items[id] = 0
-                                }
-                                stats.items[id]++
-                            }
-                        }
-                    } catch (e) {
-                        failedReports.push(data.id);
-                        return false
-                    }
-                };
-                var show = function (e, t) {
-                    if (!MessagesWindow.window) {
-                        return
-
-                    }
-                    gui.window = $(
-                            MessagesWindow.window.getContentPane())
-                        .find(".messages-analyser-" + e);
-                    if (typeof t == "undefined") {
-                        MessagesWindow.window.showLoader();
-                        gui.bar = new GameAPI.gui.progressbar(0,
-                            reports.length);
-                        gui.window.children().remove();
-                        gui.window.append(gui.bar.getMainDiv());
-                        analyse(e)
-                    } else {
-                        switch (e) {
-                        case "job":
-                            var n = showJobs();
-                            break;
-                        case "duel":
-                            var n = showDuels();
-                            break
-                        }
-                        gui.window.children().remove();
-                        gui.window.append(n);
-                        sort();
-                        switchAvg();
-                        sort();
-                        MessagesWindow.window.hideLoader()
-                    }
-                };
-                var sort = function (e) {
-                    try {
-                        if (typeof e != "undefined") {
-                            if (sorting.type == e) {
-                                sorting.ord *= -1
-                            } else {
-                                sorting.ord = 1;
-                                sorting.type = e
-                            }
-                        } else {
-                            var e = sorting.type
-                        }
-                        var t = sorting.ord;
-                        var n = function (n, r) {
-                            var i = $(n).find(".cell_" + e).html();
-                            var s = $(r).find(".cell_" + e).html();
-                            if (Number(i) == i) {
-                                return i * 1 > s * 1 ? t : -t
-                            } else {
-                                return i > s ? t : -t
-                            }
-                        };
-                        gui.rows.sort(n);
-                        for (var r = 0; r < gui.rows.length; r++) {
-                            gui.bodyscroll.appendContent(gui.rows[r])
-                        }
-                    } catch (i) {
-                        Error.report(i, "Analyser sort")
-                    }
-                };
-                var switchAvg = function () {
-                    switch (sorting.avg) {
-                    case "avg":
-                        sorting.avg = "sum";
+                    
+                    switch ( type ) {
+                      case 'job' : 
+                        statistic[type] = {'last':id,'items':{'last':0}};
                         break;
-                    case "sum":
-                        sorting.avg = "avg";
-                        break
-                    }
-                    $(gui.window).find("div.row div").each(
-                        function (e) {
-                            var t = $(this).data(
-                                String(sorting.avg));
-                            var n = $(this).data(
-                                String(sorting.avg) + "-t");
-                            $(this).html(t).attr("title", n)
-                        })
-                };
-                var showJobs = function () {
-                    sorting = {
-                        ord: 1,
-                        type: 0,
-                        avg: "avg"
+                      case 'duel' : 
+                        statistic[type] = {'last':id};
+                        break;
+                      case 'chest' : 
+                        statistic[type] = {};
+                        break;
+                      case 'all' : 
+                        statistic = {'ver':4};
+                        reset('job',true,id+1);
+                        reset('duel',true,id+1);
+                        reset('chest',true,id+1);
+                        break;
                     };
-                    var e = $('<div class="fancytable">' + '<div class="_bg tw2gui_bg_tl"></div>' + '<div class="_bg tw2gui_bg_tr"></div>' + '<div class="_bg tw2gui_bg_bl"></div>' + '<div class="_bg tw2gui_bg_br"></div>' + '<div class="trows">' + '<div class="thead statics">' + '<div class="row_head">' + '<div class="cell_0" style="width:91px; text-align:center;">' + '<span title="#NAME#" style="cursor:pointer, margin-bottom:3px;">' + '<img src="' + Images.iconName + '" />' + "</span>" + "</div>" + '<div class="cell_1" style="width:50px; text-align:center;">' + '<span title="#COUNT#">' + '<img src="' + Images.iconCount + '" />' + "</span>" + "</div>" + '<div class="cell_2" style="width:50px; text-align:center;">' + '<span title="#DURATION#">' + '<img src="' + Images.iconClock + '" />' + "</span>" + "</div>" + '<div class="cell_3" style="width:50px; text-align:center;">' + '<span title="#EXPERIENCE#">' + '<img src="' + Images.iconExperience + '" />' + "</span>" + "</div>" + '<div class="cell_4" style="width:50px; text-align:center;">' + '<span title="#WAGE#">' + '<img src="' + Images.iconDollar + '" />' + "</span>" + "</div>" + '<div class="cell_5" style="width:50px; text-align:center;">' + '<span title="#BOND#">' + '<img src="' + Images.iconUpb + '" />' + "</span>" + "</div>" + '<div class="cell_6" style="width:50px; text-align:center;">' + '<span title="#MOTIVATION#">' + '<img src="' + Images.iconMoti + '" />' + "</span>" + "</div>" + '<div class="cell_7" style="width:50px; text-align:center;">' + '<span title="#DANGER#">' + '<img src="' + Images.iconDanger + '" />' + "</span>" + "</div>" + '<div class="cell_8" style="width:50px; text-align:center;">' + '<span title="#KILLED#">' + '<img src="' + Images.iconKilled + '" />' + "</span>" + "</div>" + '<div class="cell_9" style="width:50px; text-align:center;">' + '<span title="#PRODUCTS#">' + '<img src="' + Images.iconYield + '" />' + "</span>" + "</div>" + '<div class="cell_10" style="width:50px; text-align:center;">' + '<span title="#ITEM#">' + '<img src="' + Images.iconItem + '" />' + "</span>" + "</div>" + '<div class="cell_11" style="width:41px; text-align:center;">' + '<span title="#LUCK#">' + '<img src="' + Images.iconLuck + '" />' + "</span>" + "</div>" + '<div class="cell_12" style="width:20px; text-align:right;">' + '<span title="#RESET#">' + '<img src="' + Images.iconReset + '" />' + "</span>" + "</div>" + "</div>" + "</div>" + '<div class="tbody">' + '<div class="_bg tw2gui_bg_l"></div>' + '<div class="_bg tw2gui_bg_r"></div>' + "</div>" + '<div class="tfoot statics">' + '<div class="row row_foot"></div>' + "</div>" + "</div>" + "</div>");
-                    e.find(".row_head").find("img").each(function (e) {
-                        if (e == 12) {
-                            $(this).click(function () {
-                                reset("job")
-                            })
-                        } else {
-                            $(this).click(function (e) {
-                                return function () {
-                                    sort(e)
-                                }
-                            }(e))
-                        }
+                  }
+                  else {
+                    var div = $('<div><h2>Do you really want to reset the ReportAnalyser statistics?</h2><span style="font-size:12px"><br />Give Report-Link of first Report which should be read after Reset</span></div>');
+                    var input = new GameAPI.gui.textfield("twdb_analyser_last").setSize(40);
+                    input.setLabel('Report-Link:');
+                    div.append(input.getMainDiv());
+                    var checkbox1 = new GameAPI.gui.checkbox('or use all reports&nbsp;&nbsp;');
+                    var checkbox2 = new GameAPI.gui.checkbox('or use only future reports');
+                    checkbox1.setCallback(function(state) {
+                      if(state) {
+                        checkbox2.setSelected(false);
+                        input.setValue('');
+                      };
                     });
-                    e.find(".row_head").find("img").css("cursor",
-                        "pointer");
-                    var t = 0;
-                    var n = {
-                        jobs: 0,
-                        count: 0,
-                        duration: 0,
-                        experience: 0,
-                        wage: 0,
-                        bond: 0,
-                        motivation: 0,
-                        injury: 0,
-                        killed: 0,
-                        products: 0,
-                        items: 0,
-                        luck: 0
-                    };
-                    var r = statistic.job;
-                    var i = $();
-                    gui.rows = [];
-                    for (var s in r) {
-                        var o = Jobs.getJobById(s);
-                        if (!o) {
-                            continue
+                    checkbox2.setCallback(function(state) {
+                      if(state) {
+                        checkbox1.setSelected(false);
+                        input.setValue('');
+                      };
+                    });
+                    $(input.getMainDiv()).find('span').css('font-size','12px');
+                    $(input.getMainDiv()).find('input').keyup(function(){
+                        checkbox1.setSelected(false);
+                        checkbox2.setSelected(false);
+                    });
+                    
+                    div.append(($('<div style="display:block;" />').append(checkbox1.getMainDiv()).append(checkbox2.getMainDiv())));
+                    var Box = new GameAPI.gui.dialog ('ReportAnalyser - #RESET#',div);
+                    Box.addButton('ok',function(){
+                      if(checkbox1.isSelected()){
+                        reset(type,true);
+                      } else if (checkbox2.isSelected()) {
+                        reset(type,true,statistic[type].last+1);
+                      } else {
+                        reset(type,true,input.getValue());
+                      };
+                      Box.hide();
+                      MessagesWindow.open('analyser-'+type);
+                    });
+                    Box.addButton('cancel');
+                    Box.show();
+                  };
+                };
+                
+                var Chest = (function ($) {
+                  var _that = {};
+                  _that.add = function ( item , data ) {
+                    var added = false;
+                    for (i = 0; i < data.msg.effects.length; i += 1) {
+                      var m = data.msg.effects[i];
+                      if ( m.type == 'lottery' || m.type == 'content' ) {
+                        if ( !isDefined(statistic.chest[item]) ) {
+                          statistic.chest[item] = {'count':0,'items':{}};
                         }
-                        var u = {
-                            count: 0,
-                            duration: 0,
-                            experience: 0,
-                            wage: 0,
-                            bond: 0,
-                            motivation: 0,
-                            injury: 0,
-                            killed: 0,
-                            products: 0,
-                            items: 0,
-                            luck: 0
+                        var stats = statistic.chest[item];
+                        if ( !added ) {
+                          stats.count++;
+                          added = true;
                         };
-                        var a = r[s];
-                        u.count = a.count;
-                        var f = 0;
-                        for (var t = 0; t < o.randomyields.length; t++) {
-                            f += o.randomyields[t]
-                        }
-                        if (typeof o.yields.length == "undefined") {
-                            for (var l in o.yields) {
-                                f += o.yields[l].prop
-                            }
-                        }
-                        for (var l in a.products) {
-                            for (var c in a.products[l]) {
-                                if (c == "last") {
-                                    continue
-                                }
-                                var h = ItemManager.get(l);
-                                u.products += Number(a.products[l][c]);
-                                u.luck += Number(h.price * a.products[l][c])
-                            }
-                        }
-                        for (var p in a) {
-                            if (p == "count" || p == "products") {
-                                continue
-                            }
-                            var c = a[p];
-                            u.motivation += p * c.count;
-                            u.bond += c.bond;
-                            u.duration = c.duration;
-                            u.experience += c.experience;
-                            for (var d in c.injury) {
-                                u.injury += d * c.injury[d]
-                            }
-                            for (var l in c.items) {
-                                var h = ItemManager.get(l);
-                                u.items += Number(c.items[l]);
-                                u.luck += Number(h.price * c.items[l])
-                            }
-                            u.killed += c.killed;
-                            u.wage += c.wage
-                        }
-                        var v = $('<div class="row row_' + t + '" />');
-                        var c = $('<div class="cell_0" style="width:91px; text-align:left;cursor:pointer;font-size:11px;" ></div>');
-                        c.data("sum", o.name);
-                        c.data("sum-t", o.name);
-                        c.data("avg", o.name);
-                        c.data("avg-t", o.name);
-                        v.append(c);
-                        n.jobs++;
-                        var c = $('<div class="cell_1" style="width:50px; text-align:center;cursor:pointer;" ></div>');
-                        c.data("sum", u.count);
-                        c.data("sum-t", u.count);
-                        c.data("avg", u.count);
-                        c.data("avg-t", u.count);
-                        v.append(c);
-                        n.count += u.count;
-                        var c = $('<div class="cell_2" style="width:50px; text-align:center;cursor:pointer;" ></div>');
-                        c.data("sum", (u.duration / 3600).round(2));
-                        c.data("sum-t", String((u.duration / 3600)
-                            .round(2)) + " #HOURS#");
-                        c.data("avg", (u.duration / (3600 * u.count))
-                            .round(2));
-                        c
-                            .data(
-                                "avg-t",
-                                "&empty; " + String((u.duration / (3600 * u.count))
-                                    .round(2)) + " #HOURS#");
-                        v.append(c);
-                        n.duration += u.duration;
-                        var c = $('<div class="cell_3" style="width:50px; text-align:center;cursor:pointer;" ></div>');
-                        c.data("sum", u.experience);
-                        c.data("sum-t", String(u.experience));
-                        c
-                            .data("avg", (u.experience / u.count)
-                                .round(2));
-                        c.data("avg-t", "&empty; " + String((u.experience / u.count)
-                            .round(2)));
-                        v.append(c);
-                        n.experience += u.experience;
-                        var c = $('<div class="cell_4" style="width:50px; text-align:center;cursor:pointer;" ></div>');
-                        c.data("sum", u.wage);
-                        c.data("sum-t", "$" + String(u.wage));
-                        c.data("avg", (u.wage / u.count).round(2));
-                        c.data("avg-t", "&empty; $" + String((u.wage / u.count).round(2)));
-                        v.append(c);
-                        n.wage += u.wage;
-                        var c = $('<div class="cell_5" style="width:50px; text-align:center;cursor:pointer;" ></div>');
-                        c.data("sum", u.bond);
-                        c.data("sum-t", String(u.bond));
-                        c
-                            .data("avg", (u.bond / u.count * 100)
-                                .round(2));
-                        c.data("avg-t", "&empty; " + String((u.bond / u.count * 100)
-                            .round(2)) + "%");
-                        v.append(c);
-                        n.bond += u.bond;
-                        var c = $('<div class="cell_6" style="width:50px; text-align:center;cursor:pointer;" ></div>');
-                        c.data("sum", u.motivation);
-                        c.data("sum-t", String(u.motivation) + "%");
-                        c
-                            .data("avg", (u.motivation / u.count)
-                                .round(2));
-                        c.data("avg-t", "&empty; " + String((u.motivation / u.count)
-                            .round(2)) + "%");
-                        v.append(c);
-                        n.motivation += u.motivation;
-                        var c = $('<div class="cell_7" style="width:50px; text-align:center;cursor:pointer;" ></div>');
-                        c.data("sum", u.injury);
-                        c.data("sum-t", String(u.injury));
-                        c.data("avg", (u.injury / u.count).round(2));
-                        c
-                            .data("avg-t", "&empty; " + String((u.injury / u.count)
-                                .round(2)));
-                        v.append(c);
-                        n.injury += u.injury;
-                        var c = $('<div class="cell_8" style="width:50px; text-align:center;cursor:pointer;" ></div>');
-                        c.data("sum", u.killed);
-                        c.data("sum-t", String(u.killed));
-                        c.data("avg", (u.killed / u.count * 100)
-                            .round(2));
-                        c.data("avg-t", "&empty; " + String((u.killed / u.count * 100)
-                            .round(2)) + "%");
-                        v.append(c);
-                        n.killed += u.killed;
-                        var c = $('<div class="cell_9" style="width:50px; text-align:center;cursor:pointer;" ></div>');
-                        c.data("sum", u.products);
-                        c.data("sum-t", String(u.products));
-                        c.data("avg", (u.products / u.count * 100)
-                            .round(2));
-                        c.data("avg-t", "&empty; " + String((u.products / u.count * 100)
-                            .round(2)) + "% [" + f * 100 + "%]");
-                        v.append(c);
-                        n.products += u.products;
-                        var c = $('<div class="cell_10" style="width:50px; text-align:center;cursor:pointer;" ></div>');
-                        c.data("sum", u.items);
-                        c.data("sum-t", String(u.items));
-                        c.data("avg", (u.items / u.count * 100)
-                            .round(2));
-                        c.data("avg-t", "&empty; " + String((u.items / u.count * 100)
-                            .round(2)) + "%");
-                        v.append(c);
-                        n.items += u.items;
-                        var c = $('<div class="cell_11" style="width:50px; text-align:center;cursor:pointer;" ></div>');
-                        c.data("sum", u.luck);
-                        c.data("sum-t", "$" + String(u.luck));
-                        c.data("avg", (u.luck / u.count).round(2));
-                        c.data("avg-t", "&empty; $" + String((u.luck / u.count).round(2)));
-                        v.append(c);
-                        n.luck += u.luck;
-                        gui.rows.push(v);
-                        v.click(function () {
-                            detail($(this).children(".cell_0").html())
+                        m.items.each(function (m) {
+                          if ( !isDefined(stats.items[m.item_id] ) ) {
+                            stats.items[m.item_id] = 0;
+                          }
+                          stats.items[m.item_id] += m.count;
                         });
-                        t++
+                      };
+                    };
+                    Cache.save('statistic',statistic);
+                  };
+                  _that.show = function () {
+                    if (!MessagesWindow.window) {
+                      return;
+                    };
+                    var gui = $(MessagesWindow.window.getContentPane()).find('.messages-analyser-chest');
+                    MessagesWindow.window.showLoader();
+                    gui.children().remove();
+                    var bodyscroll = new GameAPI.gui.scrollpane();
+                    $(bodyscroll.getMainDiv()).css('height','385px');
+                    gui.append(bodyscroll.getMainDiv());
+            
+                    // 680 breite
+                    for ( var chest in statistic.chest ) {
+                      var stat = statistic.chest[chest];
+                      var item = new tw2widget.Item(ItemManager.get(chest) , 'item_inventory').setCount(stat.count);
+                      item.getImgEl().addClass('item_inventory_img');
+                      bodyscroll.appendContent( $('<div style="float:left;position:relative;height:61px;width:60px;margin:5px" />').append(item.getMainDiv()) );
+                      var count = 0;
+                      var div = $('<div style="float:left;position:relative;width:590px;margin:5px" />');
+                      for ( var itemid in stat.items ) {
+                        count++;
+                        var item = new tw2widget.Item(ItemManager.get(itemid) , 'item_inventory').setCount(stat.items[itemid]);
+                        item.getImgEl().addClass('item_inventory_img');
+                        div.append(item.getMainDiv());
+                      }
+                      div.css('height', (parseInt(count/10)+1)*61 + 'px');
+                      bodyscroll.appendContent('<div style="float:left;position:relative;width:10px;height:' + String((parseInt(count/10)+1)*61 + 10 ) + 'px;background: url(' + Game.cdnURL + '/images/window/report/devider_report.png) repeat-x scroll 0 0 transparent;" />');
+                      bodyscroll.appendContent( div );
+                      
+                      bodyscroll.appendContent('<div style="clear:both;position:relative;width:100%;height:10px;display:block;background: url(' + Game.cdnURL + '/images/window/dailyactivity/wood_devider_horiz.png) repeat-x scroll 0 0 transparent;" />');
                     }
-                    gui.bodyscroll = new GameAPI.gui.scrollpane;
-                    $(gui.bodyscroll.getMainDiv()).css("height",
-                        "300px");
-                    e.find(".tbody")
-                        .append(gui.bodyscroll.getMainDiv());
-                    gui.footer = e.find(".row_foot");
-                    var c = $('<div class="cell_0" style="width:71px; text-align:center;" ></div>');
-                    c.data("sum", n.jobs);
-                    c.data("sum-t", n.jobs + " #JOBS#");
-                    c.data("avg", n.jobs);
-                    c.data("avg-t", n.jobs + " #JOBS#");
-                    gui.footer.append(c);
-                    var c = $('<div class="cell_0" style="width:20px; text-align:center;cursor:pointer;color:#444;" ></div>');
-                    c.mouseenter(function () {
-                        $(this).css("color", "#888")
-                    }).mouseleave(function () {
-                        $(this).css("color", "#444")
-                    });
-                    c.click(function () {
-                        switchAvg()
-                    });
-                    c.data("sum", "&sum;");
-                    c.data("sum-t", "#SWITCH# &empty;");
-                    c.data("avg", "&empty;");
-                    c.data("avg-t", "#SWITCH# &sum;");
-                    gui.footer.append(c);
-                    var c = $('<div class="cell_1" style="width:50px; text-align:center;" ></div>');
-                    c.data("sum", n.count);
-                    c.data("sum-t", n.count);
-                    c.data("avg", n.count);
-                    c.data("avg-t", n.count);
-                    gui.footer.append(c);
-                    var c = $('<div class="cell_2" style="width:50px; text-align:center;" ></div>');
-                    c.data("sum", (n.duration / 3600).round(2));
-                    c.data("sum-t",
-                        String((n.duration / 3600).round(2)) + "#HOURS#");
-                    c.data("avg", (n.duration / (3600 * n.count))
-                        .round(2));
-                    c.data("avg-t", "&empty; " + String((n.duration / (3600 * n.count))
-                        .round(2)) + "#HOURS#");
-                    gui.footer.append(c);
-                    var c = $('<div class="cell_3" style="width:50px; text-align:center;" ></div>');
-                    c.data("sum", n.experience);
-                    c.data("sum-t", String(n.experience));
-                    c.data("avg", (n.experience / n.count).round(2));
-                    c
-                        .data("avg-t", "&empty; " + String((n.experience / n.count)
-                            .round(2)));
-                    gui.footer.append(c);
-                    var c = $('<div class="cell_4" style="width:50px; text-align:center;" ></div>');
-                    c.data("sum", n.wage);
-                    c.data("sum-t", "$" + String(n.wage));
-                    c.data("avg", (n.wage / n.count).round(2));
-                    c.data("avg-t", "&empty; $" + String((n.wage / n.count).round(2)));
-                    gui.footer.append(c);
-                    var c = $('<div class="cell_5" style="width:50px; text-align:center;" ></div>');
-                    c.data("sum", n.bond);
-                    c.data("sum-t", String(n.bond));
-                    c.data("avg", (n.bond / n.count * 100).round(2));
-                    c.data("avg-t", "&empty; " + String((n.bond / n.count * 100).round(2)) + "%");
-                    gui.footer.append(c);
-                    var c = $('<div class="cell_6" style="width:50px; text-align:center;" ></div>');
-                    c.data("sum", n.motivation);
-                    c.data("sum-t", String(n.motivation) + "%");
-                    c.data("avg", (n.motivation / n.count).round(2));
-                    c.data("avg-t", "&empty; " + String((n.motivation / n.count).round(2)) + "%");
-                    gui.footer.append(c);
-                    var c = $('<div class="cell_7" style="width:50px; text-align:center;" ></div>');
-                    c.data("sum", n.injury);
-                    c.data("sum-t", String(n.injury));
-                    c.data("avg", (n.injury / n.count).round(2));
-                    c.data("avg-t", "&empty; " + String((n.injury / n.count).round(2)));
-                    gui.footer.append(c);
-                    var c = $('<div class="cell_8" style="width:50px; text-align:center;" ></div>');
-                    c.data("sum", n.killed);
-                    c.data("sum-t", String(n.killed));
-                    c.data("avg", (n.killed / n.count * 100).round(2));
-                    c.data("avg-t", "&empty; " + String((n.killed / n.count * 100)
-                        .round(2)) + "%");
-                    gui.footer.append(c);
-                    var c = $('<div class="cell_9" style="width:50px; text-align:center;" ></div>');
-                    c.data("sum", n.products);
-                    c.data("sum-t", String(n.products));
-                    c
-                        .data("avg", (n.products / n.count * 100)
-                            .round(2));
-                    c.data("avg-t", "&empty; " + String((n.products / n.count * 100)
-                        .round(2)) + "%");
-                    gui.footer.append(c);
-                    var c = $('<div class="cell_10" style="width:50px; text-align:center;" ></div>');
-                    c.data("sum", n.items);
-                    c.data("sum-t", String(n.items));
-                    c.data("avg", (n.items / n.count * 100).round(2));
-                    c.data("avg-t",
-                        "&empty; " + String((n.items / n.count * 100)
-                            .round(2)) + "%");
-                    gui.footer.append(c);
-                    var c = $('<div class="cell_11" style="width:50px; text-align:center;" ></div>');
-                    c.data("sum", n.luck);
-                    c.data("sum-t", "$" + String(n.luck));
-                    c.data("avg", (n.luck / n.count).round(2));
-                    c.data("avg-t", "&empty; $" + String((n.luck / n.count).round(2)));
-                    gui.footer.append(c);
-                    var i = $(
-                            '<div style="margin: 0px 6px 0px 6px;width:680px;" />')
-                        .append(e);
-                    return i
+                    
+                    
+                    MessagesWindow.window.hideLoader();
+                  };
+                  return _that;
+                })($);
+                
+                
+                
+                // start Analyse Process
+                var analyse = function (type) {
+                  if ( locked ) {
+                    return;
+                  };
+                  locked = true;
+                  reports = [];
+                  queryReports(type);
                 };
-                var detail = function (e) {};
-                _self.getExtra = function () {
-                    if (isDefined(statistic.extra)) {
-                        return statistic.extra
+                // query Report Overview Page from Server
+                var queryReports = function (type,page) {
+                  if ( !page ) {
+                    page = 1;
+                  };
+                  lastPage = page;
+                  Ajax.remoteCall('reports', 'get_reports', {page: page,folder: type}, function (json) {readReports(type,json);});
+                };
+                // put Reports into Array, which are needed to analyse from Response of Report Overview Query
+                var readReports = function (type,json) {
+                  var status = true;
+                  if(typeof(json.reports) != 'object' ) {
+                    json.reports = [];
+                    status = false;
+                  };
+                  if(typeof(json.page) == 'undefined' || lastPage != json.page) {
+                    json.reports = [];
+                    status = false;
+                  };
+                  for ( var i = 0 ; i < json.reports.length ; i++ ) {
+                    var report = json.reports[i];
+                    if ( report.report_id <= statistic[type].last ) {
+                      status = false;
+                      break;
+                    };
+                    reports.push({'id':report.report_id,'hash':report.hash,'type':type});
+                  };
+                  gui.bar.setMaxValue(reports.length);
+                  if ( status ) {
+                    window.setTimeout(function(){ queryReports(type,(lastPage+1)); }, Timer.getTimeout());
+                  } else {
+                    analyseReports(type);
+                  };
+                };
+                // Work on Report Array of to analysed Reports
+                var analyseReports = function(type) {
+                  if ( reports.length > 0 ) {
+                    gui.bar.setValue(gui.bar.getValue()+1);
+                    queryReport(reports.pop());
+                  } else {
+                    Cache.save('statistic',statistic);
+                    locked = false;
+                    show(type,true);
+                  };
+                };
+                // query Report from Server
+                var queryReport = function(report) {
+                  $.post('game.php?window=reports&mode=show_report',{'flash':null,'hash':report.hash,'report_id':report.id},function(json){readReport(report.type,json);},'json');
+                };
+                // work on Report-Query Response
+                var readReport = function(type,json) {
+                  if ( !json || !json.report_id || !json.publishHash ) {
+                    new UserMessage( 'empty Server Response' , UserMessage.TYPE_ERROR).show();
+                    return false;
+                  };
+                  
+                  if( typeof(json.page) != 'string' || typeof(json.title) != 'string' || typeof(json.js) != 'string') {
+                    failedReports.push(json.report_id);
+                  }
+                  else {
+                    switch(type) {
+                      case 'job' : analyseJobReport(json); break;
+                      case 'duel' : analyseDuelReport(json); break;
+                    };
+                    statistic[type].last = json.report_id;
+                  };
+                  window.setTimeout(function(){ analyseReports(type); }, Timer.getTimeout());
+                };
+                // Analyser Duel Report
+                var analyseDuelReport = function(json) {
+                
+                };
+                // Analyser Job Report
+                var analyseJobReport = function(json) {
+                  try { 
+                    data =  {
+                              id:null,
+                              hash:null,
+                              job:null,
+                              motivation:null,
+                              duration:null,
+                              wage:null,
+                              bond:null,
+                              experience:null,
+                              injury:0,
+                              killed:false,
+                              date_received:null,
+                              items:{},
+                            };
+                    data.id = json.report_id;
+                    data.hash = json.publishHash;
+                    var job = Jobs.getJobByName(json.title.slice(json.title.indexOf(':')+1));
+                    if ( !job ) {
+                      failedReports.push(data.id);
+                      return false;
+                    };
+                    data.job = job.id;
+                    data.date_received = json.date_received;
+                    
+                    var tmp = $(json.page);
+                    tmp.find(".rp_row_jobdata").each(function(index) {
+                      var str = $.trim($(this).children('span:last-child').html());
+                      str = str.split('&nbsp;').join(' ');
+                      switch (index) {
+                        case 0 :	data.motivation = parseInt(str.slice(0,str.indexOf(' ')));
+                                  break;
+                        case 1 :	var tmp = str.replace('h',' * 3600 + '); 
+                                  tmp = tmp.replace('m',' * 60 + '); 
+                                  tmp = tmp.replace('s',' * 1 + ');
+                                  tmp += '0';
+                                  try {
+                                    data.duration = parseInt(eval(tmp));
+                                  }
+                                  catch (e) {
+                                    throw {message:"unrecognized time on report: " + str};
+                                  }
+                                  break;
+                        case 2 :	data.wage = parseInt(str.slice(str.indexOf(' ')+1));
+                                  break;
+                        case 3 :	data.bond = parseInt(str);
+                                  break;
+                        case 4 :	data.experience = parseInt(str.slice(0,str.indexOf(' ')));
+                                  break;
+                      };
+                    });
+                    tmp.find(".rp_hurtmessage_text").each(function() {
+                      var reg = new RegExp('[0-9]+');
+                      data.injury = Number(reg.exec($(this).html()));
+                    });
+                    tmp.find(".rp_row_killmessage").each(function() {
+                      data.killed = true;
+                    });
+                    
+                    var tmp = (json.js).split(';');
+                    $(tmp).each(function() {
+                      var reg = new RegExp(/\s*ItemManager\.get\(([0-9]+)\)\s*\)\.setCount\(([0-9]+)\)/m);
+                      var array = reg.exec(this);
+                      if ( array ) {
+                        data.items[Number(array[1])] = Number(array[2]);
+                      };
+                    });
+                    if ( !statistic.job[data.job] ) {
+                      statistic.job[data.job] =  { count:0 , products:{} };
                     }
-                    return null
+                    var jobstats = statistic.job[data.job];
+                    jobstats.count++;
+                    
+                    if ( !jobstats[data.motivation] ) {
+                      jobstats[data.motivation] = {
+                                                    count:0,
+                                                    duration:0,
+                                                    wage:0,
+                                                    bond:0,
+                                                    experience:0,
+                                                    injury:{},
+                                                    killed:0,
+                                                    items:{},
+                                                    extraitems:{}
+                                                  };
+                    };
+                    var stats = jobstats[data.motivation];
+                    
+                    if ( !isDefined(stats.duration) ) {
+                      stats.duration = 0;
+                    }
+                    
+                    stats.count++;
+                    stats.duration += data.duration;
+                    stats.wage += data.wage;
+                    stats.bond += data.bond;
+                    stats.experience += data.experience;
+                    if ( !stats.injury[data.injury] ) {
+                      stats.injury[data.injury] = 0;
+                    };
+                    stats.injury[data.injury]++;
+                    if (data.killed) {
+                      stats.killed ++;
+                    };
+                    
+                    for ( var key in data.items ) {
+                      var id = Number(key);
+                      if ( id === 138 ) {
+                        if ( !isDefined(statistic.extra) ) {
+                          statistic.extra = {'count':0};
+                          _self.extra = true;
+                        };
+                        statistic.extra.count++;
+                        statistic.extra[statistic.extra.count] = data;
+                      }
+                      var count = data.items[id];
+                      var item = ItemManager.get(id);
+                      if ( Jobs.isProduct(id) !== -1  ) {
+                        if ( !jobstats.products[id] ) {
+                          jobstats.products[id] = {'last':0};
+                        };
+                        var tmp = jobstats.products[id];
+                        for ( var i = 0 ; i < count ; i++ ) {
+                          var last = jobstats.count - tmp.last
+                          tmp.last = jobstats.count;
+                          if ( !tmp[last] ) {
+                            tmp[last] = 0;
+                          }
+                          tmp[last]++;
+                        };
+                      }
+                      else if ( item.price == 0 ) {
+                        if ( !stats.extraitems[id] ) {
+                          stats.extraitems[id] = 0;
+                        };
+                        stats.extraitems[id]++;
+                      }
+                      else {
+                        luck = true;
+                        if ( !stats.items[id] ) {
+                          stats.items[id] = 0;
+                        };
+                        stats.items[id]++;
+                      };
+                    };
+                  }
+                  catch (e) {
+                    failedReports.push(data.id);
+                    return false;
+                  };
                 };
-                return _self
-            }($);
+                // create the Content of ReportWindow
+                var show = function(type,finish){
+                  if (!MessagesWindow.window) {
+                    return;
+                  };
+                  gui.window = $(MessagesWindow.window.getContentPane()).find('.messages-analyser-'+type);
+                  if( typeof(finish) == 'undefined' ){
+                    MessagesWindow.window.showLoader();
+                    gui.bar = new GameAPI.gui.progressbar(0,reports.length);
+                    gui.window.children().remove();
+                    gui.window.append(gui.bar.getMainDiv());
+                    analyse(type);
+                  } else {
+                    switch ( type ) {
+                      case 'job' : var div = showJobs();break;
+                      case 'duel' : var div = showDuels();break;
+                    };
+                    gui.window.children().remove();
+                    gui.window.append(div);
+                    sort();
+                    switchAvg();
+                    sort();
+                    MessagesWindow.window.hideLoader();
+                  };
+                };
+                // sort Table
+                var sort = function(col){
+                  try {
+                    if ( typeof(col)!='undefined' ) {
+                      if ( sorting.type == col ) {
+                        sorting.ord *= -1;
+                      } else {
+                        sorting.ord = 1;
+                        sorting.type = col;
+                      };
+                    } else {
+                      var col = sorting.type;
+                    };
+                    var order = sorting.ord;
+                    var sortingFunc = function (x,y) {
+                      var d1 = $(x).find('.cell_'+col).html();
+                      var d2 = $(y).find('.cell_'+col).html()
+                      if ( Number(d1) == d1 ) {
+                        return (d1 * 1) > (d2 * 1) ? order : -order;
+                      }
+                      else {
+                        return d1 > d2 ? order : -order;
+                      };
+                    };
+                    
+                    gui.rows.sort(sortingFunc);
+                    for ( var i = 0 ; i < gui.rows.length ; i++ ) {
+                      gui.bodyscroll.appendContent(gui.rows[i])
+                    };
+                  }
+                  catch (e) {
+                    Error.report(e,'Analyser sort');
+                  };
+                };
+                // switch between absolute values and average values
+                var switchAvg = function() {
+                  switch (sorting.avg) {
+                    case 'avg' : sorting.avg = 'sum'; break;
+                    case 'sum' : sorting.avg = 'avg'; break;
+                  };
+                  $(gui.window).find('div.row div').each(function(index) {
+                    var data = $(this).data(String(sorting.avg));
+                    var title = $(this).data(String(sorting.avg)+'-t');
+                    $(this).html(data).attr('title',title);
+                  });
+                };
+                // show the Job Statistic
+                var showJobs = function() {
+                  gui.window.addClass('view-rewards');
+                  sorting = {'ord':1,'type':0,'avg':'avg'};
+                  var table = $(
+                                      '<div class="fancytable">'
+                                      + '<div class="_bg tw2gui_bg_tl"></div>'
+                                      + '<div class="_bg tw2gui_bg_tr"></div>'
+                                      + '<div class="_bg tw2gui_bg_bl"></div>'
+                                      + '<div class="_bg tw2gui_bg_br"></div>'
+                                      + '<div class="trows">'
+                                        + '<div class="thead statics">'
+                                          + '<div class="row row_head">'
+                                            + '<div class="cell_0 view-rewards view-items" style="width:91px; text-align:center;">'
+                                              + '<span title="#NAME#" style="cursor:pointer, margin-bottom:3px;">'
+                                                + '<img src="'+Images.iconName+'" />'
+                                              + '</span>'
+                                            + '</div>'
+                                            + '<div class="cell_1 view-rewards view-items" style="width:50px; text-align:center;">'
+                                              + '<span title="#COUNT#">'
+                                                + '<img src="'+Images.iconCount+'" />'
+                                              + '</span>'
+                                            + '</div>'
+                                            + '<div class="cell_2 view-rewards view-items" style="width:50px; text-align:center;">'
+                                              + '<span title="#DURATION#">'
+                                                + '<img src="'+Images.iconClock+'" />'
+                                              + '</span>'
+                                            + '</div>'
+                                            + '<div class="cell_3 view-rewards" style="width:50px; text-align:center;">'
+                                              + '<span title="#EXPERIENCE#">'
+                                                + '<img src="'+Images.iconExperience+'" />'
+                                              + '</span>'
+                                            + '</div>'
+                                            + '<div class="cell_4 view-rewards" style="width:50px; text-align:center;">'
+                                              + '<span title="#WAGE#">'
+                                                + '<img src="'+Images.iconDollar+'" />'
+                                              + '</span>'
+                                            + '</div>'
+                                            + '<div class="cell_5 view-rewards" style="width:50px; text-align:center;">'
+                                              + '<span title="#BOND#">'
+                                                + '<img src="'+Images.iconUpb+'" />'
+                                              + '</span>'
+                                            + '</div>'
+                                            + '<div class="cell_6 view-rewards" style="width:50px; text-align:center;">'
+                                              + '<span title="#MOTIVATION#">'
+                                                + '<img src="'+Images.iconMoti+'" />'
+                                              + '</span>'
+                                            + '</div>'
+                                            + '<div class="cell_7 view-rewards" style="width:50px; text-align:center;">'
+                                              + '<span title="#DANGER#">'
+                                                + '<img src="'+Images.iconDanger+'" />'
+                                              + '</span>'
+                                            + '</div>'
+                                            + '<div class="cell_8 view-rewards" style="width:50px; text-align:center;">'
+                                              + '<span title="#KILLED#">'
+                                                + '<img src="'+Images.iconKilled+'" />'
+                                              + '</span>'
+                                            + '</div>'
+                                            + '<div class="cell_9 view-rewards" style="width:50px; text-align:center;">'
+                                              + '<span title="#PRODUCTS#">'
+                                                + '<img src="'+Images.iconYield+'" />'
+                                              + '</span>'
+                                            + '</div>'
+                                            + '<div class="cell_9 view-items" style="width:63px; text-align:center;">'
+                                              + '<span title="#PRODUCTS#">'
+                                                + '<img src="'+Images.iconYield+'" />'
+                                              + '</span>'
+                                            + '</div>'
+                                            + '<div class="cell_10 view-rewards" style="width:50px; text-align:center;">'
+                                              + '<span title="#ITEM#">'
+                                                + '<img src="'+Images.iconItem+'" />'
+                                              + '</span>'
+                                            + '</div>'
+                                            + '<div class="cell_10 view-items" style="width:378px; text-align:center;">'
+                                              + '<span title="#ITEM#">'
+                                                + '<img src="'+Images.iconItem+'" />'
+                                              + '</span>'
+                                            + '</div>'
+                                            + '<div class="cell_11 view-rewards" style="width:41px; text-align:center;">'
+                                              + '<span title="#LUCK#">'
+                                                + '<img src="'+Images.iconLuck+'" />'
+                                              + '</span>'
+                                            + '</div>'
+                                            + '<div class="cell_reset view-rewards view-items" style="width:20px; text-align:right;">'
+                                              + '<span title="#RESET#">'
+                                                + '<img src="'+Images.iconReset+'" />'
+                                              + '</span>'
+                                            + '</div>'
+                                          + '</div>'
+                                        + '</div>'
+                                        + '<div class="tbody">'
+                                          + '<div class="_bg tw2gui_bg_l"></div>'
+                                          + '<div class="_bg tw2gui_bg_r"></div>'
+                                        + '</div>'
+                                        + '<div class="tfoot statics">'
+                                          + '<div class="row row_foot"></div>'
+                                        + '</div>'
+                                      + '</div>'
+                                    + '</div>'
+                                  );
+                  table.find('.row_head > div').each(function(){
+                    var index = $(this).attr('class').match(/cell_(\d+|reset)/)[1], $img = $(this).find('img');
+                    if ( index == 'reset' ) {
+                      $(this).click(function(){reset('job');});
+                    } else {
+                      $(this).click( function(col){ return function(){sort(col);}}(index*1));
+                    };
+                  });
+                  table.find('.row_head').find('img').css('cursor','pointer');
+            
+                  var i = 0;
+                  var sum = {'jobs':0, 'count':0, 'duration':0, 'experience':0, 'wage':0, 'bond':0, 'motivation':0,'injury':0,'killed':0 ,'products':0,'items':0,'luck':0};
+                  var stats = statistic.job;
+                  var div = $();
+                  gui.rows=[];
+                  for ( var jobid in stats ) {
+                    var job = Jobs.getJobById(jobid);
+                    if ( !job ) {
+                      continue;
+                    };
+                    var row = {
+                      'count':0, 'duration':0, 'experience':0, 'wage':0, 'bond':0,
+                      'motivation':0 , 'injury':0, 'killed':0, 'products':0, 'items':0, 'luck':0,
+                      'all_products': {}, 'all_items': {}
+                    };
+                    var data = stats[jobid];
+                    
+                    row.count = data.count;
+                    
+                    var targetQuote = 0;
+                    for ( var i = 0 ; i < job.randomyields.length ; i++ ) {
+                      targetQuote += job.randomyields[i];
+                    };
+                    if ( typeof(job.yields.length) == 'undefined' ) {
+                      for (  var itemid in job.yields ) {
+                        targetQuote += job.yields[itemid].prop;
+                      };
+                    };
+                    
+                    for ( var itemid in data.products ) {
+                      for ( var tmp in data.products[itemid] ) {
+                        if ( tmp == 'last' ) {
+                          continue;
+                        };
+                        var item = ItemManager.get(itemid);
+                        row.products += Number(data.products[itemid][tmp]);
+                        row.luck += Number(item.price * data.products[itemid][tmp]);
+                        row.all_products[itemid] = (row.all_products[itemid] || 0) + data.products[itemid][tmp];
+                      };
+                    };
+                    
+                    for ( var moti in data ) {
+                      if ( moti == 'count' || moti == 'products' ) {
+                        continue;
+                      };
+                      var tmp = data[moti];
+                      row.motivation += (moti * tmp.count);
+                      row.bond += tmp.bond;
+                      row.duration = tmp.duration;
+                      row.experience += tmp.experience;
+                      for ( var injury in tmp.injury ) {
+                        row.injury += injury*tmp.injury[injury];
+                      };
+                      for ( var itemid in tmp.items ) {
+                        var item = ItemManager.get(itemid);
+                        row.items += Number(tmp.items[itemid]);
+                        row.luck += Number(item.price * tmp.items[itemid]);
+                        row.all_items[itemid] = (row.all_items[itemid] || 0) + tmp.items[itemid];
+                      };
+                      row.killed += tmp.killed;
+                      row.wage += tmp.wage;
+                    };
+            
+                    var dom = $('<div class="row row_' + i + '" />');
+                    
+                    var tmp = $('<div class="cell_0 view-rewards view-items" style="width:91px; text-align:left;cursor:pointer;font-size:11px;" ></div>');
+                    tmp.data('sum',job.name);
+                    tmp.data('sum-t',job.name);
+                    tmp.data('avg',job.name);
+                    tmp.data('avg-t',job.name);
+                    dom.append(tmp);
+                    sum.jobs++;
+                    
+                    var tmp = $('<div class="cell_1 view-rewards view-items" style="width:50px; text-align:center;cursor:pointer;" ></div>');
+                    tmp.data('sum',row.count);
+                    tmp.data('sum-t',row.count);
+                    tmp.data('avg',row.count);
+                    tmp.data('avg-t',row.count);
+                    dom.append(tmp);
+                    sum.count += row.count;
+                    
+                    var tmp = $('<div class="cell_2 view-rewards view-items" style="width:50px; text-align:center;cursor:pointer;" ></div>');
+                    tmp.data('sum',(row.duration/3600).round(2));
+                    tmp.data('sum-t',String((row.duration/3600).round(2)) + ' #HOURS#');
+                    tmp.data('avg',(row.duration/(3600*row.count)).round(2));
+                    tmp.data('avg-t','&Oslash; ' + String((row.duration/(3600*row.count)).round(2)) + ' #HOURS#');
+                    dom.append(tmp);
+                    sum.duration += row.duration;
+                    
+                    var tmp = $('<div class="cell_3 view-rewards" style="width:50px; text-align:center;cursor:pointer;" ></div>');
+                    tmp.data('sum',row.experience);
+                    tmp.data('sum-t',String(row.experience));
+                    tmp.data('avg',(row.experience/row.count).round(2));
+                    tmp.data('avg-t','&Oslash; ' + String((row.experience/row.count).round(2)));
+                    dom.append(tmp);
+                    sum.experience += row.experience;
+                    
+                    var tmp = $('<div class="cell_4 view-rewards" style="width:50px; text-align:center;cursor:pointer;" ></div>');
+                    tmp.data('sum',row.wage);
+                    tmp.data('sum-t','$' + String(row.wage));
+                    tmp.data('avg',(row.wage/row.count).round(2));
+                    tmp.data('avg-t','&Oslash; $' + String((row.wage/row.count).round(2)));
+                    dom.append(tmp);
+                    sum.wage += row.wage;
+                    
+                    var tmp = $('<div class="cell_5 view-rewards" style="width:50px; text-align:center;cursor:pointer;" ></div>');
+                    tmp.data('sum',row.bond);
+                    tmp.data('sum-t',String(row.bond));
+                    tmp.data('avg',(((row.bond/row.count)*100).round(2)));
+                    tmp.data('avg-t','&Oslash; ' + String(((row.bond/row.count)*100).round(2)) + '%');
+                    dom.append(tmp);
+                    sum.bond += row.bond;
+                    
+                    var tmp = $('<div class="cell_6 view-rewards" style="width:50px; text-align:center;cursor:pointer;" ></div>');
+                    tmp.data('sum',row.motivation);
+                    tmp.data('sum-t',String(row.motivation) + '%');
+                    tmp.data('avg',(row.motivation/row.count).round(2));
+                    tmp.data('avg-t','&Oslash; ' + String((row.motivation/row.count).round(2)) + '%');
+                    dom.append(tmp);
+                    sum.motivation += row.motivation;
+                    
+                    var tmp = $('<div class="cell_7 view-rewards" style="width:50px; text-align:center;cursor:pointer;" ></div>');
+                    tmp.data('sum',row.injury);
+                    tmp.data('sum-t',String(row.injury));
+                    tmp.data('avg',(row.injury/row.count).round(2));
+                    tmp.data('avg-t','&Oslash; ' + String((row.injury/row.count).round(2)));
+                    dom.append(tmp);
+                    sum.injury += row.injury;
+                    
+                    var tmp = $('<div class="cell_8 view-rewards" style="width:50px; text-align:center;cursor:pointer;" ></div>');
+                    tmp.data('sum',row.killed);
+                    tmp.data('sum-t',String(row.killed));
+                    tmp.data('avg',(((row.killed/row.count)*100).round(2)));
+                    tmp.data('avg-t','&Oslash; ' + String(((row.killed/row.count)*100).round(2)) + '%');
+                    dom.append(tmp);
+                    sum.killed += row.killed;
+            
+                    var tmp = $('<div class="cell_9 view-rewards" style="width:50px; text-align:center;cursor:pointer;" ></div>');
+                    tmp.data('sum',row.products);
+                    tmp.data('sum-t',String(row.products));
+                    tmp.data('avg',((row.products/row.count)*100).round(2));
+                    tmp.data('avg-t','&Oslash; ' + String(((row.products/row.count)*100).round(2)) + '% [' + (targetQuote*100) + '%]');
+                    dom.append(tmp);
+                    sum.products += row.products;
+                    
+                    var tmp = $('<div class="cell_9 view-items" style="width:63px; text-align:center;cursor:pointer;" ></div>');
+                    var items = $.map(row.all_products, function(count, itemid) {
+                      return new tw2widget.Item(ItemManager.get(itemid)).setCount(count).getMainDiv();
+                    });
+                    tmp.data('sum',items);
+                    tmp.data('avg',items);
+                    dom.append(tmp);
+                    
+                    var tmp = $('<div class="cell_10 view-rewards" style="width:50px; text-align:center;cursor:pointer;" ></div>');
+                    tmp.data('sum',row.items);
+                    tmp.data('sum-t',String(row.items));
+                    tmp.data('avg',((row.items/row.count)*100).round(2));
+                    tmp.data('avg-t','&Oslash; ' + String(((row.items/row.count)*100).round(2)) + '%');
+                    dom.append(tmp);
+                    sum.items += row.items;
+                    
+                    var tmp = $('<div class="cell_10 view-items" style="width:390px; text-align:center;cursor:pointer;" ></div>');
+                    var items = $.map(row.all_items, function(count, itemid) {
+                      return new tw2widget.Item(ItemManager.get(itemid)).setCount(count).getMainDiv();
+                    });
+                    tmp.data('sum',items);
+                    tmp.data('avg',items);
+                    dom.append(tmp);
+                    
+                    var tmp = $('<div class="cell_11 view-rewards" style="width:50px; text-align:center;cursor:pointer;" ></div>');
+                    tmp.data('sum',row.luck);
+                    tmp.data('sum-t','$' + String(row.luck));
+                    tmp.data('avg',(row.luck/row.count).round(2));
+                    tmp.data('avg-t','&Oslash; $' + String((row.luck/row.count).round(2)));
+                    dom.append(tmp);
+                    sum.luck += row.luck;
+                    
+                    gui.rows.push(dom);
+                    dom.click(function(){
+                      detail($(this).children('.cell_0').html());
+                    });
+            
+                    i++;
+                  };
+                  gui.bodyscroll = new GameAPI.gui.scrollpane();
+                  $(gui.bodyscroll.getMainDiv()).css('height','300px');
+                  table.find('.tbody').append(gui.bodyscroll.getMainDiv());
+                  gui.footer = table.find('.row_foot');
+            
+                  
+                  var tmp = $('<div class="cell_0" style="width:71px; text-align:center;" ></div>');
+                  tmp.data('sum',sum.jobs);
+                  tmp.data('sum-t',sum.jobs + ' #JOBS#');
+                  tmp.data('avg',sum.jobs);
+                  tmp.data('avg-t',sum.jobs + ' #JOBS#');
+                  gui.footer.append(tmp);
+                  
+                  var tmp = $('<div class="cell_0 view-rewards view-items" style="width:87px; text-align:center;cursor:pointer;color:#444;" ></div>');
+                  tmp.mouseenter(function(){$(this).css('color','#888')}).mouseleave(function(){$(this).css('color','#444')});
+                  tmp.click(function(){switchAvg();});
+                  tmp.data('sum','&sum;');
+                  tmp.data('sum-t','#SWITCH# &Oslash;');
+                  tmp.data('avg','&Oslash;');
+                  tmp.data('avg-t','#SWITCH# &sum;');
+                  gui.footer.append(tmp);
+                  
+                  var tmp = $('<div class="cell_1 view-rewards view-items" style="width:50px; text-align:center;" ></div>');
+                  tmp.data('sum',sum.count);
+                  tmp.data('sum-t',sum.count);
+                  tmp.data('avg',sum.count);
+                  tmp.data('avg-t',sum.count);
+                  gui.footer.append(tmp);
+                  
+                  var tmp = $('<div class="cell_2 view-rewards view-items" style="width:50px; text-align:center;" ></div>');
+                  tmp.data('sum',(sum.duration/3600).round(2));
+                  tmp.data('sum-t',String((sum.duration/3600).round(2)) + '#HOURS#');
+                  tmp.data('avg',(sum.duration/(3600*sum.count)).round(2));
+                  tmp.data('avg-t','&Oslash; ' + String((sum.duration/(3600*sum.count)).round(2)) + '#HOURS#');
+                  gui.footer.append(tmp);
+                  
+                  var tmp = $('<div class="cell_3 view-rewards" style="width:50px; text-align:center;" ></div>');
+                  tmp.data('sum',sum.experience);
+                  tmp.data('sum-t',String(sum.experience));
+                  tmp.data('avg',(sum.experience/sum.count).round(2));
+                  tmp.data('avg-t','&Oslash; ' + String((sum.experience/sum.count).round(2)));
+                  gui.footer.append(tmp);
+                  
+                  var tmp = $('<div class="cell_4 view-rewards" style="width:50px; text-align:center;" ></div>');
+                  tmp.data('sum',sum.wage);
+                  tmp.data('sum-t','$'+String(sum.wage));
+                  tmp.data('avg',(sum.wage/sum.count).round(2));
+                  tmp.data('avg-t','&Oslash; $' + String((sum.wage/sum.count).round(2)));
+                  gui.footer.append(tmp);
+                  
+                  var tmp = $('<div class="cell_5 view-rewards" style="width:50px; text-align:center;" ></div>');
+                  tmp.data('sum',sum.bond);
+                  tmp.data('sum-t',String(sum.bond));
+                  tmp.data('avg',(((sum.bond/sum.count)*100).round(2)));
+                  tmp.data('avg-t','&Oslash; ' + String(((sum.bond/sum.count)*100).round(2)) + '%');
+                  gui.footer.append(tmp);
+                  
+                  var tmp = $('<div class="cell_6 view-rewards" style="width:50px; text-align:center;" ></div>');
+                  tmp.data('sum',sum.motivation);
+                  tmp.data('sum-t',String(sum.motivation) + '%');
+                  tmp.data('avg',(sum.motivation/sum.count).round(2));
+                  tmp.data('avg-t','&Oslash; ' + String((sum.motivation/sum.count).round(2)) + '%');
+                  gui.footer.append(tmp);
+                  
+                  var tmp = $('<div class="cell_7 view-rewards" style="width:50px; text-align:center;" ></div>');
+                  tmp.data('sum',sum.injury);
+                  tmp.data('sum-t',String(sum.injury));
+                  tmp.data('avg',(sum.injury/sum.count).round(2));
+                  tmp.data('avg-t','&Oslash; ' + String((sum.injury/sum.count).round(2)));
+                  gui.footer.append(tmp);
+                  
+                  var tmp = $('<div class="cell_8 view-rewards" style="width:50px; text-align:center;" ></div>');
+                  tmp.data('sum',sum.killed);
+                  tmp.data('sum-t',String(sum.killed));
+                  tmp.data('avg',(((sum.killed/sum.count)*100).round(2)));
+                  tmp.data('avg-t','&Oslash; ' + String(((sum.killed/sum.count)*100).round(2)) + '%');
+                  gui.footer.append(tmp);
+            
+                  var tmp = $('<div class="cell_9 view-rewards" style="width:50px; text-align:center;" ></div>');
+                  tmp.data('sum',sum.products);
+                  tmp.data('sum-t',String(sum.products));
+                  tmp.data('avg',((sum.products/sum.count)*100).round(2));
+                  tmp.data('avg-t','&Oslash; ' + String(((sum.products/sum.count)*100).round(2)) + '%');
+                  gui.footer.append(tmp);
+            
+                  var tmp = $('<div class="cell_9 view-items" style="width:63px; text-align:center;" ></div>');
+                  tmp.data('sum',sum.products);
+                  tmp.data('sum-t',String(sum.products));
+                  tmp.data('avg',((sum.products/sum.count)*100).round(2));
+                  tmp.data('avg-t','&Oslash; ' + String(((sum.products/sum.count)*100).round(2)) + '%');
+                  gui.footer.append(tmp);
+                  
+                  var tmp = $('<div class="cell_10 view-rewards" style="width:50px; text-align:center;" ></div>');
+                  tmp.data('sum',sum.items);
+                  tmp.data('sum-t',String(sum.items));
+                  tmp.data('avg',((sum.items/sum.count)*100).round(2));
+                  tmp.data('avg-t','&Oslash; ' + String(((sum.items/sum.count)*100).round(2)) + '%');
+                  gui.footer.append(tmp);
+                  
+                  var tmp = $('<div class="cell_10 view-items" style="width:390px; text-align:center;" ></div>');
+                  tmp.data('sum',sum.items);
+                  tmp.data('sum-t',String(sum.items));
+                  tmp.data('avg',((sum.items/sum.count)*100).round(2));
+                  tmp.data('avg-t','&Oslash; ' + String(((sum.items/sum.count)*100).round(2)) + '%');
+                  gui.footer.append(tmp);
+                  
+                  var tmp = $('<div class="cell_11 view-rewards" style="width:50px; text-align:center;" ></div>');
+                  tmp.data('sum',sum.luck);
+                  tmp.data('sum-t','$' + String(sum.luck));
+                  tmp.data('avg',(sum.luck/sum.count).round(2));
+                  tmp.data('avg-t','&Oslash; $' + String((sum.luck/sum.count).round(2)));
+                  gui.footer.append(tmp);
+                  
+                  var div = $('<div style="margin: 0px 6px 0px 6px;width:680px;" />')
+                    .append(
+                        $('<a href="#">#SWITCH_REWARDS_ITEMS#</a>')
+                        .css({marginTop: '-8px', display: 'block', textAlign: 'center'})
+                        .click(function() { $('.messages-analyser-job').toggleClass('view-rewards view-items'); })
+                    ).append(table);
+                  
+                  return div;
+                };      
+                // detailed JobReport
+                var	detail = function (job) {
+                };
+                _self.getExtra = function ( ) {
+                  if ( isDefined(statistic.extra) ) {
+                    return statistic.extra;
+                  };
+                  return null;
+                };
+            
+                return _self;
+            })($);
             Debugger.Analyser = Analyser;
+    
             var Notes = function (e) {
                 var t = {};
                 var n = null;
