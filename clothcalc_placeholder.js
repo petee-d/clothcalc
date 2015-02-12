@@ -36,6 +36,7 @@
             update: "tw-db.info/cache/userscripts/clothcalc/dev_clothcalc_eng.user.js",
             check: "tw-db.info/cache/userscripts/clothcalc/dev_version",
             url: "tw-db.info",
+            protocol: location.protocol.match(/^(.+):$/)[1],
             gameversion: 2.16,
             lang: "eng"
         });
@@ -3677,7 +3678,7 @@
                 var i = function () {
                     t.div.children().remove();
                     Window.hideLoader();
-                    e.getScript("http://" + Script.url + "/cache/js/sDoImport_" + Script.lang + ".js")
+                    e.getScript(Script.protocol + "://" + Script.url + "/cache/js/sDoImport_" + Script.lang + ".js")
                 };
                 return t
             }($);
@@ -3881,7 +3882,7 @@
                     t.setCaption("Alliance Import".escapeHTML()).click(
                         function () {
                             t.disable();
-                            e.getScript("http://" + Script.url + "/js/sDoAllianceImport.js")
+                            e.getScript(Script.protocol + "://" + Script.url + "/js/sDoAllianceImport.js")
                         }).appendTo(r);
                     Window.hideLoader()
                 };
@@ -3929,7 +3930,7 @@
                     var msg = '<div class="txcenter">#MAKE_UPDATE#</div>';
                     msg = msg.replace("=1=", "<b>" + Script.name + "</b>");
                     msg += "<div><br />current version: " + (Script.version / 100) + " revision " + Script.revision + "<br />new version: " + (ver / 100) + " revision " + rev + "</div>";
-                    var url = "http://" + Script.update;
+                    var url = Script.protocol + "://" + Script.update;
                     if ($.browser.webkit) { url += "?" + Script.version + Script.revision };
                     var refresh = function() { try { location.href = url; } catch (e) {}; };
                     (new GameAPI.gui.dialog(title, msg, GameAPI.gui.dialog.SYS_WARNING))
@@ -3956,7 +3957,7 @@
                 };
                 
                 _self.query = function() { setTimeout(function() {
-                    $.getScript("http://" + Script.check + "?" + (new Date).getTime());
+                    $.getScript(Script.protocol + "://" + Script.check + "?" + (new Date).getTime());
                     }, 500); };
                 
 		// never touch this without adjust serverside component
@@ -7165,7 +7166,7 @@
                 
                 var removeWorkQueuePA = function () {
                     try {
-                        $("body").append('<style>#queuedTasks .buyPremiumTask {background: url("http://public.beta.the-west.net/images/transparent.png");}</style>');
+                        $("body").append('<style>#queuedTasks .buyPremiumTask {background: url("//public.beta.the-west.net/images/transparent.png");}</style>');
                         Premium.checkForAutomationPremium = function (callback, failCallback) {
                             if (typeof failCallback !== 'undefined') return failCallback();
                         }
@@ -8198,7 +8199,7 @@
                     n(
                         o,
                         function (t) {
-                            if (t.origin !== "http://" + Script.url) {
+                            if (t.origin !== Script.protocol + "://" + Script.url) {
                                 return
 
                             }
@@ -8386,8 +8387,9 @@
                             2: Number(Premium.hasBonus("money")),
                             3: Number(Premium.hasBonus("character"))
                         };
-                        var f = '<form name="TWDB_CC_Form" action="http://' + Script.url + '/ingame_calc_2.php" method="post">';
+                        var f = '<form name="TWDB_CC_Form" action="' + Script.protocol + '://' + Script.url + '/ingame_calc_2.php" method="post">';
                         f += '<input style="display:none" type="text" name="worldfull" value="' + window.location.host + '" />';
+                        f += '<input style="display:none" type="text" name="protocol" value="' + Script.protocol + '" />';
                         f += '<input style="display:none" type="text" name="version" value="' + TheWestApi.version + '" />';
                         f += '<input style="display:none" type="text" name="nick" value="' + Character.name + '" />';
                         f += '<input style="display:none" type="text" name="level" value="' + Number(Character.level) + '" />';
@@ -8561,7 +8563,7 @@
                         t.el
                             .find(".questRequirementHelp")
                             .append(
-                                '<a target="_blank" title="#QUESTWIKI#" href="http://' + Script.url + "/quest_redirect.php?id=" + t.id + '" style="margin-left:10px;"><img src="' + Images.questwiki + '" /></a>')
+                                '<a target="_blank" title="#QUESTWIKI#" href="' + Script.protocol + '://' + Script.url + "/quest_redirect.php?id=" + t.id + '" style="margin-left:10px;"><img src="' + Images.questwiki + '" /></a>')
                     };
                     GameInject.injectQuest(function (e) {
                         n(e)
