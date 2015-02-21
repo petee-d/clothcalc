@@ -9118,186 +9118,166 @@
             /////////////////////////////
             var DuelMotivation = (function ($) {
                 var _self = {};
-                var bar = null;
                 var loader = {};
-                var lastDeath = null;
+                var bar = null;
+                var warnBar = null;
+                var lastDuelProt = null;
+                var lastMotivation = null;
                 var kotimeout = 0;
-                var kotime = null;
                 var kotimeStr = "";
                 var countdown = 0;
-                var synctimer = 0;
+                var timerType = "";
+                var oldSystem = false;
 
                 var init = function () {
                     if (loader.ready) {
                         return;
-                    };
+                    }
                     if (!Settings.get('duelmotivation', true)) {
                         loader.ready = true;
                         return;
-                    };
-                    addBar();
-                    GameInject.injectSetDuelMotivation(function () {
-                        refresh();
-                    });
-                    GameInject.injectReportReceivedEntry(function (data) {
-                        if (data.type == 'duel') {
-                            getMoti();
-                        }
-                    });
-                    if (w.Character.homeTown.town_id != 0) { // we want KO timer only if in town
-                        EventHandler.listen(['character_died', 'health'], function () {
-                            if (Character.health > 5) {
-                                return;
-                            }; // safety value of 5, HP regenerate quite fast if you're a HP monster
-                            checkSheriff();
-                        });
-                        var now = new ServerDate().getTime(); // takes care of client-server offset
-                        if ((Character.lastDied + 172800) * 1e3 > now) { // if last death is less than 48h ago
-                            lastDeath = TWDB.Cache.load('lastDeath');
-                            if (Math.abs((new Date(lastDeath)).getTime() - (new Date(Character.lastDied * 1e3)).getTime()) < 1e4) { // 10sec rounding safety 
-                                kotime = new Date((Character.lastDied + 172800) * 1e3);
-                                kotimeout = parseInt((kotime.getTime() - now) / 1000);
-                                initCountdown();
-                            } else {
-                                checkSheriff();
-                            }
-                        } else {
-                            getMoti();
-                        };
-                    } else {
-                        getMoti();
-                    };
-                    loader.ready = true;
+                    }                    
+                    
+                    /**TODO: remove if Inno adds listener - asked Diggo on 9.2.2015 **/
+                    // Check for a listener & add it if neccessary:
+                    if (Character.setDuelProtection.toString().search('duelprotection_changed') == -1) {
+			Character.twdb_setDuelProtection = Character.setDuelProtection;
+			Character.setDuelProtection = function (dp) {
+			    var changed = (dp != Character.duelProtection);
+			    Character.twdb_setDuelProtection.apply(this, arguments);
+			    if (changed) { EventHandler.signal('duelprotection_changed', []); }
+			};
+		    }	// Check for listener ### end
+                    
+		    // now for the real stuff...
+                    var duelmotCss = "div#ui_character_container .twdb_charcont_ext {background-image:"+$('#ui_character_container').css('background-image')+"; background-repeat:no-repeat; background-position:bottom left; width:143px; height:15px; position:absolute; left:0px; top:173px; padding-top:2px;}"
+                    		   + "div#ui_character_container #duelmot_bar {background-image:url("+TWDB.images.duelMotBar+"); background-repeat:no-repeat; background-position:0px -26px; top:2px; left:3px; height:13px; width:137px; position:absolute; color:#FFF; text-align:center; font-size:8pt; line-height:12px; font-weight:bold; text-shadow: 1px 0px 1px #000, -1px 0px 1px #000;}"
+                    		   + "div#ui_character_container .duelmot_ko {background-position:0px -13px!important;}"
+                    		   + "div#ui_character_container .duelmot_protect {background-position:0px 0px!important;}"
+                    		   + "div#ui_character_container .duelmot_warn {background-position:0px 0px; top:2px; left:3px; opacity:0;}"
+                    		   + "div#ui_character_container .duelmot_dim {opacity:0.6;}";
+                    TWDB.Util.addCss(duelmotCss, "duelmot");
+                    
+                    oldSystem = (Game.duelProtectionEarly === Game.duelProtectionHours);
+		    
+                    addBar();		    
+		    EventHandler.listen('duelprotection_changed', function () { checkKO(); });
+		    EventHandler.listen('duelmotivation_changed', function () { checkMoti(); });
+		    checkKO();
+		    checkMoti(true);
+		    if (Character.homeTown.town_id !== 0) {
+		    	// init duel motivation
+			Ajax.remoteCallMode("building_saloon", "get_data", {town_id: Character.homeTown.town_id}, function(data) {
+			    if (data.error) { return new UserMessage(data.msg).show(); }
+			    Character.setDuelMotivation(data.motivation);});
+			
+			/** TODO: move to GameInject if needed **/
+			/*
+			if (!oldSystem) {	// wrapper for catching protection-ending duels
+			    SaloonWindow.twdb_startDuel = SaloonWindow.startDuel;
+			    SaloonWindow.startDuel = function(playerId, allianceId, skipAllianceCheck, skipProtectionCheck) {
+				SaloonWindow.twdb_startDuel.apply(this, arguments);
+				if (skipProtectionCheck === true) { EventHandler.signal('duelprotection_canceled', []); }
+			    };
+			}
+			*/
+		    }
+		    loader.ready = true;
                 };
-
-                loader = Loader.add('DuelMotivation', 'tw-db DuelMotivation', init, {
-                    'Settings': true
-                });
 
                 var addBar = function () {
-                    $('#ui_character_container').css({
-                        'background-repeat': 'no-repeat',
-                        'height': '191px'
-                    });
-                    var container = $('<div />').css({
-                        'background-image': $('#ui_character_container').css('background-image'),
-                        'background-repeat': 'no-repeat',
-                        'background-position': 'bottom left',
-                        'width': '143px',
-                        'height': '15px',
-                        'position': 'absolute',
-                        'left': '0px',
-                        'top': '173px',
-                        'padding-top': '2px',
-                    });
-                    $('.energy_bar').before(container);
-                    bar = $('<div class="status_bar">').css({
-                        'top': '2px',
-                        'left': '3px'
-                    });
-                    if (Premium.hasBonus('regen')) {
-                        bar.css({
-                            'background-position': '-137px -13px'
-                        })
+                    $('#ui_character_container').css({'background-repeat': 'no-repeat', 'height': '191px'});
+                    $('.energy_add').css({'top': '161px'});
+                    var container = $('<div class="twdb_charcont_ext" />').insertBefore('.energy_bar');
+                    bar = $('<div id="duelmot_bar" class="duelmot_dim" />').appendTo(container);
+                    warnBar = $('<div class="status_bar duelmot_warn" />').appendTo(container);
+                };
+
+                var setBar = function (text, popup, style, fade, callback) {
+		if (text === undefined) { text = ''; }
+		if (popup === undefined) { popup = false; }
+		if (style === undefined) { style = false; }
+		if (fade === undefined) { fade = false; }
+                    if (!fade) {
+                    	if (typeof style === 'string') {bar.attr("class", style);}
+                    	bar.text(text);
+                    	if (typeof popup === 'string') {warnBar.addMousePopup(popup);}
                     } else {
-                        bar.css({
-                            'background-position': '-137px -26px'
-                        });
-                    }
-                    container.append(bar);
-                    $('.energy_add').css({
-                        'top': '161px'
-                    });
+                    	warnBar.fadeTo(400, 1, function () {
+			    setBar(text, popup, style, false);
+			    if (callback) { callback(); }
+			    warnBar.fadeTo(400, 0);});
+		    }
+		};
+                    	
+                var checkKO = function () {
+		    if (lastDuelProt === Character.duelProtection) { return; }
+		    lastDuelProt = Character.duelProtection;
+		    if (Character.getDuelProtection(true) > new ServerDate().getTime()) {	// in the future?
+			initCountdown();
+		    } else {
+			if (kotimeout > 0) { w.clearInterval(countdown); }
+		    	checkMoti();
+		    }
+		};
+                    	
+                var checkMoti = function (iniRun) {
+		    if (lastMotivation === Character.duelMotivation || kotimeout > 0) { return; }	// event handler gets also called for NPC motivation changes...
+		    lastMotivation = Character.duelMotivation;
+                    var motivation = Math.round(Character.duelMotivation * 100);
+                    setBar(motivation + '%', '#DUELMOTIVATION#:&nbsp;' + motivation + '%', iniRun ? "duelmot_dim" : "");
                 };
-
-                var getMoti = function () {
-                    if (kotimeout > 0) {
-                        return;
-                    }; // no need to check if you're KOed      	  
-                    Ajax.remoteCall('duel', 'get_data', {}, function (json) {
-                        if (json.error) {
-                            return new UserMessage(json.msg).show();
-                        }
-                        window.Character.setDuelMotivation(json.motivation);
-                        refresh();
-                    });
-                };
-
-                var checkSheriff = function () {
-                    if (w.Character.homeTown.town_id == 0) {
-                        return;
-                    }; // no Sheriff without town
-                    Ajax.remoteCallMode('building_sheriff', 'index', {
-                        town_id: w.Character.homeTown.town_id
-                    }, function (json) {
-                        if (json.error) {
-                            return new UserMessage(json.msg).show();
-                        }
-                        if (json.timeleft > 0) {
-                            kotimeout = json.timeleft;
-                            kotime = new Date((new ServerDate).getTime() + kotimeout * 1e3);
-                            TWDB.Cache.save('lastDeath', (lastDeath = new Date(parseInt(kotime.getTime() / 1e3 - 172800) * 1e3).toJSON()));
-                            initCountdown();
-                        } else {
-                            getMoti();
-                        };
-                    });
-                };
-
-                var initCountdown = function () {
+                
+                var initCountdown = function (forceProt) {
                     if (countdown) {
                         w.clearInterval(countdown);
-                    };
-                    kotimeStr = kotime.toLocaleString();
-                    bar.css({
-                            "background-position": "0px 0px"
-                        }).addClass("koblink")
-                        .click(function () {
-                            bar.removeClass("koblink").stop(true, false).css({
-                                opacity: 1
-                            });
-                        });
-                    countdown = w.setInterval(function () {
-                        refresh();
-                    }, 1000);
-                    refresh();
+                    }
+                    var now = new ServerDate().getTime();
+                    var ko = Character.getMandatoryDuelProtection(true);
+                    var prot = Character.getDuelProtection(true);
+                    kotimeStr = "<div style='text-align:center;'>#KOTIME#<br />";
+                    if (!oldSystem && ko > now && !forceProt) {
+                    	kotimeStr += "#DUEL_KO_END#&nbsp;" + new Date(ko).toLocaleString() + "<br />";
+			kotimeout = parseInt((ko - now) / 1e3, 10);
+			timerType = "getMandatoryDuelProtection";
+		    } else {
+			kotimeout = parseInt((prot - now) / 1e3, 10);
+			timerType = "getDuelProtection";
+		    }
+		    kotimeStr += "#DUEL_PROTECT_END#&nbsp;" + new Date(prot).toLocaleString() + "</div>";
+		    setBar(kotimeout.formatDuration(), kotimeStr, (timerType === "getDuelProtection") ? 'duelmot_protect' : 'duelmot_ko', true);
+                    warnBar.addClass("koblink")
+                           .click(function() { warnBar.removeClass("koblink").stop(true, false).css({ opacity: 0 }); });
+                    countdown = w.setInterval(function() { refresh(); }, 1000);
                 };
 
                 var refresh = function () {
                     if (kotimeout > 0) {
-                        if (++synctimer >= 180) { // recalculate exact duration only every ~3min
-                            kotimeout = parseInt((kotime.getTime() - (new ServerDate).getTime()) / 1e3);
-                            synctimer = 0
+                        if (kotimeout % 180 === 0) { // recalculate exact duration only every ~3min
+                            kotimeout = parseInt((Character[timerType](true) - (new ServerDate()).getTime()) / 1e3, 10);
                         } else {
                             kotimeout--; // otherwise -1 because our interval is 1sec
                         }
                         if (kotimeout <= 0) {
-                            w.clearInterval(countdown);
-                            bar.text('').stop(true, true).css({
-                                opacity: 1
-                            }).removeMousePopup();
-                            getMoti();
-                            return;
+			    w.clearInterval(countdown);
+			    warnBar.stop(true, true);
+                            if (timerType === 'getDuelProtection') {
+				lastMotivation = null;
+				return setBar('', '', '', true, checkMoti);
+			    } else {
+			    	return initCountdown(true);	// rerun for 2nd phase - duel protection in new system
+			    }
                         }
-                        var timeStr = kotimeout.formatDuration();
-                        bar.text(timeStr).addMousePopup("#KOTIME#:&nbsp;" + timeStr + "<br />(" + kotimeStr + ")");
-                        if ((kotimeout <= 1800) && bar.hasClass("koblink") && (synctimer % 9 === 0)) {
-                            bar.fadeTo(500, .5).fadeTo(500, 1); // blink effect if remaining time < 30m
+                        setBar(kotimeout.formatDuration());
+                        if ((kotimeout <= 1800) && warnBar.hasClass("koblink") && (kotimeout % 8 === 0)) {
+                            warnBar.fadeTo(500, 0.5).fadeTo(500, 0); // blink effect if remaining time < 30m
                         }
                         return;
                     } // <-- if we are KOed; otherwise show motivation ... v v v
-                    var motivation = Math.round(Character.duelMotivation * 100);
-                    if (Premium.hasBonus('regen')) {
-                        bar.css({
-                            'background-position': '-' + Math.floor(137 - motivation * 1.37) + 'px -13px'
-                        });
-                    } else {
-                        bar.css({
-                            'background-position': '-' + Math.floor(137 - motivation * 1.37) + 'px -26px'
-                        });
-                    }
-                    bar.text(motivation + '%').addMousePopup('#DUELMOTIVATION#:&nbsp;' + motivation + '%');
+                    return checkMoti();
                 };            
+
+                loader = Loader.add('DuelMotivation', 'tw-db DuelMotivation', init, {'Settings': true});
                 return _self;
             })($);
             Debugger.DuelMotivation = DuelMotivation;
