@@ -9209,10 +9209,7 @@
                     if (Character.getDuelProtection(true) > new ServerDate().getTime()) {	// in the future?
                         initCountdown();
                     } else if (kotimeout > 0) {
-                        w.clearInterval(countdown);
-                        warnBar.stop(true, true);
-                        lastMotivation = null;
-                        setBar('', '', '', true, checkMoti);
+                        lastMotivation = 666;           // my stop signal
                     } else {
                         checkMoti();
                     }
@@ -9256,10 +9253,11 @@
                         } else {
                             kotimeout--; // otherwise -1 because our interval is 1sec
                         }
-                        if (kotimeout <= 0) {
+                        if (kotimeout <= 0 || lastMotivation === 666) {
                             w.clearInterval(countdown);
                             warnBar.stop(true, true);
-                            if (timerType === 'getDuelProtection') {
+                            kotimeout = 0;
+                            if (timerType === 'getDuelProtection' || lastMotivation === 666) {
                                 lastMotivation = null;
                                 return setBar('', '', '', true, checkMoti);
                             } else {
@@ -9273,7 +9271,7 @@
                         return;
                     } // <-- if we are KOed; otherwise show motivation ... v v v
                     lastMotivation = null;
-                    return checkMoti();
+                    checkMoti();
                 };            
 
                 loader = Loader.add('DuelMotivation', 'tw-db DuelMotivation', init, {'Settings': true});
