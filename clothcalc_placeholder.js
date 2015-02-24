@@ -25,7 +25,7 @@
     // start this one
 
     if (isDefined(window.TWDB)) { (new west.gui.Dialog(TWDB.script.name, 
-    	    '<div class="txcenter"><b><br>#CC_INSTALLED_TWICE#</br></b></div>', west.gui.Dialog.SYS_WARNING)).addButton("OK").show();
+            '<div class="txcenter"><b><br>#CC_INSTALLED_TWICE#</br></b></div>', west.gui.Dialog.SYS_WARNING)).addButton("OK").show();
     } else {
 
         TWDB = {};
@@ -49,10 +49,10 @@
             var t = Math.pow(10, e);
             return Math.round(this * t) / t
         };
-		/**TODO: get rid of this **/
-		String.prototype.twdb_twiceHTMLUnescape = function () {
-			return $($.parseHTML($($.parseHTML(this+"")).text())).text();
-		}
+                /**TODO: get rid of this **/
+                String.prototype.twdb_twiceHTMLUnescape = function () {
+                        return $($.parseHTML($($.parseHTML(this+"")).text())).text();
+                }
         if (!console) {
             console = {}
         }
@@ -121,22 +121,22 @@
         TWDB.Util = (function($) {
             var _public = {};
             
-	    /**
-	     * Appends CSS style definitions to the document's head.
-	     *
-	     * @param {String} cssString Standard CSS definition(s) "selector {style;}".
-	     * @param {String} optionalId Optional ID to create multiple <style> elements.
-	     *				  Standard ID is twdb_css, if param is present it's twdb_css_optionalId.
-	     */            
+            /**
+             * Appends CSS style definitions to the document's head.
+             *
+             * @param {String} cssString Standard CSS definition(s) "selector {style;}".
+             * @param {String} optionalId Optional ID to create multiple <style> elements.
+             *				  Standard ID is twdb_css, if param is present it's twdb_css_optionalId.
+             */            
             var _addCss = function(cssString, optionalId) {
-            	var id = "twdb_css";
-            	if (typeof optionalId != "undefined" && typeof optionalId == "string") { id += "_" + optionalId.replace(/\w+/g, "")};
-            	if ($("head style#" + id).append(cssString).length == 1) { return; }
-		else { $("head").append($('<style type="text/css" id="' + id +'">').text(cssString)) };
-	    };
-	    _public.addCss = function(cssString, optionalId) { return _addCss(cssString, optionalId); };
-	    
-	    return _public;
+                var id = "twdb_css";
+                if (typeof optionalId != "undefined" && typeof optionalId == "string") { id += "_" + optionalId.replace(/\w+/g, "")};
+                if ($("head style#" + id).append(cssString).length == 1) { return; }
+                else { $("head").append($('<style type="text/css" id="' + id +'">').text(cssString)) };
+            };
+            _public.addCss = function(cssString, optionalId) { return _addCss(cssString, optionalId); };
+            
+            return _public;
         })(jQuery);
             
         TWDB.ClothCalc = {
@@ -477,7 +477,7 @@
                 };
                 for (var key in this.calcdata.items) {
                     if (typeof this.data.items[key] == "undefined") {
-			if (!isDefined(ItemManager.get(key))) { console.log("Item ID="+key+" seems to be no more defined..."); }; // rare case that an item that was previously best for a job got removed from TW .. I'm curious
+                        if (!isDefined(ItemManager.get(key))) { console.log("Item ID="+key+" seems to be no more defined..."); }; // rare case that an item that was previously best for a job got removed from TW .. I'm curious
                         // if (this.isBetterItem(this.calcdata.items[key].id)) {	// check doesn't make sense - if our previous best item is gone, we need to update!
                             return true;
                         // };
@@ -1111,19 +1111,19 @@
                         this.base = 0;
                         this.basetime = 15;
                         this.parent.gui.job.mode.css("background-position", "0px 0px")
-			    .click(function() { t.mode(1); t.parent.joblist.update(); });
+                            .click(function() { t.mode(1); t.parent.joblist.update(); });
                         break;
                     case 1:
                         this.base = 1;
                         this.basetime = 600;
                         this.parent.gui.job.mode.css("background-position", "-20px 0px")
-			    .click(function() { t.mode(2); t.parent.joblist.update(); });
+                            .click(function() { t.mode(2); t.parent.joblist.update(); });
                         break;
                     case 2:
                         this.base = 2;
                         this.basetime = 3600;
                         this.parent.gui.job.mode.css("background-position", "-40px 0px")
-			    .click(function() { t.mode(0); t.parent.joblist.update(); });
+                            .click(function() { t.mode(0); t.parent.joblist.update(); });
                         break;
                     };
                 },
@@ -1142,8 +1142,8 @@
                         stars = Math.min(Math.floor(points / step), 15),
                         dmot = Math.ceil(mot / 25) * 0.25;
                     return points < 5 * step || points <= malus ?
-			Math[r1](({0: 1, 1: 2, 2: 3, 3: 4, 4: 5, 5: 6.25})[freezeBronze ? 0 : stars] * magic * dmot * factor) :
-			Math[r2](formula(points - malus, stars) * magic * dmot * factor);
+                        Math[r1](({0: 1, 1: 2, 2: 3, 3: 4, 4: 5, 5: 6.25})[freezeBronze ? 0 : stars] * magic * dmot * factor) :
+                        Math[r2](formula(points - malus, stars) * magic * dmot * factor);
                 },
                 calcWage: function(pts, mal, magic, mot, fac) {
                     return this._calcStepFormula('ceil', 'round', function(lp) { return 6.25 * Math.pow(lp, 0.05) }, pts, mal, magic, mot, fac);
@@ -1247,13 +1247,13 @@
                     var t = this.parent.calcdata.jobs[e].values;
                     t.laborpoints = this.parent.calcdata.jobs[e].laborpoints.sum;
                     var n = "<table>" + '<tr><td colspan="4" style="font-weight:bold;text-align:center;font-size:11px;">' + this.parent.calcdata.jobs[e].name + "</td></tr>"
-			+ '<tr><td><img src="' + TWDB.images.iconExperience + '" title=" #EXPERIENCE# " height="15px" width="15px" /></td><td style="font-size:10px;vertical-align:bottom;">' + t.experience + "</td>"
-			    + '<td><img src="' + TWDB.images.iconDollar + '" title=" #WAGES# " height="15px" width="15px" /></td><td style="font-size:10px;vertical-align:bottom;">' + t.wages + "</td></tr>"
-			+ '<tr><td><img src="' + TWDB.images.iconLuck + '" title=" #LUCK# " height="15px" width="15px" /></td><td style="font-size:10px;vertical-align:bottom;">' + t.luck1 + "-" + t.luck2 + "</td>"
-			    + '<td><img src="' + TWDB.images.iconDanger + '" title=" #DANGER# " height="15px" width="15px" /></td><td style="font-size:10px;vertical-align:bottom;">' + t.danger + "</td></tr>"
-			+ '<tr><td><img src="' + TWDB.images.iconLaborpoints + '" title=" #LABORPOINTS# " height="15px" width="15px" /></td><td style="font-size:10px;vertical-align:bottom;">' + t.laborpoints + "</td>"
-			    + '<td><img src="' + TWDB.images.iconClock + '" title=" #DURATION# " height="15px" width="15px" /></td><td style="font-size:10px;vertical-align:bottom;">' + t.duration + "</td></tr>"
-			+ '<tr><td><img src="' + TWDB.images.iconMoti + '" title=" #MOTIVATION# "  height="15px" width="15px" /></td><td style="font-size:10px;vertical-align:bottom;">' + t.resmotivation * 100 + ' (' + Math.round(t.motivation * 100) + ")%</td><td></td><td></td></tr>" + "</table>";
+                        + '<tr><td><img src="' + TWDB.images.iconExperience + '" title=" #EXPERIENCE# " height="15px" width="15px" /></td><td style="font-size:10px;vertical-align:bottom;">' + t.experience + "</td>"
+                            + '<td><img src="' + TWDB.images.iconDollar + '" title=" #WAGES# " height="15px" width="15px" /></td><td style="font-size:10px;vertical-align:bottom;">' + t.wages + "</td></tr>"
+                        + '<tr><td><img src="' + TWDB.images.iconLuck + '" title=" #LUCK# " height="15px" width="15px" /></td><td style="font-size:10px;vertical-align:bottom;">' + t.luck1 + "-" + t.luck2 + "</td>"
+                            + '<td><img src="' + TWDB.images.iconDanger + '" title=" #DANGER# " height="15px" width="15px" /></td><td style="font-size:10px;vertical-align:bottom;">' + t.danger + "</td></tr>"
+                        + '<tr><td><img src="' + TWDB.images.iconLaborpoints + '" title=" #LABORPOINTS# " height="15px" width="15px" /></td><td style="font-size:10px;vertical-align:bottom;">' + t.laborpoints + "</td>"
+                            + '<td><img src="' + TWDB.images.iconClock + '" title=" #DURATION# " height="15px" width="15px" /></td><td style="font-size:10px;vertical-align:bottom;">' + t.duration + "</td></tr>"
+                        + '<tr><td><img src="' + TWDB.images.iconMoti + '" title=" #MOTIVATION# "  height="15px" width="15px" /></td><td style="font-size:10px;vertical-align:bottom;">' + t.resmotivation * 100 + ' (' + Math.round(t.motivation * 100) + ")%</td><td></td><td></td></tr>" + "</table>";
                     return n;
                 }
             },
@@ -2420,22 +2420,22 @@
                     $tr.append('<td style="text-align:left;vertical-align:middle">' + tmp.time.formatDuration() + "</td>");
                     $tr.append(jQuery('<td style="text-align:left;vertical-align:middle">')
                             .append(jQuery('<img src="' + TWDB.images.arrow + '" title="#DIRECTION#" style="cursor:pointer;-moz-transform: ' + rotat + "-webkit-transform:" + rotat + "-rotat-transform:" + rotat + "-ms-transform:" + rotat + "transform:" + rotat + '" />')
-				    .click(function(x, y) { return function() {
-						Map.center(x, y);}
-					    }(tmp.x, tmp.y))));
+                                    .click(function(x, y) { return function() {
+                                                Map.center(x, y);}
+                                            }(tmp.x, tmp.y))));
                     var $td = jQuery("<td />");
                     var btn = new TWDB.GameAPI.gui.button("#OPEN#", function (id, x, y) { return function() {
-									TWDB.Jobs.openJob(id, x, y); }
-								    }(_this.jobs.selected, tmp.x, tmp.y));
-		    jQuery(btn.divMain).css({"min-width": "50px", "max-width": "80px"});
-		    jQuery(btn.divMain).find(".textart_title").css({overflow: "hidden"});
+                                                                        TWDB.Jobs.openJob(id, x, y); }
+                                                                    }(_this.jobs.selected, tmp.x, tmp.y));
+                    jQuery(btn.divMain).css({"min-width": "50px", "max-width": "80px"});
+                    jQuery(btn.divMain).find(".textart_title").css({overflow: "hidden"});
                     btn.appendTo($td);
                     $tr.append($td);
                     if (Premium.hasBonus("automation")) {
                         var $td = jQuery("<td />");
                         var btn = new TWDB.GameAPI.gui.button("#JOB_START#", function (id, x, y) { return function() {
-									    TWDB.Jobs.startJob(id, x, y, Number(_this.jobs.basetime)); }
-									}(_this.jobs.selected, tmp.x, tmp.y));
+                                                                            TWDB.Jobs.startJob(id, x, y, Number(_this.jobs.basetime)); }
+                                                                        }(_this.jobs.selected, tmp.x, tmp.y));
                         jQuery(btn.divMain).css({"min-width": "50px", "max-width": "80px"});
                         jQuery(btn.divMain).find(".textart_title").css({overflow: "hidden"});
                         btn.appendTo($td);
@@ -3701,21 +3701,21 @@
   //
   /////////////////////////////
             var Settings = function ($) {
-		    var _self = {};                                  
-		    var settings = {};                               
-		    var wnd = null;                                  
-		    var loader = {};                                 
+                    var _self = {};                                  
+                    var settings = {};                               
+                    var wnd = null;                                  
+                    var loader = {};                                 
 
-		    var init = function (){                        
-		    if (loader.ready) {                          
-		      return;                                      
-		    };                                             
-		    var tmp = Cache.load('settings');              
-		    if (typeof(tmp) == 'object' && tmp != null) {
-		      settings = tmp;                              
-		    } else {                                       
-		      settings = {};                               
-		    };                                             
+                    var init = function (){                        
+                    if (loader.ready) {                          
+                      return;                                      
+                    };                                             
+                    var tmp = Cache.load('settings');              
+                    if (typeof(tmp) == 'object' && tmp != null) {
+                      settings = tmp;                              
+                    } else {                                       
+                      settings = {};                               
+                    };                                             
                     wnd = Window.addTab('settings','#SETTINGS#','#SETTINGS#',open);
                     loader.ready = true;
                 };
@@ -3725,11 +3725,11 @@
                 });
                 
                 var open = function() {
-		wnd.children().remove();
-		var bodyscroll = new GameAPI.gui.scrollpane();
-		$(bodyscroll.getMainDiv()).css('height','300px');
-		wnd.append(bodyscroll.getMainDiv());
-		var values = [
+                wnd.children().remove();
+                var bodyscroll = new GameAPI.gui.scrollpane();
+                $(bodyscroll.getMainDiv()).css('height','300px');
+                wnd.append(bodyscroll.getMainDiv());
+                var values = [
                         [0, "collector", "#HELP_COLLECTOR#", false],
                         [0, "jobBoniTooltip", "#HELP_JOBBONI#", false],
                         [0, "buyTip", "#HELP_BUYTIP#", false],
@@ -3772,86 +3772,86 @@
                         [0, "directsleep", "#HELP_DIRECTSLEEP#", false],
                         [0, "weeklycrafting", "#CRAFTNOTICE#", false]
                     ];
-		    var tmp = {};
-		    var table = $('<table />');
-		    var group = {};
-		    for (var i=0; i < values.length; i++) {
-		      var name = values[i][1];
-		      tmp[name] = _self.get(name);
-		      var row = $('<tr />');
-		      switch (values[i][0]) {
-			case 0: 
-			    var callback = function(name) { return function(){ tmp[name] = !(tmp[name]); }}(name);
-			    var checkbox = new GameAPI.gui.checkbox('', (!tmp[name] ? '' : 'tw2gui_checkbox_checked'), callback );
-			    row.append($('<td style="width:25px;" />').append(checkbox.getMainDiv()));
-			    break;
-		      };
-		      row.append($('<td></td>').text((values[i][2]+"").twdb_twiceHTMLUnescape())); /**TODO: get rid of unescape **/
-		      if (values[i][3]) {
-		      	var gname = values[i][3];
-			if (!isDefined(group[gname])) {
-			  group[gname] = $('<table />').hide();
-			  table.append( $('<tr><td style="width:25px;cursor:pointer;"></td><td style="cursor:pointer;" class="item_sell"><span class="twdb_cat butMinus" style="margin-top: -3px;"></span>&nbsp;&nbsp;' + gname + '</td></tr>')
-					  .click(function(name) {
-					      return function(){
-						  $(group[name]).toggle();
-						  $(this).find("span.twdb_cat").toggleClass("butMinus").toggleClass("butPlus");
-					      }
-					  }(gname)),
-				       $('<tr>').append( $('<td style="width:25px;">'), $('<td>').append(group[gname]))
-				      );
-			}
-			group[gname].append(row);
-		      } else {
-			  table.append(row);
-		      }
-		    };
-				
-		    var combobox = new GameAPI.gui.combobox();
-		    combobox.addItem('left','#LEFT#').addItem('right','#RIGHT#').addItem('custom','#CUSTOM_POSITION#');
-		    combobox.select(String(settings['clothPos']));
-		    var row = $('<tr />').append($('<td colspan="2" />').append(combobox.getMainDiv()).append('<span>&nbsp;#HELP_POSITION#</span>'));
-		    table.append(row);
-		    
-		    var btn = new GameAPI.gui.button('#SAVE#', function(){
-			switch (combobox.getValue()) {
-			  case 'left' : settings['clothPos'] = 'left'; break;
-			  case 'right' : settings['clothPos'] = 'right'; break;
-			  default : settings['clothPos'] = 'custom'; break;
-			}
-			save(tmp);
-		      });
+                    var tmp = {};
+                    var table = $('<table />');
+                    var group = {};
+                    for (var i=0; i < values.length; i++) {
+                      var name = values[i][1];
+                      tmp[name] = _self.get(name);
+                      var row = $('<tr />');
+                      switch (values[i][0]) {
+                        case 0: 
+                            var callback = function(name) { return function(){ tmp[name] = !(tmp[name]); }}(name);
+                            var checkbox = new GameAPI.gui.checkbox('', (!tmp[name] ? '' : 'tw2gui_checkbox_checked'), callback );
+                            row.append($('<td style="width:25px;" />').append(checkbox.getMainDiv()));
+                            break;
+                      };
+                      row.append($('<td></td>').text((values[i][2]+"").twdb_twiceHTMLUnescape())); /**TODO: get rid of unescape **/
+                      if (values[i][3]) {
+                        var gname = values[i][3];
+                        if (!isDefined(group[gname])) {
+                          group[gname] = $('<table />').hide();
+                          table.append( $('<tr><td style="width:25px;cursor:pointer;"></td><td style="cursor:pointer;" class="item_sell"><span class="twdb_cat butMinus" style="margin-top: -3px;"></span>&nbsp;&nbsp;' + gname + '</td></tr>')
+                                          .click(function(name) {
+                                              return function(){
+                                                  $(group[name]).toggle();
+                                                  $(this).find("span.twdb_cat").toggleClass("butMinus").toggleClass("butPlus");
+                                              }
+                                          }(gname)),
+                                       $('<tr>').append( $('<td style="width:25px;">'), $('<td>').append(group[gname]))
+                                      );
+                        }
+                        group[gname].append(row);
+                      } else {
+                          table.append(row);
+                      }
+                    };
+                                
+                    var combobox = new GameAPI.gui.combobox();
+                    combobox.addItem('left','#LEFT#').addItem('right','#RIGHT#').addItem('custom','#CUSTOM_POSITION#');
+                    combobox.select(String(settings['clothPos']));
+                    var row = $('<tr />').append($('<td colspan="2" />').append(combobox.getMainDiv()).append('<span>&nbsp;#HELP_POSITION#</span>'));
+                    table.append(row);
                     
-		    var res = $('<div style="width:100%;text-align:right;" />').append($('<img style="position:relative;top:-20px;cursor:pointer;" title=" reset local Storage" src="' + Images.iconReset + '" />').click(function(){Cache.reset();}));
-		    bodyscroll.appendContent(table);
-		    wnd.append(btn.getMainDiv()).append(res);
-		    Window.hideLoader();
+                    var btn = new GameAPI.gui.button('#SAVE#', function(){
+                        switch (combobox.getValue()) {
+                          case 'left' : settings['clothPos'] = 'left'; break;
+                          case 'right' : settings['clothPos'] = 'right'; break;
+                          default : settings['clothPos'] = 'custom'; break;
+                        }
+                        save(tmp);
+                      });
+                    
+                    var res = $('<div style="width:100%;text-align:right;" />').append($('<img style="position:relative;top:-20px;cursor:pointer;" title=" reset local Storage" src="' + Images.iconReset + '" />').click(function(){Cache.reset();}));
+                    bodyscroll.appendContent(table);
+                    wnd.append(btn.getMainDiv()).append(res);
+                    Window.hideLoader();
                 };
                 
-	      _self.get = function(key, defValue) {
-		if (!isDefined(settings[key])) {
-		  _self.set(key,defValue);
-		  return defValue;
-		};
-		return settings[key];
-	      };
-	      
-	      _self.set = function(key, data) {
-		settings[key] = data;
-		Cache.save('settings',settings);
-	      };
-	      
-	      var save = function(tmp) {
-		for ( var key in tmp ) {
-		  settings[key] = tmp[key];
-		};
-		if (Cache.save('settings',settings)) {
-		  new UserMessage('#SAVE_SUCCESSFUL#', UserMessage.TYPE_SUCCESS).show();
-		} else {
-		  new UserMessage('#SAVE_ERROR#', UserMessage.TYPE_ERROR).show();
-		};
-	      };
-	      return _self;
+              _self.get = function(key, defValue) {
+                if (!isDefined(settings[key])) {
+                  _self.set(key,defValue);
+                  return defValue;
+                };
+                return settings[key];
+              };
+              
+              _self.set = function(key, data) {
+                settings[key] = data;
+                Cache.save('settings',settings);
+              };
+              
+              var save = function(tmp) {
+                for ( var key in tmp ) {
+                  settings[key] = tmp[key];
+                };
+                if (Cache.save('settings',settings)) {
+                  new UserMessage('#SAVE_SUCCESSFUL#', UserMessage.TYPE_SUCCESS).show();
+                } else {
+                  new UserMessage('#SAVE_ERROR#', UserMessage.TYPE_ERROR).show();
+                };
+              };
+              return _self;
             }($);
             _base.Settings = Settings;
             Debugger.Settings = Settings;
@@ -3920,14 +3920,14 @@
                         var msg = '<div class="txcenter">#OPEN_RELEASENOTES#</div>';
                         msg = msg.replace("=1=", "<b>" + Script.name + "</b>");
                         (new GameAPI.gui.dialog(title, msg, GameAPI.gui.dialog.SYS_WARNING))
-			    .addButton("no").addButton("yes", function() { Window.open("notes"); }).show();
+                            .addButton("no").addButton("yes", function() { Window.open("notes"); }).show();
                     };
                     loader.ready = true;
                 };
                 loader = Loader.add("Updater", "tw-db Updater", init, {Cache: true, Window: true});
                 
                 var update = function(ver, rev) {
-		    var title = "#NEED_UPDATE#";
+                    var title = "#NEED_UPDATE#";
                     var msg = '<div class="txcenter">#MAKE_UPDATE#</div>';
                     msg = msg.replace("=1=", "<b>" + Script.name + "</b>");
                     msg += "<div><br />current version: " + (Script.version / 100) + " revision " + Script.revision + "<br />new version: " + (ver / 100) + " revision " + rev + "</div>";
@@ -3935,7 +3935,7 @@
                     if ($.browser.webkit) { url += "?" + Script.version + Script.revision };
                     var refresh = function() { try { location.href = url; } catch (e) {}; };
                     (new GameAPI.gui.dialog(title, msg, GameAPI.gui.dialog.SYS_WARNING))
-			.addButton("#NOTNOW#").addButton("ok", refresh).show();
+                        .addButton("#NOTNOW#").addButton("ok", refresh).show();
                 };
                 _self.wasUpdated = function() { return updated; };
                 
@@ -3946,7 +3946,7 @@
                     var hidden = false;
                     for (var i = 0; i < Script.notes.length; i++) {
                         var head = $("<h3><a>Version " + String(Script.notes[i].version / 100) + "</a></h3>")
-			    .css("border-bottom", "1px solid black")
+                            .css("border-bottom", "1px solid black")
                             .click(function() { $(this).next().toggle(); });
                         var body = $("<div>" + Script.notes[i].notes + "</div>");
                         bodyscroll.appendContent(head).appendContent(body);
@@ -3961,10 +3961,10 @@
                     $.getScript(Script.protocol + "://" + Script.check + "?" + (new Date).getTime());
                     }, 500); };
                 
-		// never touch this without adjust serverside component
-		_self.check = function (ver, rev, uid) {
-		    if (Script.version != ver || Script.revision != rev) { update(ver, rev); };
-		};
+                // never touch this without adjust serverside component
+                _self.check = function (ver, rev, uid) {
+                    if (Script.version != ver || Script.revision != rev) { update(ver, rev); };
+                };
                 return _self;
             })($);
             _base.Updater = Updater;
@@ -3979,34 +3979,34 @@
   //
   ///////////////////////////////////////
             var Sleep = (function($) {
-		var _self = {};
-		var btn = null;
-		var forts = [];
-		var tmp = [];
-		var cache = {};
-		var days = 1;
-		var opened = false;
-		var loader = {};
-		var init = function() {
-		    if (loader.ready) { return; };
-		    // Settings.addOption( '#INTERFACE#' , 'directsleep', 0 ,'#HELP_DIRECTSLEEP#');	// for new settings system only
-		    if (Settings.get('directsleep', true)) {
-			var sleepCss = "ul.tw2gui_selectbox_content.twdb_sleepmenu {max-width: 320px!important; white-space: nowrap; overflow-y: auto; overflow-x: hidden;}"
-				     + "ul.tw2gui_selectbox_content.twdb_sleepmenu > li {padding-right: 20px!important;}";
-			TWDB.Util.addCss(sleepCss);
-			cache = Cache.load('barracks');
-			if (cache == null || typeof(cache) != 'object') { cache = {}; };
-			if (Character.homeTown.town_id != 0) { addButton(); getForts(); };
-		    };
-		    loader.ready = true;
-		};
-		loader = Loader.add('Sleep', 'tw-db DirectSleep', init , {'Cache':true, 'Settings':true});
+                var _self = {};
+                var btn = null;
+                var forts = [];
+                var tmp = [];
+                var cache = {};
+                var days = 1;
+                var opened = false;
+                var loader = {};
+                var init = function() {
+                    if (loader.ready) { return; };
+                    // Settings.addOption( '#INTERFACE#' , 'directsleep', 0 ,'#HELP_DIRECTSLEEP#');	// for new settings system only
+                    if (Settings.get('directsleep', true)) {
+                        var sleepCss = "ul.tw2gui_selectbox_content.twdb_sleepmenu {max-width: 320px!important; white-space: nowrap; overflow-y: auto; overflow-x: hidden;}"
+                                     + "ul.tw2gui_selectbox_content.twdb_sleepmenu > li {padding-right: 20px!important;}";
+                        TWDB.Util.addCss(sleepCss);
+                        cache = Cache.load('barracks');
+                        if (cache == null || typeof(cache) != 'object') { cache = {}; };
+                        if (Character.homeTown.town_id != 0) { addButton(); getForts(); };
+                    };
+                    loader.ready = true;
+                };
+                loader = Loader.add('Sleep', 'tw-db DirectSleep', init , {'Cache':true, 'Settings':true});
       
                 var addButton = function() {
                     btn = GameInject.CharacterButton.add(Images.buttonSleep);
                     btn.addMousePopup('#SLEEP#').click(function(e) {
-                    	    if (w.Character.homeTown.town_id != 0 && forts.length == 0) { sleepHotel(); }
-                    	    else { createMenu(e); }; });
+                            if (w.Character.homeTown.town_id != 0 && forts.length == 0) { sleepHotel(); }
+                            else { createMenu(e); }; });
                 };
                 
                 var createMenu = function(e) {
@@ -4015,17 +4015,17 @@
                     pos.x = pos[0];
                     pos.y = pos[1];
                     for (var i=0; i < forts.length; i++) {
-                    	forts[i].distance = w.Map.calcWayTime(pos,forts[i]);
+                        forts[i].distance = w.Map.calcWayTime(pos,forts[i]);
                     };
                     forts.sort(function(a, b){ return(a.distance==b.distance)?0:(a.distance>b.distance)?1:-1;});
                     var selectbox = (new GameAPI.gui.selectbox(true))
-			.addListener(function (key) { switch (key) { case 0: sleepHotel(); break;
-								    default: sleepFort(key); break; }; })
-                    	.addItem(0, '#HOTEL#&nbsp;' + w.Map.calcWayTime(pos, w.Character.homeTown).formatDuration());
+                        .addListener(function (key) { switch (key) { case 0: sleepHotel(); break;
+                                                                    default: sleepFort(key); break; }; })
+                        .addItem(0, '#HOTEL#&nbsp;' + w.Map.calcWayTime(pos, w.Character.homeTown).formatDuration());
                     for (var i=0; i < forts.length; i++) {
-                    	if (forts[i].stage != 0) {
-                    	    selectbox.addItem(forts[i].id, '#STAGE#&nbsp;' + forts[i].stage + '&nbsp;' + forts[i].distance.formatDuration() + '&nbsp;|&nbsp;' + forts[i].name);
-                    	};
+                        if (forts[i].stage != 0) {
+                            selectbox.addItem(forts[i].id, '#STAGE#&nbsp;' + forts[i].stage + '&nbsp;' + forts[i].distance.formatDuration() + '&nbsp;|&nbsp;' + forts[i].name);
+                        };
                     };
                     // Dun - Add auto vertical scollbar
                     // $(selectbox.elContent).css({"max-height": "270px", "width": "250px", "overflow-y": 'auto'});
@@ -4038,14 +4038,14 @@
 
                 var sleepHotel = function() {
                     Ajax.remoteCallMode("building_hotel", "get_data", {town_id: w.Character.homeTown.town_id}, function(resp) {
-                    	if (resp.error) {
-                    	    new UserMessage(resp.error, UserMessage.TYPE_ERROR).show(); return;
-                    	};
-                    	var room = "";
-                    	for (var key in resp.rooms) {
-                    	    if (resp.rooms[key].available) { room = key; };
-                    	};
-                    	w.TaskQueue.add(new TaskSleep(w.Character.homeTown.town_id, room));
+                        if (resp.error) {
+                            new UserMessage(resp.error, UserMessage.TYPE_ERROR).show(); return;
+                        };
+                        var room = "";
+                        for (var key in resp.rooms) {
+                            if (resp.rooms[key].available) { room = key; };
+                        };
+                        w.TaskQueue.add(new TaskSleep(w.Character.homeTown.town_id, room));
                     });
                 };
                 
@@ -4056,39 +4056,39 @@
                 var getForts = function() {
                     if (w.Character.homeTown.alliance_id == 0) { return; };
                     Ajax.remoteCallMode("alliance", "get_data", {alliance_id: w.Character.homeTown.alliance_id}, function(resp) {
-                    	if (resp.error) {
-                    	    new UserMessage(resp.error, UserMessage.TYPE_ERROR).show(); return;
-                    	};
-                    	tmp = resp.data.forts;
-                    	if (tmp.length > 0) {
-                    	    w.setTimeout(function(){ getFort(); }, Timer.getTimeout());
-                    	};
+                        if (resp.error) {
+                            new UserMessage(resp.error, UserMessage.TYPE_ERROR).show(); return;
+                        };
+                        tmp = resp.data.forts;
+                        if (tmp.length > 0) {
+                            w.setTimeout(function(){ getFort(); }, Timer.getTimeout());
+                        };
                     });
                 };
                 
                 var getFort = function() {
                     try {
-                    	if (tmp.length <= 0) { return; };
-                    	var fort = tmp.pop();
-                    	var id = fort.fort_id;
-                    	if (!isDefined(cache[id])) { cache[id] = {'time': 0, 'stage': 0}; };
-                    	$.extend(cache[id], {'id': id, 'x': fort.x, 'y': fort.y, 'name': fort.name, 'type': fort.type});                    	
-                    	if (cache[id].stage != 5 && (cache[id].time + days*86400) > (new Date().getTime()/1000)) {
-                    	    forts.push(cache[id]);
-                    	    if (tmp.length > 0) { w.setTimeout(function(){ getFort(); }, Timer.getTimeout()); }
-                    	    else { Cache.save('barracks',cache); };
-                    	    return;
-                    	};
-                    	Ajax.remoteCallMode('fort_building_barracks', 'index', {fort_id: id}, function(resp) {
-                    	    if (resp.error) { new UserMessage(resp.error, UserMessage.TYPE_ERROR).show();}
-                    	    else {
-                    	    	cache[id].time = Number(new Date().getTime()/1000).round(0);
-                    	    	if (isDefined(resp.barrackStage)) { cache[id].stage = resp.barrackStage; };
-                    	    };
-                    	    forts.push(cache[id]);
-                    	    if (tmp.length > 0) { w.setTimeout(function(){ getFort(); }, Timer.getTimeout()); }
-                    	    else { Cache.save('barracks',cache); };
-                    	});
+                        if (tmp.length <= 0) { return; };
+                        var fort = tmp.pop();
+                        var id = fort.fort_id;
+                        if (!isDefined(cache[id])) { cache[id] = {'time': 0, 'stage': 0}; };
+                        $.extend(cache[id], {'id': id, 'x': fort.x, 'y': fort.y, 'name': fort.name, 'type': fort.type});                    	
+                        if (cache[id].stage != 5 && (cache[id].time + days*86400) > (new Date().getTime()/1000)) {
+                            forts.push(cache[id]);
+                            if (tmp.length > 0) { w.setTimeout(function(){ getFort(); }, Timer.getTimeout()); }
+                            else { Cache.save('barracks',cache); };
+                            return;
+                        };
+                        Ajax.remoteCallMode('fort_building_barracks', 'index', {fort_id: id}, function(resp) {
+                            if (resp.error) { new UserMessage(resp.error, UserMessage.TYPE_ERROR).show();}
+                            else {
+                                cache[id].time = Number(new Date().getTime()/1000).round(0);
+                                if (isDefined(resp.barrackStage)) { cache[id].stage = resp.barrackStage; };
+                            };
+                            forts.push(cache[id]);
+                            if (tmp.length > 0) { w.setTimeout(function(){ getFort(); }, Timer.getTimeout()); }
+                            else { Cache.save('barracks',cache); };
+                        });
                     } catch (e) { Error.report(e,'getFortData'); };
                 };
                 return _self;
@@ -7080,44 +7080,44 @@
                 
                 var fastSkillChange = function () {
                     $("div.char_links.skills").click(function() {
-			var e = 80,
-			    t = function () {
-				if ($(".skills_content,.skills_content4Shaman").length != 2) {
-				    if (e-- <= 0 && n != -1) {
-					clearInterval(n);
-					n = -1;
-				    }
-				} else {
-				    $(".skills_content,.skills_content4Shaman").find(".butMinus,.butPlus").each(function() {
-					function r() {
-					    e = Math.max(Math.round(e * (e / 200 + 1) / (e / 133 + 1)), 15);
-					    n.click();
-					    t = setTimeout(r, e)
-					}
+                        var e = 80,
+                            t = function () {
+                                if ($(".skills_content,.skills_content4Shaman").length != 2) {
+                                    if (e-- <= 0 && n != -1) {
+                                        clearInterval(n);
+                                        n = -1;
+                                    }
+                                } else {
+                                    $(".skills_content,.skills_content4Shaman").find(".butMinus,.butPlus").each(function() {
+                                        function r() {
+                                            e = Math.max(Math.round(e * (e / 200 + 1) / (e / 133 + 1)), 15);
+                                            n.click();
+                                            t = setTimeout(r, e)
+                                        }
     
-					function i() {
-					    t = setTimeout(r,e)
-					}
+                                        function i() {
+                                            t = setTimeout(r,e)
+                                        }
     
-					function s() {
-					    if (t != -1) {
-						clearTimeout(t);
-						t = -1
-					    }
-					    e = 400
-					}
-					if ($(this).get(0).twdb_skills)
-					    return;
-					$(this).get(0).twdb_skills = true;
-					var e = 400,
-					    t = -1,
-					    n = $(this).css("cursor","pointer");
-					n.mousedown(i).mouseup(s).mouseout(s)
-				    })
-				}
-			    },
-			    n = setInterval(t, 50)
-		    })
+                                        function s() {
+                                            if (t != -1) {
+                                                clearTimeout(t);
+                                                t = -1
+                                            }
+                                            e = 400
+                                        }
+                                        if ($(this).get(0).twdb_skills)
+                                            return;
+                                        $(this).get(0).twdb_skills = true;
+                                        var e = 400,
+                                            t = -1,
+                                            n = $(this).css("cursor","pointer");
+                                        n.mousedown(i).mouseup(s).mouseout(s)
+                                    })
+                                }
+                            },
+                            n = setInterval(t, 50)
+                    })
                 };
                 
                 var QuestbookSwitch = function () {
@@ -7130,15 +7130,15 @@
                             // create intro text & add it
                             var $introtext = $("<span><br>" + quest.description + "</span>");
                             $("div.window-quest_solved div.quest_description_container").append($introtext);
-			    // create switch link & add it
+                            // create switch link & add it
                             var $swbutton = $('<a href="#"> #QB_SHOWCOMP# </a>').addClass("introshown").click(function () {
-				var $t = $(this),
-				    is = $t.hasClass("introshown");
-				$endtext.toggle(is);
-				$introtext.toggle(!is);
-				$t.text(is ? ' #QB_SHOWINTRO# ' : ' #QB_SHOWCOMP# ');
-				$t.toggleClass("introshown");
-			    });
+                                var $t = $(this),
+                                    is = $t.hasClass("introshown");
+                                $endtext.toggle(is);
+                                $introtext.toggle(!is);
+                                $t.text(is ? ' #QB_SHOWINTRO# ' : ' #QB_SHOWCOMP# ');
+                                $t.toggleClass("introshown");
+                            });
                             $("div.window-quest_solved div.solved_text_container").append($("<div style='text-align:center;'>").append($swbutton));
                         }
                     } catch (e) {
@@ -7198,10 +7198,10 @@
                         Premium.twdb_confirmUse = Premium.confirmUse;
                         Premium.confirmUse = function(bonus, title, description, price, payload, callback, cancelCallback, buttons) {
                             if (reg.test(bonus)) {
-				if (typeof cancelCallback !== 'undefined') return cancelCallback();
-			    } else {
-			    	return Premium.twdb_confirmUse(bonus, title, description, price, payload, callback, cancelCallback, buttons);
-			    }
+                                if (typeof cancelCallback !== 'undefined') return cancelCallback();
+                            } else {
+                                return Premium.twdb_confirmUse(bonus, title, description, price, payload, callback, cancelCallback, buttons);
+                            }
                         }                            
                     } catch (e) {
                         Error.report(e, "manipulate removeVariousPA");
@@ -7210,10 +7210,10 @@
                 
                 var activateFortRecruitment = function () {
                     try {
-												FortBattleWindow.twdb_getInfoArea = FortBattleWindow.getInfoArea;
+                                                                                                FortBattleWindow.twdb_getInfoArea = FortBattleWindow.getInfoArea;
                         FortBattleWindow.getInfoArea = function () {
-														this.preBattle.battleData.canSetPrivilege = true;
-														return FortBattleWindow.twdb_getInfoArea.apply(this, arguments);
+                                                                                                                this.preBattle.battleData.canSetPrivilege = true;
+                                                                                                                return FortBattleWindow.twdb_getInfoArea.apply(this, arguments);
                         }
                     } catch (e) {
                         Error.report(e, "manipulate FortBattleWindow.getInfoArea")
@@ -7221,258 +7221,258 @@
                 };
 
                 var enhanceMarketSellDialog = function() {
-		    if (!w.ItemManager.isLoaded()) {
-			ItemManager.init();	// load as soon as possible, otherwise it will fail the first time...
-		    }
-		    // private variables
-		    var item4sale;
-		    var settings = TWDB.Cache.load("msdsettings");
-		    if (typeof settings != "object" || settings == null) {
-			settings = { cb: {} };
-		    } else if (typeof settings.cb != "object" || settings.cb == null) {
-			settings.cb = {};
-		    }
-		    
+                    if (!w.ItemManager.isLoaded()) {
+                        ItemManager.init();	// load as soon as possible, otherwise it will fail the first time...
+                    }
+                    // private variables
+                    var item4sale;
+                    var settings = TWDB.Cache.load("msdsettings");
+                    if (typeof settings != "object" || settings == null) {
+                        settings = { cb: {} };
+                    } else if (typeof settings.cb != "object" || settings.cb == null) {
+                        settings.cb = {};
+                    }
+                    
                     try {
-			// ========================== backup & wrap Dialog.show function
-			if (!isDefined(west.gui.Dialog.prototype.TWDB_show)) {
-			    west.gui.Dialog.prototype.TWDB_show = west.gui.Dialog.prototype.show;
-			}
-			west.gui.Dialog.prototype.show = function() {
-			    if (this.divMain.attr('id') === 'market_createoffer_window')  {
-				var dlg = this.TWDB_show();
-				w.setTimeout(function(){MarketWindow.TWDB_touchUpSellDialog(dlg)},25);
-				return dlg;
-			    };
-			    return this.TWDB_show();
-			}
-			// ========================== backup & wrap MarketWindow.createMarketOffer function
-			if (!isDefined(MarketWindow.TWDB_createMarketOffer)) {
-			    MarketWindow.TWDB_createMarketOffer = MarketWindow.createMarketOffer;
-			}
-			MarketWindow.createMarketOffer = function(source) {
-			    var item_id = (typeof source == 'number' ? source : $(source).data('itemId'));
-			    if (item_id === undefined) {
-				var itemObj = $(this).data('dnd_droppedObj');
-				item_id = itemObj.data('itemId');
-			    }
-			    item4sale = w.ItemManager.get(item_id);
-			    return MarketWindow.TWDB_createMarketOffer(item_id);
-			}
+                        // ========================== backup & wrap Dialog.show function
+                        if (!isDefined(west.gui.Dialog.prototype.TWDB_show)) {
+                            west.gui.Dialog.prototype.TWDB_show = west.gui.Dialog.prototype.show;
+                        }
+                        west.gui.Dialog.prototype.show = function() {
+                            if (this.divMain.attr('id') === 'market_createoffer_window')  {
+                                var dlg = this.TWDB_show();
+                                w.setTimeout(function(){MarketWindow.TWDB_touchUpSellDialog(dlg)},25);
+                                return dlg;
+                            };
+                            return this.TWDB_show();
+                        }
+                        // ========================== backup & wrap MarketWindow.createMarketOffer function
+                        if (!isDefined(MarketWindow.TWDB_createMarketOffer)) {
+                            MarketWindow.TWDB_createMarketOffer = MarketWindow.createMarketOffer;
+                        }
+                        MarketWindow.createMarketOffer = function(source) {
+                            var item_id = (typeof source == 'number' ? source : $(source).data('itemId'));
+                            if (item_id === undefined) {
+                                var itemObj = $(this).data('dnd_droppedObj');
+                                item_id = itemObj.data('itemId');
+                            }
+                            item4sale = w.ItemManager.get(item_id);
+                            return MarketWindow.TWDB_createMarketOffer(item_id);
+                        }
                     } catch (e) {
                         Error.report(e, "manipulate market sell dialog")
                     }
-			
-		    // ========================== add enhancements
-		    MarketWindow.TWDB_touchUpSellDialog = function(dialog) {
-			if (dialog.divMain.attr('id') !== 'market_createoffer_window')  {
-			    return;
-			};
-			var $dc = $("div.tw2gui_dialog_content", dialog.divMain);
-			// check if Inno's function has added all controls, otherwise retry with a tiny delay
-			if ($dc.find('#auction_item_slot', $dc).html() == "") return w.setTimeout(function(){MarketWindow.TWDB_touchUpSellDialog(dialog)},25);
-			
-			// allows access to windows, eg chat, by making the framefix very tiny
-			$('div.tw2gui_dialog_framefix').css({left:"50%",top:"50%",width:"1px",height:"1px"});
-			
-			// only basic modifications, controls added later
-			$("textarea#auction_description", $dc).css("width","270px").closest("tr").append("<td id='twdb_msd_desc_cc'>");
-			var $t2 = $("table:nth-child(2)", $dc);
-			$("tr:first-child", $t2).after($("<tr>").append('<td>','<td id="twdb_msd_bid_cc" style="min-width: 90px;">','<td>','<td id="twdb_msd_buy_cc" style="min-width: 90px;">'));
-			$("tr:nth-last-child(5) td:nth-child(2) span.tw2gui_textfield", $t2).after('<span id="twdb_msd_mult_cc" title="#MSD_MULTIPLYPRICES#" style="background-image: url(&quot;/images/ranking/town_ranking_icons.png&quot;); display:inline-block; height:16px; width:16px; background-position:0px -80px; cursor:pointer;">&nbsp;</span>');
-			$("tr:last-child td:first-child", $t2).attr("colspan",3).before('<td id="twdb_msd_opt_cc">');
-			
-			var dlgCenter = function() {
-			    dialog.divMain.css({"margin-top": "-" + (dialog.divMain.height() / 2) + "px",
-			    			"margin-left": "-" + (dialog.divMain.width() / 2) + "px"});
-			};
-			
-			var togglePresets = function() {
-			    var val, group = this.groupClass;
-			    $('div.tw2gui_checkbox.'+group).not(this.divMain).removeClass('tw2gui_checkbox_checked');
-			    if (this.isSelected()) {
-				val = this.getValue();
-				this.divMain.next().click();
-			    } else {
-				val = 0;
-			    }
-			    // saving the pair group:val in settings
-			    settings.cb[group] = val;
-			    TWDB.Cache.save("msdsettings", settings);
-			    new UserMessage("#SAVE_SUCCESSFUL#",UserMessage.TYPE_SUCCESS).show();
-			    return this;
-			}
-			
-			var savePresets = function(key, val) {
-			    settings[key] = val;
-			    TWDB.Cache.save("msdsettings", settings);
-			    new UserMessage("#SAVE_SUCCESSFUL#",UserMessage.TYPE_SUCCESS).show();
-			}
-		    
-			var loadPresets = function() {
-			    var group, obj;
-			    for (group in settings.cb) {
-				if (!settings.cb.hasOwnProperty(group)) continue; 
-				$('div.tw2gui_checkbox.'+group).each(function(){
-					obj = $(this).guiElement();
-					if (obj.getValue() === settings.cb[group]) {
-					    obj.setSelected(true, true);
-					    $(this).next().click();
-					}
-				});
-			    }
-			    $("textarea#auction_description", $dc).val(settings.description || "");		  // description
-			    $('span#market_days.tw2gui_combobox', $dc).guiElement().select(settings.duration || 1); // auction length 1-7 days
-			    $('span#market_rights.tw2gui_combobox', $dc).guiElement().select(isDefined(settings.rights) ? settings.rights : 2); // 2: all, 1: alliance, 0:town
-			}
-			
-		    
-			// building controls...
-			$("#twdb_msd_desc_cc", $dc)
-			    .append($('<div class="tw2gui-iconset tw2gui-icon-save" title="#MSD_SAVEDESCRIPT#">')
-					.click(function(){savePresets("description",$("textarea#auction_description", $dc).val());}),          
-				    $('<div class="tw2gui-iconset tw2gui-icon-abort" title="#MSD_DELETEDESCRIPT#">')
-					.click(function(){savePresets("description","");$("textarea#auction_description", $dc).val("")}));
-			    
-			$("#twdb_msd_buy_cc", $dc)
-			    .append(new west.gui.Checkbox("", "twdb_msd_buy_fix", togglePresets).setTitle("#MSD_USEDEFAULT#").setValue(2).divMain)	// (label, groupClass, callback)
-			    .append($('<div class="tw2gui_checkbox" title="#MSD_SETBUYPRICE#">')
-				    .append('<span class="invPopup_buyicon" style="height:20px;">')
-				    .click(function(){
-					$('#market_max_price', $dc).val(item4sale.price || 1).keyup();}))
-			    .append('&nbsp;&nbsp;')
-			    .append(new west.gui.Checkbox("", "twdb_msd_buy_fix", togglePresets).setTitle("#MSD_USEDEFAULT#").setValue(1).divMain)	// (label, groupClass, callback)
-			    .append($('<div class="tw2gui_checkbox" title="#MSD_SETSELLPRICE#">')
-				    .append('<span class="invPopup_sellicon" style="height:20px;">')
-				    .click(function(){
-					$('#market_max_price', $dc).val(item4sale.sell_price || 1).keyup();}));
-			    
-			$("#twdb_msd_bid_cc", $dc)
-			    .append(new west.gui.Checkbox("", "twdb_msd_bid_fix", togglePresets).setTitle("#MSD_USEDEFAULT#").setValue(2).divMain)	// (label, groupClass, callback)
-			    .append($('<div class="tw2gui_checkbox" title="#MSD_SETBUYPRICE#">')
-				    .append('<span class="invPopup_buyicon" style="height:20px;">')
-				    .click(function(){
-					$('#market_min_bid', $dc).val(item4sale.price || 1).keyup();}))
-			    .append('&nbsp;&nbsp;')
-			    .append(new west.gui.Checkbox("", "twdb_msd_bid_fix", togglePresets).setTitle("#MSD_USEDEFAULT#").setValue(1).divMain)	// (label, groupClass, callback)
-			    .append($('<div class="tw2gui_checkbox" title="#MSD_SETSELLPRICE#">')
-				    .append('<span class="invPopup_sellicon" style="height:20px;">')
-				    .click(function(){
-					$('#market_min_bid', $dc).val(item4sale.sell_price || 1).keyup();}));
-			    
-			$("#twdb_msd_mult_cc", $dc).click(function(){
-					var p, n = parseInt($('#market_sell_itemStack', $dc).val(), 10);
-					if (n>0) {
-					    p = parseInt($('#market_min_bid', $dc).val(), 10);
-					    if (p>0) { $('#market_min_bid', $dc).val(n*p).keyup(); }
-					    p = parseInt($('#market_max_price', $dc).val(), 10);
-					    if (p>0) { $('#market_max_price', $dc).val(n*p).keyup(); }
-					};
-			});
-			    
-			$("#twdb_msd_opt_cc", $dc)
-			    .append($('<span class="tw2gui-iconset tw2gui-icon-save" title="#MSD_SAVEOPT#" style="display: inline-block;">')
-					.click(function(){savePresets("duration", parseInt($('#market_days', $dc).data('value'), 10));
-							  savePresets("rights", parseInt($('#market_rights', $dc).data('value'), 10));}),          
-				    $('<span class="tw2gui-iconset tw2gui-icon-abort" title="#MSD_DELETEOPT#" style="display: inline-block;">')
-					.click(function(){savePresets("duration", 1); $('span#market_days.tw2gui_combobox', $dc).guiElement().select(1);
-							  savePresets("rights", 2); $('span#market_rights.tw2gui_combobox', $dc).guiElement().select(2);}));
-			
-			// add icons to sell rights selectbox
-			var rights = $('span#market_rights.tw2gui_combobox', $dc).guiElement().items;
-			if (rights.length === 3) {	// just in case they change anything there..
-			    var ico = ["home","flag","world"];
-			    for (var i=0; i<rights.length; i++) {
-			    	rights[i].node[0].innerHTML = '<span class="tw2gui-iconset tw2gui-icon-' + ico[rights[i].value] + '" style="display: inline-block;position: relative;top: 4px;"></span>&nbsp;' + rights[i].node[0].innerHTML;
-				};
-			};
-			
-			// add toggle function for "other offers" if any
-			var $head = $('h4', $dc),
-			    $table = $('table#mps_otheroffers', $dc);
-			if ($('tr', $table).length > 2 || $('tr:nth-child(2) > td', $table).attr('colspan') != 4) {
-			    $head.html($head.html() + '&nbsp;(' + ($('tr', $table).length-1) + ')')
-				 .click(function() { $table.toggle(); dlgCenter(); })
-				 .css({"cursor": "pointer"});
-			} else {
-			    $head.html($head.html() + '&nbsp;(0)');
-			    $table.hide();
-			};
-			
-			dlgCenter();
-			loadPresets();
-		    };
+                        
+                    // ========================== add enhancements
+                    MarketWindow.TWDB_touchUpSellDialog = function(dialog) {
+                        if (dialog.divMain.attr('id') !== 'market_createoffer_window')  {
+                            return;
+                        };
+                        var $dc = $("div.tw2gui_dialog_content", dialog.divMain);
+                        // check if Inno's function has added all controls, otherwise retry with a tiny delay
+                        if ($dc.find('#auction_item_slot', $dc).html() == "") return w.setTimeout(function(){MarketWindow.TWDB_touchUpSellDialog(dialog)},25);
+                        
+                        // allows access to windows, eg chat, by making the framefix very tiny
+                        $('div.tw2gui_dialog_framefix').css({left:"50%",top:"50%",width:"1px",height:"1px"});
+                        
+                        // only basic modifications, controls added later
+                        $("textarea#auction_description", $dc).css("width","270px").closest("tr").append("<td id='twdb_msd_desc_cc'>");
+                        var $t2 = $("table:nth-child(2)", $dc);
+                        $("tr:first-child", $t2).after($("<tr>").append('<td>','<td id="twdb_msd_bid_cc" style="min-width: 90px;">','<td>','<td id="twdb_msd_buy_cc" style="min-width: 90px;">'));
+                        $("tr:nth-last-child(5) td:nth-child(2) span.tw2gui_textfield", $t2).after('<span id="twdb_msd_mult_cc" title="#MSD_MULTIPLYPRICES#" style="background-image: url(&quot;/images/ranking/town_ranking_icons.png&quot;); display:inline-block; height:16px; width:16px; background-position:0px -80px; cursor:pointer;">&nbsp;</span>');
+                        $("tr:last-child td:first-child", $t2).attr("colspan",3).before('<td id="twdb_msd_opt_cc">');
+                        
+                        var dlgCenter = function() {
+                            dialog.divMain.css({"margin-top": "-" + (dialog.divMain.height() / 2) + "px",
+                                                "margin-left": "-" + (dialog.divMain.width() / 2) + "px"});
+                        };
+                        
+                        var togglePresets = function() {
+                            var val, group = this.groupClass;
+                            $('div.tw2gui_checkbox.'+group).not(this.divMain).removeClass('tw2gui_checkbox_checked');
+                            if (this.isSelected()) {
+                                val = this.getValue();
+                                this.divMain.next().click();
+                            } else {
+                                val = 0;
+                            }
+                            // saving the pair group:val in settings
+                            settings.cb[group] = val;
+                            TWDB.Cache.save("msdsettings", settings);
+                            new UserMessage("#SAVE_SUCCESSFUL#",UserMessage.TYPE_SUCCESS).show();
+                            return this;
+                        }
+                        
+                        var savePresets = function(key, val) {
+                            settings[key] = val;
+                            TWDB.Cache.save("msdsettings", settings);
+                            new UserMessage("#SAVE_SUCCESSFUL#",UserMessage.TYPE_SUCCESS).show();
+                        }
+                    
+                        var loadPresets = function() {
+                            var group, obj;
+                            for (group in settings.cb) {
+                                if (!settings.cb.hasOwnProperty(group)) continue; 
+                                $('div.tw2gui_checkbox.'+group).each(function(){
+                                        obj = $(this).guiElement();
+                                        if (obj.getValue() === settings.cb[group]) {
+                                            obj.setSelected(true, true);
+                                            $(this).next().click();
+                                        }
+                                });
+                            }
+                            $("textarea#auction_description", $dc).val(settings.description || "");		  // description
+                            $('span#market_days.tw2gui_combobox', $dc).guiElement().select(settings.duration || 1); // auction length 1-7 days
+                            $('span#market_rights.tw2gui_combobox', $dc).guiElement().select(isDefined(settings.rights) ? settings.rights : 2); // 2: all, 1: alliance, 0:town
+                        }
+                        
+                    
+                        // building controls...
+                        $("#twdb_msd_desc_cc", $dc)
+                            .append($('<div class="tw2gui-iconset tw2gui-icon-save" title="#MSD_SAVEDESCRIPT#">')
+                                        .click(function(){savePresets("description",$("textarea#auction_description", $dc).val());}),          
+                                    $('<div class="tw2gui-iconset tw2gui-icon-abort" title="#MSD_DELETEDESCRIPT#">')
+                                        .click(function(){savePresets("description","");$("textarea#auction_description", $dc).val("")}));
+                            
+                        $("#twdb_msd_buy_cc", $dc)
+                            .append(new west.gui.Checkbox("", "twdb_msd_buy_fix", togglePresets).setTitle("#MSD_USEDEFAULT#").setValue(2).divMain)	// (label, groupClass, callback)
+                            .append($('<div class="tw2gui_checkbox" title="#MSD_SETBUYPRICE#">')
+                                    .append('<span class="invPopup_buyicon" style="height:20px;">')
+                                    .click(function(){
+                                        $('#market_max_price', $dc).val(item4sale.price || 1).keyup();}))
+                            .append('&nbsp;&nbsp;')
+                            .append(new west.gui.Checkbox("", "twdb_msd_buy_fix", togglePresets).setTitle("#MSD_USEDEFAULT#").setValue(1).divMain)	// (label, groupClass, callback)
+                            .append($('<div class="tw2gui_checkbox" title="#MSD_SETSELLPRICE#">')
+                                    .append('<span class="invPopup_sellicon" style="height:20px;">')
+                                    .click(function(){
+                                        $('#market_max_price', $dc).val(item4sale.sell_price || 1).keyup();}));
+                            
+                        $("#twdb_msd_bid_cc", $dc)
+                            .append(new west.gui.Checkbox("", "twdb_msd_bid_fix", togglePresets).setTitle("#MSD_USEDEFAULT#").setValue(2).divMain)	// (label, groupClass, callback)
+                            .append($('<div class="tw2gui_checkbox" title="#MSD_SETBUYPRICE#">')
+                                    .append('<span class="invPopup_buyicon" style="height:20px;">')
+                                    .click(function(){
+                                        $('#market_min_bid', $dc).val(item4sale.price || 1).keyup();}))
+                            .append('&nbsp;&nbsp;')
+                            .append(new west.gui.Checkbox("", "twdb_msd_bid_fix", togglePresets).setTitle("#MSD_USEDEFAULT#").setValue(1).divMain)	// (label, groupClass, callback)
+                            .append($('<div class="tw2gui_checkbox" title="#MSD_SETSELLPRICE#">')
+                                    .append('<span class="invPopup_sellicon" style="height:20px;">')
+                                    .click(function(){
+                                        $('#market_min_bid', $dc).val(item4sale.sell_price || 1).keyup();}));
+                            
+                        $("#twdb_msd_mult_cc", $dc).click(function(){
+                                        var p, n = parseInt($('#market_sell_itemStack', $dc).val(), 10);
+                                        if (n>0) {
+                                            p = parseInt($('#market_min_bid', $dc).val(), 10);
+                                            if (p>0) { $('#market_min_bid', $dc).val(n*p).keyup(); }
+                                            p = parseInt($('#market_max_price', $dc).val(), 10);
+                                            if (p>0) { $('#market_max_price', $dc).val(n*p).keyup(); }
+                                        };
+                        });
+                            
+                        $("#twdb_msd_opt_cc", $dc)
+                            .append($('<span class="tw2gui-iconset tw2gui-icon-save" title="#MSD_SAVEOPT#" style="display: inline-block;">')
+                                        .click(function(){savePresets("duration", parseInt($('#market_days', $dc).data('value'), 10));
+                                                          savePresets("rights", parseInt($('#market_rights', $dc).data('value'), 10));}),          
+                                    $('<span class="tw2gui-iconset tw2gui-icon-abort" title="#MSD_DELETEOPT#" style="display: inline-block;">')
+                                        .click(function(){savePresets("duration", 1); $('span#market_days.tw2gui_combobox', $dc).guiElement().select(1);
+                                                          savePresets("rights", 2); $('span#market_rights.tw2gui_combobox', $dc).guiElement().select(2);}));
+                        
+                        // add icons to sell rights selectbox
+                        var rights = $('span#market_rights.tw2gui_combobox', $dc).guiElement().items;
+                        if (rights.length === 3) {	// just in case they change anything there..
+                            var ico = ["home","flag","world"];
+                            for (var i=0; i<rights.length; i++) {
+                                rights[i].node[0].innerHTML = '<span class="tw2gui-iconset tw2gui-icon-' + ico[rights[i].value] + '" style="display: inline-block;position: relative;top: 4px;"></span>&nbsp;' + rights[i].node[0].innerHTML;
+                                };
+                        };
+                        
+                        // add toggle function for "other offers" if any
+                        var $head = $('h4', $dc),
+                            $table = $('table#mps_otheroffers', $dc);
+                        if ($('tr', $table).length > 2 || $('tr:nth-child(2) > td', $table).attr('colspan') != 4) {
+                            $head.html($head.html() + '&nbsp;(' + ($('tr', $table).length-1) + ')')
+                                 .click(function() { $table.toggle(); dlgCenter(); })
+                                 .css({"cursor": "pointer"});
+                        } else {
+                            $head.html($head.html() + '&nbsp;(0)');
+                            $table.hide();
+                        };
+                        
+                        dlgCenter();
+                        loadPresets();
+                    };
                 };
                 
-		var weeklyCrafting = function() {
-		    if (w.Character.professionId && w.Character.professionSkill > 599) {
-			
-			var weeklyCraftingNotice = function (id) {
-			    var entry = new OnGoingEntry();
-			    var result = ItemManager.get((ItemManager.get(id).craftitem));
-			    var notice = "<div style='text-align:center;'>#CRAFTAVAILABLE#<br />"
-					+ '<div class="item  item_inventory" style="display:inline-block;float:none;"><img class="tw_item item_inventory_img" src="' + result.image + '"></div><br />'
-					+ result.name + "</div>";
-			    entry.init("", function() {CharacterWindow.open("crafting");TWDB.Cache.save('craftingCheck', {found: false, date: null});}, 11);
-			    entry.setTooltip(notice);
-			    entry.setImageClass("work");
-			    entry.highlightBorder();
-			    WestUi.NotiBar.add(entry);
-			    TitleTicker.setNotifyMessage("#CRAFTING#");
-			    AudioController.play(AudioController.SOUND_NEWMSG);
-			};	// ## weeklyCraftingNotice()
-			
-			var weeklyCraftingCheck = function () {
-			    var craftingCheck = TWDB.Cache.load("craftingCheck") || {found: false, date: null};
-			    if (!craftingCheck.found) {
-				return weeklyCraftingGet();
-			    }
-			    var timediff = (new Date(craftingCheck.date)).getTime() - (new ServerDate).getTime();
-			    if (timediff < 0) {		// ready to craft
-				return weeklyCraftingNotice(craftingCheck.found);
-			    } else if (timediff < 86400000) {	// if less than 24 hrs
-				if (timediff < 180000) {	// if less than 3 mins	=>	set direct timer
-				    w.setTimeout(function(){weeklyCraftingNotice(craftingCheck.found)}, timediff);
-				} else {	// 3m < t < 24h		=>	check again in t/2 since JS timers tend to go askew
-				    w.setTimeout(function(){weeklyCraftingCheck()}, parseInt(timediff/2));
-				}
-			    } // else, if > 24hrs, do nothing. You can't stay logged in that long ^^
-			}	// ##  weeklyCraftingCheck
-			
-			var weeklyCraftingGet = function () {
-			    Ajax.remoteCall('crafting', '', {}, function(json) {
-				if (json.error) { return new UserMessage(json.msg).show(); }
-				if (json.hasOwnProperty('recipes_content') && json.recipes_content.length > 0) {
-				    var i, timed_recipe = ({1:20099,2:20104,3:20114,4:20109})[w.Character.professionId];
-				    for (i = 0; i < json.recipes_content.length; i++) {
-					if (json.recipes_content[i].item_id == timed_recipe) {
-					    if (json.recipes_content[i].last_craft) {
-						TWDB.Cache.save('craftingCheck', {
-						    found: timed_recipe,
-						    date:  new Date((new ServerDate).getTime() + parseInt(json.recipes_content[i].last_craft * 1e3)),
-						    });
-					    } else {
-						TWDB.Cache.save('craftingCheck', {
-						    found: timed_recipe,
-						    date:  new Date(null),
-						    });
-					    }
-					return weeklyCraftingCheck();
-					}
-				    }
-				}
-				TWDB.Cache.save('craftingCheck', {
-				    found: false,
-				    date:  null,
-				    });
-				    /**TODO: add question if feature should be disabled **/
-			    });
-			}	// ##  weeklyCraftingGet
-		
-			weeklyCraftingCheck();
-		    }
-		};
-		    
+                var weeklyCrafting = function() {
+                    if (w.Character.professionId && w.Character.professionSkill > 599) {
+                        
+                        var weeklyCraftingNotice = function (id) {
+                            var entry = new OnGoingEntry();
+                            var result = ItemManager.get((ItemManager.get(id).craftitem));
+                            var notice = "<div style='text-align:center;'>#CRAFTAVAILABLE#<br />"
+                                        + '<div class="item  item_inventory" style="display:inline-block;float:none;"><img class="tw_item item_inventory_img" src="' + result.image + '"></div><br />'
+                                        + result.name + "</div>";
+                            entry.init("", function() {CharacterWindow.open("crafting");TWDB.Cache.save('craftingCheck', {found: false, date: null});}, 11);
+                            entry.setTooltip(notice);
+                            entry.setImageClass("work");
+                            entry.highlightBorder();
+                            WestUi.NotiBar.add(entry);
+                            TitleTicker.setNotifyMessage("#CRAFTING#");
+                            AudioController.play(AudioController.SOUND_NEWMSG);
+                        };	// ## weeklyCraftingNotice()
+                        
+                        var weeklyCraftingCheck = function () {
+                            var craftingCheck = TWDB.Cache.load("craftingCheck") || {found: false, date: null};
+                            if (!craftingCheck.found) {
+                                return weeklyCraftingGet();
+                            }
+                            var timediff = (new Date(craftingCheck.date)).getTime() - (new ServerDate).getTime();
+                            if (timediff < 0) {		// ready to craft
+                                return weeklyCraftingNotice(craftingCheck.found);
+                            } else if (timediff < 86400000) {	// if less than 24 hrs
+                                if (timediff < 180000) {	// if less than 3 mins	=>	set direct timer
+                                    w.setTimeout(function(){weeklyCraftingNotice(craftingCheck.found)}, timediff);
+                                } else {	// 3m < t < 24h		=>	check again in t/2 since JS timers tend to go askew
+                                    w.setTimeout(function(){weeklyCraftingCheck()}, parseInt(timediff/2));
+                                }
+                            } // else, if > 24hrs, do nothing. You can't stay logged in that long ^^
+                        }	// ##  weeklyCraftingCheck
+                        
+                        var weeklyCraftingGet = function () {
+                            Ajax.remoteCall('crafting', '', {}, function(json) {
+                                if (json.error) { return new UserMessage(json.msg).show(); }
+                                if (json.hasOwnProperty('recipes_content') && json.recipes_content.length > 0) {
+                                    var i, timed_recipe = ({1:20099,2:20104,3:20114,4:20109})[w.Character.professionId];
+                                    for (i = 0; i < json.recipes_content.length; i++) {
+                                        if (json.recipes_content[i].item_id == timed_recipe) {
+                                            if (json.recipes_content[i].last_craft) {
+                                                TWDB.Cache.save('craftingCheck', {
+                                                    found: timed_recipe,
+                                                    date:  new Date((new ServerDate).getTime() + parseInt(json.recipes_content[i].last_craft * 1e3)),
+                                                    });
+                                            } else {
+                                                TWDB.Cache.save('craftingCheck', {
+                                                    found: timed_recipe,
+                                                    date:  new Date(null),
+                                                    });
+                                            }
+                                        return weeklyCraftingCheck();
+                                        }
+                                    }
+                                }
+                                TWDB.Cache.save('craftingCheck', {
+                                    found: false,
+                                    date:  null,
+                                    });
+                                    /**TODO: add question if feature should be disabled **/
+                            });
+                        }	// ##  weeklyCraftingGet
+                
+                        weeklyCraftingCheck();
+                    }
+                };
+                    
                 return _self;
             }($);
             Debugger.Snippets = Snippets;
@@ -7501,185 +7501,185 @@
                 var _position = [];
                 var _reportreceived = [];
                 
-		/**
-		 * Adds a new image button to the right of the character / avatar GUI element.
-		 *
-		 * @param {String} image URI of the button image (50x25px, right half = highlight state).
-		 * @return {jQuery} The new button.
-		 */
-		_self.CharacterButton = (function ($) {
-		    var _that = {};
-		    var count = 0;
-		    var $container = null;
-		    
-		    _that.add = function(image) {
-			if (count == 0) {
-			    var bgCss = "div#twdb_characbut {width:36px; height:35px; position:absolute; left:141px; top:131px; border-bottom-left-radius:8px;"
-				      + "background:url(" + Game.cdnURL + "/images/interface/character/character.png?3) no-repeat -141px -105px transparent;}";
-				    TWDB.Util.addCss(bgCss);
-			    $container = $('<div id="twdb_characbut" />');
-			    $('#ui_character_container').prepend($container);
-			};
-			count++;
-			$container.css({ 'height': (10 + 26*count) + 'px',
-					'background-position': '-141px ' + (26*count - 131) + 'px' });
-			var $button = $('<div class="char_links" style="top:' + (6 + (count-1)*26) + 'px;left:6px;background:url(' + image + ')no-repeat 0px 0px transparent;"/>');
-			$button.hover(function() { $(this).css('background-position','-25px 0px'); },	// mouse over
-				      function() { $(this).css('background-position','0px 0px'); });	// mouse out
-			$container.append($button);
-			return $button;
+                /**
+                 * Adds a new image button to the right of the character / avatar GUI element.
+                 *
+                 * @param {String} image URI of the button image (50x25px, right half = highlight state).
+                 * @return {jQuery} The new button.
+                 */
+                _self.CharacterButton = (function ($) {
+                    var _that = {};
+                    var count = 0;
+                    var $container = null;
+                    
+                    _that.add = function(image) {
+                        if (count == 0) {
+                            var bgCss = "div#twdb_characbut {width:36px; height:35px; position:absolute; left:141px; top:131px; border-bottom-left-radius:8px;"
+                                      + "background:url(" + Game.cdnURL + "/images/interface/character/character.png?3) no-repeat -141px -105px transparent;}";
+                                    TWDB.Util.addCss(bgCss);
+                            $container = $('<div id="twdb_characbut" />');
+                            $('#ui_character_container').prepend($container);
+                        };
+                        count++;
+                        $container.css({ 'height': (10 + 26*count) + 'px',
+                                        'background-position': '-141px ' + (26*count - 131) + 'px' });
+                        var $button = $('<div class="char_links" style="top:' + (6 + (count-1)*26) + 'px;left:6px;background:url(' + image + ')no-repeat 0px 0px transparent;"/>');
+                        $button.hover(function() { $(this).css('background-position','-25px 0px'); },	// mouse over
+                                      function() { $(this).css('background-position','0px 0px'); });	// mouse out
+                        $container.append($button);
+                        return $button;
                     };
                     return _that;
                 })($);
                 
                 /* ============================== Chat ============================== */
                 _self.ChatLayout = (function($) {
-		    var callbacks = [];
-		    return function(callback) {
-			if (callbacks.length == 0) {
-				try {
-				    save["window.Chat.Layout.Tab.prototype.getMainDiv"] = window.Chat.Layout.Tab.prototype.getMainDiv;
-				    window.Chat.Layout.Tab.prototype.getMainDiv = function() {
-					for (var i=0; i<callbacks.length; i++) {
-					    try { callbacks[i](this); }
-					    catch (e) { Error.report(e, 'callbacks on Chat Layout'); };
-					};
-					return this.mainDiv;
-				    };
-				} catch(e) {
-				    Error.report(e, 'manipulate Chat Layout');
-				    window.Chat.Layout.Tab.prototype.getMainDiv = save["window.Chat.Layout.Tab.prototype.getMainDiv"];
-				};
-			};
-			callbacks.push(callback);	// this line was accidentially in the if-block above, allowing only one callback. Error didn't show up since we only have on callback by now.
-		    };
+                    var callbacks = [];
+                    return function(callback) {
+                        if (callbacks.length == 0) {
+                                try {
+                                    save["window.Chat.Layout.Tab.prototype.getMainDiv"] = window.Chat.Layout.Tab.prototype.getMainDiv;
+                                    window.Chat.Layout.Tab.prototype.getMainDiv = function() {
+                                        for (var i=0; i<callbacks.length; i++) {
+                                            try { callbacks[i](this); }
+                                            catch (e) { Error.report(e, 'callbacks on Chat Layout'); };
+                                        };
+                                        return this.mainDiv;
+                                    };
+                                } catch(e) {
+                                    Error.report(e, 'manipulate Chat Layout');
+                                    window.Chat.Layout.Tab.prototype.getMainDiv = save["window.Chat.Layout.Tab.prototype.getMainDiv"];
+                                };
+                        };
+                        callbacks.push(callback);	// this line was accidentially in the if-block above, allowing only one callback. Error didn't show up since we only have on callback by now.
+                    };
                 })($);
                 
                 _self.ChatSend = (function($) {
-		    var callbacks = [];
-		    return function(callback) {
-			if (callbacks.length == 0) {
+                    var callbacks = [];
+                    return function(callback) {
+                        if (callbacks.length == 0) {
                             try {
                                 window.Chat.Layout.Tab.prototype.twdb_send = window.Chat.Layout.Tab.prototype.send;
                                 window.Chat.Layout.Tab.prototype.send = function() {
                                     for (var i=0; i<callbacks.length; i++) {
                                         try { callbacks[i](this); }
                                         catch (e) { Error.report(e, 'callbacks on Chat Send'); };
-				    };
-				    this.twdb_send();
-				};
+                                    };
+                                    this.twdb_send();
+                                };
                             } catch (e) {
                                 Error.report(e, "manipulate Chat Send");
                                 window.Chat.Layout.Tab.prototype.send = window.Chat.Layout.Tab.prototype.twdb_send;
                             };
                         };
-			callbacks.push(callback);	// same as above
+                        callbacks.push(callback);	// same as above
                     };
                 })($);
                 
                 /* ============================== Market ============================== */
                 _self.MarketOfferTable = (function($) {
-		    var callbacks = [];
-		    return function(callback) {
-			if (callbacks.length == 0) {
-				try {
-				    save["MarketWindow.Offer.updateTable"] = MarketWindow.Offer.updateTable;
-				    MarketWindow.Offer.updateTable = function(data) {
-					save["MarketWindow.Offer.updateTable"](data);
-					for (var i=0; i<callbacks.length; i++) {
-					    try { callbacks[i](data); }
-					    catch (e) { Error.report(e, 'callbacks MarketOfferTable'); };
-					};
-				    };
-				} catch(e) {
-				    Error.report(e, 'manipulate MarketOfferTable');
-				    MarketWindow.Offer.updateTable = save["MarketWindow.Offer.updateTable"];
-				};
-			};
-			callbacks.push(callback);	// same as above
-		    };
+                    var callbacks = [];
+                    return function(callback) {
+                        if (callbacks.length == 0) {
+                                try {
+                                    save["MarketWindow.Offer.updateTable"] = MarketWindow.Offer.updateTable;
+                                    MarketWindow.Offer.updateTable = function(data) {
+                                        save["MarketWindow.Offer.updateTable"](data);
+                                        for (var i=0; i<callbacks.length; i++) {
+                                            try { callbacks[i](data); }
+                                            catch (e) { Error.report(e, 'callbacks MarketOfferTable'); };
+                                        };
+                                    };
+                                } catch(e) {
+                                    Error.report(e, 'manipulate MarketOfferTable');
+                                    MarketWindow.Offer.updateTable = save["MarketWindow.Offer.updateTable"];
+                                };
+                        };
+                        callbacks.push(callback);	// same as above
+                    };
                 })($);
                 
                 _self.MarketWatchlistTable = (function($) {
-		    var callbacks = [];
-		    return function(callback) {
-			if (callbacks.length == 0) {
-				try {
-				    save["MarketWindow.Watchlist.updateTable"] = MarketWindow.Watchlist.updateTable;
-				    MarketWindow.Watchlist.updateTable = function(data) {
-					save["MarketWindow.Watchlist.updateTable"](data);
-					for (var i=0; i<callbacks.length; i++) {
-					    try { callbacks[i](data); }
-					    catch (e) { Error.report(e, 'callbacks MarketWatchlistTable'); };
-					};
-				    };
-				} catch(e) {
-				    Error.report(e, 'manipulate MarketWatchlistTable');
-				    MarketWindow.Watchlist.updateTable = save["MarketWindow.Watchlist.updateTable"];
-				};
-			};
-			callbacks.push(callback);	// same as above
-		    };
+                    var callbacks = [];
+                    return function(callback) {
+                        if (callbacks.length == 0) {
+                                try {
+                                    save["MarketWindow.Watchlist.updateTable"] = MarketWindow.Watchlist.updateTable;
+                                    MarketWindow.Watchlist.updateTable = function(data) {
+                                        save["MarketWindow.Watchlist.updateTable"](data);
+                                        for (var i=0; i<callbacks.length; i++) {
+                                            try { callbacks[i](data); }
+                                            catch (e) { Error.report(e, 'callbacks MarketWatchlistTable'); };
+                                        };
+                                    };
+                                } catch(e) {
+                                    Error.report(e, 'manipulate MarketWatchlistTable');
+                                    MarketWindow.Watchlist.updateTable = save["MarketWindow.Watchlist.updateTable"];
+                                };
+                        };
+                        callbacks.push(callback);	// same as above
+                    };
                 })($);
                 
                 _self.MarketWhatIsHotTable = (function($) {
-		    var callbacks = [];
-		    return function(callback) {
-			if (callbacks.length == 0) {
-				try {
-				    save["MarketWindow.WhatIsHot.updateTable"] = MarketWindow.WhatIsHot.updateTable;
-				    MarketWindow.WhatIsHot.updateTable = function(data) {
-					save["MarketWindow.WhatIsHot.updateTable"](data);
-					for (var i=0; i<callbacks.length; i++) {
-					    try { callbacks[i](data); }
-					    catch (e) { Error.report(e, 'callbacks MarketWhatIsHotTable'); };
-					};
-				    };
-				} catch(e) {
-				    Error.report(e, 'manipulate MarketWhatIsHotTable');
-				    MarketWindow.WhatIsHot.updateTable = save["MarketWindow.WhatIsHot.updateTable"];
-				};
-			};
-			callbacks.push(callback);
-		    };
+                    var callbacks = [];
+                    return function(callback) {
+                        if (callbacks.length == 0) {
+                                try {
+                                    save["MarketWindow.WhatIsHot.updateTable"] = MarketWindow.WhatIsHot.updateTable;
+                                    MarketWindow.WhatIsHot.updateTable = function(data) {
+                                        save["MarketWindow.WhatIsHot.updateTable"](data);
+                                        for (var i=0; i<callbacks.length; i++) {
+                                            try { callbacks[i](data); }
+                                            catch (e) { Error.report(e, 'callbacks MarketWhatIsHotTable'); };
+                                        };
+                                    };
+                                } catch(e) {
+                                    Error.report(e, 'manipulate MarketWhatIsHotTable');
+                                    MarketWindow.WhatIsHot.updateTable = save["MarketWindow.WhatIsHot.updateTable"];
+                                };
+                        };
+                        callbacks.push(callback);
+                    };
                 })($);
                 
                 /* ============================== DuelMotivation ============================== */
                 _self.injectSetDuelMotivation = (function($) {
-		    var callbacks = [];
-		    return function(callback) {
-			if (callbacks.length == 0) {
-			    try {
-				Character.twdb_setDuelMotivation = Character.setDuelMotivation;
-				Character.setDuelMotivation = function(data) {
-				    this.twdb_setDuelMotivation(data);
-				    for (var i=0; i<callbacks.length; i++) {
-					try { callbacks[i](data); }
-					catch (e) { Error.report(e, 'callbacks setDuelMotivation'); };
-				    };
-				};
-			    } catch(e) {
-				Error.report(e, 'manipulate setDuelMotivation');
-				Character.setDuelMotivation = twdb_Character.setDuelMotivation;
-			    };
-			};
-			callbacks.push(callback);
-		    };
+                    var callbacks = [];
+                    return function(callback) {
+                        if (callbacks.length == 0) {
+                            try {
+                                Character.twdb_setDuelMotivation = Character.setDuelMotivation;
+                                Character.setDuelMotivation = function(data) {
+                                    this.twdb_setDuelMotivation(data);
+                                    for (var i=0; i<callbacks.length; i++) {
+                                        try { callbacks[i](data); }
+                                        catch (e) { Error.report(e, 'callbacks setDuelMotivation'); };
+                                    };
+                                };
+                            } catch(e) {
+                                Error.report(e, 'manipulate setDuelMotivation');
+                                Character.setDuelMotivation = twdb_Character.setDuelMotivation;
+                            };
+                        };
+                        callbacks.push(callback);
+                    };
                 })($);
                 
                 
                 /* ============================== ItemUse ============================== */
                 _self.ItemUse = (function($) {
-		    var callbacks = [];
-		    return function(callback) {
-			if (callbacks.length == 0) {
-			    ItemUse.twdb = function (item, data) {
-				for (var i=0; i < callbacks.length; i++) {
-				    try { callbacks[i](item, data); }
-				    catch(e) { Error.report(e, 'callbacks on ItemUse'); };
-				};
-			    };
-			    
+                    var callbacks = [];
+                    return function(callback) {
+                        if (callbacks.length == 0) {
+                            ItemUse.twdb = function (item, data) {
+                                for (var i=0; i < callbacks.length; i++) {
+                                    try { callbacks[i](item, data); }
+                                    catch(e) { Error.report(e, 'callbacks on ItemUse'); };
+                                };
+                            };
+                            
                             save["ItemUse.doIt"] = ItemUse.doIt;
                             try {
                                 var str = ItemUse.doIt.toString();
@@ -7726,7 +7726,7 @@
                     try {
                         west.game.shop.item.view.prototype["TWDB" + name] = function(item) {
                             try { return callback(item); }
-			    catch (e) { Error.report(e, "callback on injectTrader, function: " + name); return ""; };
+                            catch (e) { Error.report(e, "callback on injectTrader, function: " + name); return ""; };
                         }
                     } catch (e) {
                         Error.report(e, "injectTrader, creating callback function: " + name)
@@ -9141,48 +9141,41 @@
                     /**TODO: remove if Inno adds listener - asked Diggo on 9.2.2015 **/
                     // Check for a listener & add it if neccessary:
                     if (Character.setDuelProtection.toString().search('duelprotection_changed') == -1) {
-			Character.twdb_setDuelProtection = Character.setDuelProtection;
-			Character.setDuelProtection = function (dp) {
-			    var changed = (dp != Character.duelProtection);
-			    Character.twdb_setDuelProtection.apply(this, arguments);
-			    if (changed) { EventHandler.signal('duelprotection_changed', []); }
-			};
-		    }	// Check for listener ### end
+                        Character.twdb_setDuelProtection = Character.setDuelProtection;
+                        Character.setDuelProtection = function (dp) {
+                            if (dp === 0) { dp = 1 };        // workaround for Inno's bug - duel protection is set to null if dp==0; changing it to 1 has no negative effects since it's a timestamp and it's far enough in the past
+                            var changed = (dp != Character.duelProtection);
+                            Character.twdb_setDuelProtection.apply(this, arguments);
+                            if (changed) { EventHandler.signal('duelprotection_changed', []); }
+                        };
+                    } else if (TWDB.script.check.search('dev_version')) {
+                        console.log('setDuelProtection changed');
+                        new UserMessage('setDuelProtection changed').show();
+                    }   // Check for listener ### end
                     
-		    // now for the real stuff...
+                    // now for the real stuff...
                     var duelmotCss = "div#ui_character_container .twdb_charcont_ext {background-image:"+$('#ui_character_container').css('background-image')+"; background-repeat:no-repeat; background-position:bottom left; width:143px; height:15px; position:absolute; left:0px; top:173px; padding-top:2px;}"
-                    		   + "div#ui_character_container #duelmot_bar {background-image:url("+TWDB.images.duelMotBar+"); background-repeat:no-repeat; background-position:0px -26px; top:2px; left:3px; height:13px; width:137px; position:absolute; color:#FFF; text-align:center; font-size:8pt; line-height:12px; font-weight:bold; text-shadow: 1px 0px 1px #000, -1px 0px 1px #000;}"
-                    		   + "div#ui_character_container .duelmot_ko {background-position:0px -13px!important;}"
-                    		   + "div#ui_character_container .duelmot_protect {background-position:0px 0px!important;}"
-                    		   + "div#ui_character_container .duelmot_warn {background-position:0px 0px; top:2px; left:3px; opacity:0;}"
-                    		   + "div#ui_character_container .duelmot_dim {opacity:0.6;}";
+                                   + "div#ui_character_container #duelmot_bar {background-image:url("+TWDB.images.duelMotBar+"); background-repeat:no-repeat; background-position:0px -26px; top:2px; left:3px; height:13px; width:137px; position:absolute; color:#FFF; text-align:center; font-size:8pt; line-height:12px; font-weight:bold; text-shadow: 1px 0px 1px #000, -1px 0px 1px #000;}"
+                                   + "div#ui_character_container .duelmot_ko {background-position:0px -13px!important;}"
+                                   + "div#ui_character_container .duelmot_protect {background-position:0px 0px!important;}"
+                                   + "div#ui_character_container .duelmot_warn {background-position:0px 0px; top:2px; left:3px; opacity:0;}"
+                                   + "div#ui_character_container .duelmot_dim {opacity:0.6;}";
                     TWDB.Util.addCss(duelmotCss, "duelmot");
                     
                     oldSystem = (Game.duelProtectionEarly === Game.duelProtectionHours);
-		    
+                    
                     addBar();		    
-		    EventHandler.listen('duelprotection_changed', function () { checkKO(); });
-		    EventHandler.listen('duelmotivation_changed', function () { checkMoti(); });
-		    checkKO();
-		    checkMoti(true);
-		    if (Character.homeTown.town_id !== 0) {
-		    	// init duel motivation
-			Ajax.remoteCallMode("building_saloon", "get_data", {town_id: Character.homeTown.town_id}, function(data) {
-			    if (data.error) { return new UserMessage(data.msg).show(); }
-			    Character.setDuelMotivation(data.motivation);});
-			
-			/** TODO: move to GameInject if needed **/
-			/*
-			if (!oldSystem) {	// wrapper for catching protection-ending duels
-			    SaloonWindow.twdb_startDuel = SaloonWindow.startDuel;
-			    SaloonWindow.startDuel = function(playerId, allianceId, skipAllianceCheck, skipProtectionCheck) {
-				SaloonWindow.twdb_startDuel.apply(this, arguments);
-				if (skipProtectionCheck === true) { EventHandler.signal('duelprotection_canceled', []); }
-			    };
-			}
-			*/
-		    }
-		    loader.ready = true;
+                    EventHandler.listen('duelprotection_changed', function () { checkKO(); });
+                    EventHandler.listen('duelmotivation_changed', function () { checkMoti(); });
+                    checkKO();
+                    checkMoti(true);
+                    if (Character.homeTown.town_id !== 0) {
+                        // init duel motivation
+                        Ajax.remoteCallMode("building_saloon", "get_data", {town_id: Character.homeTown.town_id}, function(data) {
+                            if (data.error) { return new UserMessage(data.msg).show(); }
+                            Character.setDuelMotivation(data.motivation);});
+                    }
+                    loader.ready = true;
                 };
 
                 var addBar = function () {
@@ -9194,36 +9187,40 @@
                 };
 
                 var setBar = function (text, popup, style, fade, callback) {
-		if (text === undefined) { text = ''; }
-		if (popup === undefined) { popup = false; }
-		if (style === undefined) { style = false; }
-		if (fade === undefined) { fade = false; }
+                if (text === undefined) { text = ''; }
+                if (popup === undefined) { popup = false; }
+                if (style === undefined) { style = false; }
+                if (fade === undefined) { fade = false; }
                     if (!fade) {
-                    	if (typeof style === 'string') {bar.attr("class", style);}
-                    	bar.text(text);
-                    	if (typeof popup === 'string') {warnBar.addMousePopup(popup);}
+                        if (typeof style === 'string') {bar.attr("class", style);}
+                        bar.text(text);
+                        if (typeof popup === 'string') {warnBar.addMousePopup(popup);}
                     } else {
-                    	warnBar.fadeTo(400, 1, function () {
-			    setBar(text, popup, style, false);
-			    if (callback) { callback(); }
-			    warnBar.fadeTo(400, 0);});
-		    }
-		};
-                    	
+                        warnBar.fadeTo(400, 1, function () {
+                            setBar(text, popup, style, false);
+                            if (callback) { callback(); }
+                            warnBar.fadeTo(400, 0);});
+                    }
+                };
+                        
                 var checkKO = function () {
-		    if (lastDuelProt === Character.duelProtection) { return; }
-		    lastDuelProt = Character.duelProtection;
-		    if (Character.getDuelProtection(true) > new ServerDate().getTime()) {	// in the future?
-			initCountdown();
-		    } else {
-			if (kotimeout > 0) { w.clearInterval(countdown); }
-		    	checkMoti();
-		    }
-		};
-                    	
+                    if (lastDuelProt === Character.duelProtection) { return; }
+                    lastDuelProt = Character.duelProtection;
+                    if (Character.getDuelProtection(true) > new ServerDate().getTime()) {	// in the future?
+                        initCountdown();
+                    } else if (kotimeout > 0) {
+                        w.clearInterval(countdown);
+                        warnBar.stop(true, true);
+                        lastMotivation = null;
+                        setBar('', '', '', true, checkMoti);
+                    } else {
+                        checkMoti();
+                    }
+                };
+                        
                 var checkMoti = function (iniRun) {
-		    if (lastMotivation === Character.duelMotivation || kotimeout > 0) { return; }	// event handler gets also called for NPC motivation changes...
-		    lastMotivation = Character.duelMotivation;
+                    if (lastMotivation === Character.duelMotivation || kotimeout > 0) { return; }	// event handler gets also called for NPC motivation changes...
+                    lastMotivation = Character.duelMotivation;
                     var motivation = Math.round(Character.duelMotivation * 100);
                     setBar(motivation + '%', '#DUELMOTIVATION#:&nbsp;' + motivation + '%', iniRun ? "duelmot_dim" : "");
                 };
@@ -9237,15 +9234,16 @@
                     var prot = Character.getDuelProtection(true);
                     kotimeStr = "<div style='text-align:center;'>#KOTIME#<br />";
                     if (!oldSystem && ko > now && !forceProt) {
-                    	kotimeStr += "#DUEL_KO_END#&nbsp;" + new Date(ko).toLocaleString() + "<br />";
-			kotimeout = parseInt((ko - now) / 1e3, 10);
-			timerType = "getMandatoryDuelProtection";
-		    } else {
-			kotimeout = parseInt((prot - now) / 1e3, 10);
-			timerType = "getDuelProtection";
-		    }
-		    kotimeStr += "#DUEL_PROTECT_END#&nbsp;" + new Date(prot).toLocaleString() + "</div>";
-		    setBar(kotimeout.formatDuration(), kotimeStr, (timerType === "getDuelProtection") ? 'duelmot_protect' : 'duelmot_ko', true);
+                        kotimeStr += "#DUEL_KO_END#&nbsp;" + new Date(ko).toLocaleString() + "<br />";
+                        kotimeout = parseInt((ko - now) / 1e3, 10);
+                        timerType = "getMandatoryDuelProtection";
+                    } else {
+                        kotimeout = parseInt((prot - now) / 1e3, 10);
+                        timerType = "getDuelProtection";
+                    }
+                    kotimeout = Math.max(0, kotimeout);
+                    kotimeStr += "#DUEL_PROTECT_END#&nbsp;" + new Date(prot).toLocaleString() + "</div>";
+                    setBar(kotimeout.formatDuration(), kotimeStr, (timerType === "getDuelProtection") ? 'duelmot_protect' : 'duelmot_ko', true);
                     warnBar.addClass("koblink")
                            .click(function() { warnBar.removeClass("koblink").stop(true, false).css({ opacity: 0 }); });
                     countdown = w.setInterval(function() { refresh(); }, 1000);
@@ -9254,19 +9252,19 @@
                 var refresh = function () {
                     if (kotimeout > 0) {
                         if (kotimeout % 180 === 0) { // recalculate exact duration only every ~3min
-                            kotimeout = parseInt((Character[timerType](true) - (new ServerDate()).getTime()) / 1e3, 10);
+                            kotimeout = parseInt((Character[timerType](true) - (new ServerDate()).getTime()) / 1e3, 10) || 0;   // catches NaN or null results -> 0
                         } else {
                             kotimeout--; // otherwise -1 because our interval is 1sec
                         }
                         if (kotimeout <= 0) {
-			    w.clearInterval(countdown);
-			    warnBar.stop(true, true);
+                            w.clearInterval(countdown);
+                            warnBar.stop(true, true);
                             if (timerType === 'getDuelProtection') {
-				lastMotivation = null;
-				return setBar('', '', '', true, checkMoti);
-			    } else {
-			    	return initCountdown(true);	// rerun for 2nd phase - duel protection in new system
-			    }
+                                lastMotivation = null;
+                                return setBar('', '', '', true, checkMoti);
+                            } else {
+                                return initCountdown(true);	// rerun for 2nd phase - duel protection in new system
+                            }
                         }
                         setBar(kotimeout.formatDuration());
                         if ((kotimeout <= 1800) && warnBar.hasClass("koblink") && (kotimeout % 8 === 0)) {
@@ -9274,6 +9272,7 @@
                         }
                         return;
                     } // <-- if we are KOed; otherwise show motivation ... v v v
+                    lastMotivation = null;
                     return checkMoti();
                 };            
 
