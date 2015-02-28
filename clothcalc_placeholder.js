@@ -2624,119 +2624,101 @@
             }($);
             _base.Error = Error;
             Debugger.Error = Error;
+
+            ///// complete ////////////////////////
+            //
+            //  Loader:       is starting the several Script Features
+            //  Init:         general script starter, run Loader.init();
+            //  Methodes:     - add (key,call,finished,dependency) // add a Script Module to load
+            //                    -> key: is the index
+            //                    -> txt: Description for the gui
+            //                    -> call: is the function to load
+            //                    -> dependency: empty || array of Modules loaded first
+            //                    <- object refernce {ready:false} // should be change through Module to true, if Module is loaded
+            //                - init () // start loading modules
+            //
+            ///////////////////////////////////////
             var Loader = function (e) {
-                var t = {};
-                var n = [];
-                var r = {};
-                var i = {};
-                var s;
-                var o = false;
-                var u = false;
-                var a = false;
-                var f = 0;
-                t.add = function (e, t, r, i) {
-                    var s = {
-                        ready: false
-                    };
-                    n.push({
-                        key: e,
-                        txt: t,
-                        call: r,
-                        dep: i || {},
-                        ready: s,
-                        count: 0
-                    });
-                    return s
+                var _self = {};
+                var stack = [];
+                var loaded = {};
+                var failed = {};
+                var interval;
+                var current = false;
+                var locked = false;
+                var loop = false;
+                var round = 0;
+                _self.add = function(key, txt, call, dependency) {
+                    var r = {ready:false};
+                    stack.push({key:key, txt:txt, call:call, dep:dependency||{}, ready:r, count:0});
+                    return r;
                 };
-                t.init = function () {
-                    if (s) {
-                        return
-
-                    }
-                    d();
-                    s = w.setInterval(function () {
-                        l()
-                    }, 500)
+                _self.init = function() {
+                    if (interval) { return; }
+                    // Gui.add();   --- Scooby's idea of a graphical loader
+                    interval = w.setInterval(function() { worker(); }, 500);
                 };
-                var l = function () {
-                    if (u) {
-                        return
-
-                    }
-                    u = true;
-                    if (o === false) {
-                        if (!c()) {
-                            u = false;
-                            return
-
-                        }
+                var worker = function() {
+                    if (locked) { return; }
+                    locked = true;
+                    if (current === false) {
+                        if (!checkGame()) {
+                            locked = false;
+                            return;
+                        };
                         try {
                             Updater.query();
-                            // Dun - changing cosmetic and link to twdb
-                            // paypal
-                            var e = w.TheWestApi
-                                .register(
-                                    "twdb_clothcalc",
-                                    "tw-db.info Cloth Calc",
-                                    "1.34",
-                                    String(Script.gameversion),
-                                    "scoobydoo - Dun - Petee [tw-db.info]",
-                                    "http://tw-db.info");
-
-                            var Paypal = '<br><br><form action="https://www.paypal.com/cgi-bin/webscr" method="post">' + '<input name="cmd" value="_s-xclick" type="hidden">' + '<input name="encrypted" value="-----BEGIN PKCS7-----MIIHNwYJKoZIhvcNAQcEoIIHKDCCByQCAQExggEwMIIBLAIBADCBlDCBjjELMAkGA1UEBhMCVVMxCzAJBgNVBAgTAkNBMRYwFAYDVQQHEw1Nb3VudGFpbiBWaWV3MRQwEgYDVQQKEwtQYXlQYWwgSW5jLjETMBEGA1UECxQKbGl2ZV9jZXJ0czERMA8GA1UEAxQIbGl2ZV9hcGkxHDAaBgkqhkiG9w0BCQEWDXJlQHBheXBhbC5jb20CAQAwDQYJKoZIhvcNAQEBBQAEgYChINvT18jAz9CalhBmJdmLCwpXoNRJP+VkXk8FX8ggf0svoPqtoBds+0Jtzdvj9jQ0Sf6erVBUCcRpMpkb+Tf3GCQVHTglnw8JrK6ZzzRhjsZZCJn7tgFwu2LimWCyFnNbeGNt3JeAUyoPqqNlc8tD5abn15g/a8T7+lmSJMLZOjELMAkGBSsOAwIaBQAwgbQGCSqGSIb3DQEHATAUBggqhkiG9w0DBwQIKDoxC57piTyAgZCs1uffooeE6z5oFOY8gF33GntGddTvCLpVnR2oEfR3HaNWR2/DSZsxTSBxOQ9h43E+9A9WN1QJDj+4qyu/20IbTBVkFCl/eoGTV44O///OowbrCRqIUbDKtBBj6rrv876AFW0aV8/iRoreP66eCBd3FG7K6Pue0rBR7khec7TFMM0kd++ZT0QTSvuQ4IvsbOWgggOHMIIDgzCCAuygAwIBAgIBADANBgkqhkiG9w0BAQUFADCBjjELMAkGA1UEBhMCVVMxCzAJBgNVBAgTAkNBMRYwFAYDVQQHEw1Nb3VudGFpbiBWaWV3MRQwEgYDVQQKEwtQYXlQYWwgSW5jLjETMBEGA1UECxQKbGl2ZV9jZXJ0czERMA8GA1UEAxQIbGl2ZV9hcGkxHDAaBgkqhkiG9w0BCQEWDXJlQHBheXBhbC5jb20wHhcNMDQwMjEzMTAxMzE1WhcNMzUwMjEzMTAxMzE1WjCBjjELMAkGA1UEBhMCVVMxCzAJBgNVBAgTAkNBMRYwFAYDVQQHEw1Nb3VudGFpbiBWaWV3MRQwEgYDVQQKEwtQYXlQYWwgSW5jLjETMBEGA1UECxQKbGl2ZV9jZXJ0czERMA8GA1UEAxQIbGl2ZV9hcGkxHDAaBgkqhkiG9w0BCQEWDXJlQHBheXBhbC5jb20wgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBAMFHTt38RMxLXJyO2SmS+Ndl72T7oKJ4u4uw+6awntALWh03PewmIJuzbALScsTS4sZoS1fKciBGoh11gIfHzylvkdNe/hJl66/RGqrj5rFb08sAABNTzDTiqqNpJeBsYs/c2aiGozptX2RlnBktH+SUNpAajW724Nv2Wvhif6sFAgMBAAGjge4wgeswHQYDVR0OBBYEFJaffLvGbxe9WT9S1wob7BDWZJRrMIG7BgNVHSMEgbMwgbCAFJaffLvGbxe9WT9S1wob7BDWZJRroYGUpIGRMIGOMQswCQYDVQQGEwJVUzELMAkGA1UECBMCQ0ExFjAUBgNVBAcTDU1vdW50YWluIFZpZXcxFDASBgNVBAoTC1BheVBhbCBJbmMuMRMwEQYDVQQLFApsaXZlX2NlcnRzMREwDwYDVQQDFAhsaXZlX2FwaTEcMBoGCSqGSIb3DQEJARYNcmVAcGF5cGFsLmNvbYIBADAMBgNVHRMEBTADAQH/MA0GCSqGSIb3DQEBBQUAA4GBAIFfOlaagFrl71+jq6OKidbWFSE+Q4FqROvdgIONth+8kSK//Y/4ihuE4Ymvzn5ceE3S/iBSQQMjyvb+s2TWbQYDwcp129OPIbD9epdr4tJOUNiSojw7BHwYRiPh58S1xGlFgHFXwrEBb3dgNbMUa+u4qectsMAXpVHnD9wIyfmHMYIBmjCCAZYCAQEwgZQwgY4xCzAJBgNVBAYTAlVTMQswCQYDVQQIEwJDQTEWMBQGA1UEBxMNTW91bnRhaW4gVmlldzEUMBIGA1UEChMLUGF5UGFsIEluYy4xEzARBgNVBAsUCmxpdmVfY2VydHMxETAPBgNVBAMUCGxpdmVfYXBpMRwwGgYJKoZIhvcNAQkBFg1yZUBwYXlwYWwuY29tAgEAMAkGBSsOAwIaBQCgXTAYBgkqhkiG9w0BCQMxCwYJKoZIhvcNAQcBMBwGCSqGSIb3DQEJBTEPFw0xMTAxMTkyMDQ1NDVaMCMGCSqGSIb3DQEJBDEWBBSftIcjkFDuoOkdAfklhyX0/yFgtzANBgkqhkiG9w0BAQEFAASBgF9SGe3NSMpJbcwAlWM9fDzOYOQovnXP1jCT9eR7ZCsZ4UdlS5u5/ubq4KvSd2s/Iz7H8I69CL5vY6n50Qk57lZv2m+DSmY/p+xjcPG0JBuRaT0uGNOeiPdXwC+HiDPP6EhJXXEZv5fqXPmOUJPdovWYgyu/LgVCRAZw1qp3995m-----END PKCS7-----" type="hidden">' + '<input type="image" src="https://www.paypalobjects.com/en_US/DE/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">' + '<img width="1" border="0" height="1" src="https://www.paypal.com/en_GB/i/scr/pixel.gif" alt="">' + "</form>";
-
-                            var forma = $(
-                                    "<div style='font-family: comic sans ms;font-size: 13pt;padding-top: 10px;text-align: center;' />")
-                                .append("#CCSCRIPT#")
-                                .append(Paypal).append(
-                                    "<br>#THANK_YOU#"); // Dun -
-                            // adding
-                            // constant
-
-                            e.setGui(forma);
-                            if (e.isOutdated()) {
-                                w.TheWestApi.displayOutdated()
-                            }
-                        } catch (n) {
-                            Error.report(n, "");
-                            (new UserMessage("#APIERROR#",
-                                UserMessage.TYPE_FATAL)).show();
-                            p();
-                            return
-
-                        }
-                        
+                            registerScript();
+                        } catch (e) {
+                            Error.report(e, '');
+                            new UserMessage('#APIERROR#', UserMessage.TYPE_FATAL).show();
+                            return destroy();
+                        };
                         // Not needed at the moment, but we keep it for the case that there will be another incompatible version change
                         /* if (window.TheWestApi.version < 2.04) {
                             (new UserMessage("TWDB-ClothCalc Script is deactivated until the Gameversion on your world is updated to 2.04. Sorry!", UserMessage.TYPE_FATAL)).show();
-                            p();
-                            return;
-                        }; */
-
-                        h();
-                        return
-
+                            return destroy();
+                        } */
+                        return next();
                     }
-                    if (isDefined(i[o.key])) {
-                        h();
-                        return
-
+                    if (isDefined(failed[current.key])) {
+                        return next();
                     }
-                    if (o.ready.ready) {
-                        r[o.key] = true;
-                        a = false;
-                        h();
-                        return
-
+                    if (current.ready.ready) {
+                        loaded[current.key] = true;
+                        loop = false;
+                        return next();
                     }
-                    u = false
+                    locked = false;
                 };
-                var c = function () {
+                var checkGame = function() {
                     if (!isDefined(w.jQuery) || !isDefined(w.TheWestApi) || !isDefined(w.TheWestApi.version) || !w.ItemManager.isLoaded()) {
-                        return false
+                        return false;
+                    } else {
+                        return true;
+                }};
+                var registerScript = function() {
+                    var TheWestApiGui = w.TheWestApi.register(
+                        "twdb_clothcalc",
+                        "tw-db.info Cloth Calc",
+                        "2.04",
+                        String(Script.gameversion),
+                        "scoobydoo, Dun, Petee, Bluep [tw-db.info]",
+                        "http://tw-db.info");
+
+                    var PayPal = '<br><br><form action="https://www.paypal.com/cgi-bin/webscr" method="post">'
+                               + '<input name="cmd" value="_s-xclick" type="hidden">'
+                               + '<input name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----" type="hidden">'
+                               + '<input type="image" src="https://www.paypalobjects.com/en_US/DE/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">'
+                               + '<img width="1" border="0" height="1" src="https://www.paypal.com/en_GB/i/scr/pixel.gif" alt=""></form><br>';
+                    var content = $("<div style='font-family:comic sans ms; font-size:13pt; padding-top:10px; text-align:center;' />")
+                                 .append("#CCSCRIPT#", Paypal, "#THANK_YOU#");
+                    TheWestApiGui.setGui(content);
+                    if (TheWestApiGui.isOutdated()) {
+                        w.TheWestApi.displayOutdated();
                     }
-                    return true
                 };
+
                 var h = function () {
                     if (n.length == 0) {
                         m();
