@@ -11,23 +11,22 @@
  * - 
  * */
  
-(function (f) {
+(function(f) {
     var d = document,
         s = d.createElement('script');
     s.setAttribute('type', 'application/javascript');
     s.textContent = '(' + f.toString() + ')()';
     (d.body || d.head || d.documentElement).appendChild(s);
     s.parentNode.removeChild(s)
-})(function () {
+})(function() {
 
     // Dun : Just test if there is already a TWDB object in the DOM ,
     // if it exists, there is another cc/lang installed, so do not
     // start this one
 
-    if (isDefined(window.TWDB)) { (new west.gui.Dialog(TWDB.script.name, 
-            '<div class="txcenter"><b><br>#CC_INSTALLED_TWICE#</br></b></div>', west.gui.Dialog.SYS_WARNING)).addButton("OK").show();
+    if (isDefined(window.TWDB)) {
+        (new west.gui.Dialog(TWDB.script.name, '<div class="txcenter"><b><br>#CC_INSTALLED_TWICE#</br></b></div>', west.gui.Dialog.SYS_WARNING)).addButton("OK").show();
     } else {
-
         TWDB = {};
         TWDB.script = new Object({
             version: 38,
@@ -45,20 +44,24 @@
 
         // START OF SCRIPT CODE THAT CAN BE EDITED IN A RELEASE
         TheWestApi.version = Game.version = (parseInt(Game.version) ? Game.version : TWDB.script.gameversion);
-        Number.prototype.round = function (e) {
+        TWDB.script.isDev = function() {
+            return (this.check.search('dev_version') !== -1);
+        };
+        
+        Number.prototype.round = function(e) {
             var t = Math.pow(10, e);
             return Math.round(this * t) / t
         };
-                /**TODO: get rid of this **/
-                String.prototype.twdb_twiceHTMLUnescape = function () {
-                        return $($.parseHTML($($.parseHTML(this+"")).text())).text();
-                }
-        if (!console) {
-            console = {}
+        
+        /**TODO: get rid of this **/
+        String.prototype.twdb_twiceHTMLUnescape = function () {
+                return $($.parseHTML($($.parseHTML(this+"")).text())).text();
         }
-        if (!console.log) {
-            console.log = function (e) {}
+        
+        if (!console) { console={}; }
+        if (!console.log) { console.log = function(e){}; }
         }
+        
         TWDB.images = new Object({
             ClothCalcButton: "data:image/png;base64,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",
             iconName: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABMAAAATCAYAAAByUDbMAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAqBJREFUeNqslEtvElEUxy90gOHRDhQpDBIEaysKNQZpYpqiLroxaUjUrV/Bpd/BD6IrdySGmK5cVzf1sSgNgrzDAB0QBpgZxnPonYZSSLvwJj/unXMP/3vOfRyDpmnkfzUGf1Kp1Lw5A7BEwTYGVNpfaul0+kxsQbMAHOCmi/aBFtAF5IWRLbC7gLtPGOalPBpZG7J8cmKxHIDtN3AKaNcVw6gCYZNp/4XV+kaRJNKs16V3wSBG9pdyKTrjgr1aBsK7LPtqPBwStdsl1mbTGiuX98HuB6zzIpgnZgJuAHfWNc2ndjpEabcn3KtUtnERupfG64jZAH7XbN5bHg5ZVRTJT0Kq416PhATBsyJJUZj3AOarxPB7BQhuGo2Rcb9PTiVpcMDzuOnErCjMVqmUpKnarxLD1TxOgyF2X1F4TPHQbC4KNtug4HY30CFSrW5AFwKcswc4K4ar3YwbjU8xLQVSPOK4iUjW5xOw94miixfFBAy9s6kyc+5WOCHLG0qrRfqtlhLv93mcZGX53PdBsZisclwGhjlA0u8cM3O3vAFNiztrNccwlyOGdpvZPju9Cw1S9X+OxdZh+IO+itG0mH63go+bzWeD4+PJ3apxXPvChiqKabXXczgGAzaRz+99DYUOwVyeFdNTDNzK5dZQCDf8/c4OPp/vgAisAY/eZjLP8VTDjUYExHALHHRe08WwMrDJQuEhW6+zaMh7PFnoPgFH9Pngg69mvd5otFy+vVmr8RClq2W3W+hBqtNpDj2CsCQ4HGX40H75/R/A9g11cQ7A0xyD2EevKL4GH3WrWFz5Eoko9P/EgMUR6hk+oVVMkz4lrFsVSofWMIberQBNGX1qug/Us/PIVFpWMII/9Kgl+j2e8hGpraRnAwx0n38CDAD3lwpCS51YdAAAAABJRU5ErkJggg==",
@@ -2638,7 +2641,7 @@
             //                - init () // start loading modules
             //
             ///////////////////////////////////////
-            var Loader = function (e) {
+            var Loader = (function($) {
                 var _self = {};
                 var stack = [];
                 var loaded = {};
@@ -2648,20 +2651,23 @@
                 var locked = false;
                 var loop = false;
                 var round = 0;
+                
                 _self.add = function(key, txt, call, dependency) {
                     var r = {ready:false};
                     stack.push({key:key, txt:txt, call:call, dep:dependency||{}, ready:r, count:0});
                     return r;
                 };
+                
                 _self.init = function() {
                     if (interval) { return; }
                     // Gui.add();   --- Scooby's idea of a graphical loader
                     interval = w.setInterval(function() { worker(); }, 500);
                 };
+                
                 var worker = function() {
                     if (locked) { return; }
                     locked = true;
-                    if (current === false) {
+                    if (current === false) {    // = first run
                         if (!checkGame()) {
                             locked = false;
                             return;
@@ -2679,6 +2685,7 @@
                             (new UserMessage("TWDB-ClothCalc Script is deactivated until the Gameversion on your world is updated to 2.04. Sorry!", UserMessage.TYPE_FATAL)).show();
                             return destroy();
                         } */
+            /** if (Settings.get('scooby')) {   **/
                         return next();
                     }
                     if (isDefined(failed[current.key])) {
@@ -2691,12 +2698,14 @@
                     }
                     locked = false;
                 };
+                
                 var checkGame = function() {
                     if (!isDefined(w.jQuery) || !isDefined(w.TheWestApi) || !isDefined(w.TheWestApi.version) || !w.ItemManager.isLoaded()) {
                         return false;
                     } else {
                         return true;
                 }};
+                
                 var registerScript = function() {
                     var TheWestApiGui = w.TheWestApi.register(
                         "twdb_clothcalc",
@@ -2705,7 +2714,6 @@
                         String(Script.gameversion),
                         "scoobydoo, Dun, Petee, Bluep [tw-db.info]",
                         "http://tw-db.info");
-
                     var PayPal = '<br><br><form action="https://www.paypal.com/cgi-bin/webscr" method="post">'
                                + '<input name="cmd" value="_s-xclick" type="hidden">'
                                + '<input name="encrypted" value="-----BEGIN PKCS7-----MIIHNwYJKoZIhvcNAQcEoIIHKDCCByQCAQExggEwMIIBLAIBADCBlDCBjjELMAkGA1UEBhMCVVMxCzAJBgNVBAgTAkNBMRYwFAYDVQQHEw1Nb3VudGFpbiBWaWV3MRQwEgYDVQQKEwtQYXlQYWwgSW5jLjETMBEGA1UECxQKbGl2ZV9jZXJ0czERMA8GA1UEAxQIbGl2ZV9hcGkxHDAaBgkqhkiG9w0BCQEWDXJlQHBheXBhbC5jb20CAQAwDQYJKoZIhvcNAQEBBQAEgYChINvT18jAz9CalhBmJdmLCwpXoNRJP+VkXk8FX8ggf0svoPqtoBds+0Jtzdvj9jQ0Sf6erVBUCcRpMpkb+Tf3GCQVHTglnw8JrK6ZzzRhjsZZCJn7tgFwu2LimWCyFnNbeGNt3JeAUyoPqqNlc8tD5abn15g/a8T7+lmSJMLZOjELMAkGBSsOAwIaBQAwgbQGCSqGSIb3DQEHATAUBggqhkiG9w0DBwQIKDoxC57piTyAgZCs1uffooeE6z5oFOY8gF33GntGddTvCLpVnR2oEfR3HaNWR2/DSZsxTSBxOQ9h43E+9A9WN1QJDj+4qyu/20IbTBVkFCl/eoGTV44O///OowbrCRqIUbDKtBBj6rrv876AFW0aV8/iRoreP66eCBd3FG7K6Pue0rBR7khec7TFMM0kd++ZT0QTSvuQ4IvsbOWgggOHMIIDgzCCAuygAwIBAgIBADANBgkqhkiG9w0BAQUFADCBjjELMAkGA1UEBhMCVVMxCzAJBgNVBAgTAkNBMRYwFAYDVQQHEw1Nb3VudGFpbiBWaWV3MRQwEgYDVQQKEwtQYXlQYWwgSW5jLjETMBEGA1UECxQKbGl2ZV9jZXJ0czERMA8GA1UEAxQIbGl2ZV9hcGkxHDAaBgkqhkiG9w0BCQEWDXJlQHBheXBhbC5jb20wHhcNMDQwMjEzMTAxMzE1WhcNMzUwMjEzMTAxMzE1WjCBjjELMAkGA1UEBhMCVVMxCzAJBgNVBAgTAkNBMRYwFAYDVQQHEw1Nb3VudGFpbiBWaWV3MRQwEgYDVQQKEwtQYXlQYWwgSW5jLjETMBEGA1UECxQKbGl2ZV9jZXJ0czERMA8GA1UEAxQIbGl2ZV9hcGkxHDAaBgkqhkiG9w0BCQEWDXJlQHBheXBhbC5jb20wgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBAMFHTt38RMxLXJyO2SmS+Ndl72T7oKJ4u4uw+6awntALWh03PewmIJuzbALScsTS4sZoS1fKciBGoh11gIfHzylvkdNe/hJl66/RGqrj5rFb08sAABNTzDTiqqNpJeBsYs/c2aiGozptX2RlnBktH+SUNpAajW724Nv2Wvhif6sFAgMBAAGjge4wgeswHQYDVR0OBBYEFJaffLvGbxe9WT9S1wob7BDWZJRrMIG7BgNVHSMEgbMwgbCAFJaffLvGbxe9WT9S1wob7BDWZJRroYGUpIGRMIGOMQswCQYDVQQGEwJVUzELMAkGA1UECBMCQ0ExFjAUBgNVBAcTDU1vdW50YWluIFZpZXcxFDASBgNVBAoTC1BheVBhbCBJbmMuMRMwEQYDVQQLFApsaXZlX2NlcnRzMREwDwYDVQQDFAhsaXZlX2FwaTEcMBoGCSqGSIb3DQEJARYNcmVAcGF5cGFsLmNvbYIBADAMBgNVHRMEBTADAQH/MA0GCSqGSIb3DQEBBQUAA4GBAIFfOlaagFrl71+jq6OKidbWFSE+Q4FqROvdgIONth+8kSK//Y/4ihuE4Ymvzn5ceE3S/iBSQQMjyvb+s2TWbQYDwcp129OPIbD9epdr4tJOUNiSojw7BHwYRiPh58S1xGlFgHFXwrEBb3dgNbMUa+u4qectsMAXpVHnD9wIyfmHMYIBmjCCAZYCAQEwgZQwgY4xCzAJBgNVBAYTAlVTMQswCQYDVQQIEwJDQTEWMBQGA1UEBxMNTW91bnRhaW4gVmlldzEUMBIGA1UEChMLUGF5UGFsIEluYy4xEzARBgNVBAsUCmxpdmVfY2VydHMxETAPBgNVBAMUCGxpdmVfYXBpMRwwGgYJKoZIhvcNAQkBFg1yZUBwYXlwYWwuY29tAgEAMAkGBSsOAwIaBQCgXTAYBgkqhkiG9w0BCQMxCwYJKoZIhvcNAQcBMBwGCSqGSIb3DQEJBTEPFw0xMTAxMTkyMDQ1NDVaMCMGCSqGSIb3DQEJBDEWBBSftIcjkFDuoOkdAfklhyX0/yFgtzANBgkqhkiG9w0BAQEFAASBgF9SGe3NSMpJbcwAlWM9fDzOYOQovnXP1jCT9eR7ZCsZ4UdlS5u5/ubq4KvSd2s/Iz7H8I69CL5vY6n50Qk57lZv2m+DSmY/p+xjcPG0JBuRaT0uGNOeiPdXwC+HiDPP6EhJXXEZv5fqXPmOUJPdovWYgyu/LgVCRAZw1qp3995m-----END PKCS7-----" type="hidden">'
@@ -2718,70 +2726,89 @@
                         w.TheWestApi.displayOutdated();
                     }
                 };
-
-                var h = function () {
-                    if (n.length == 0) {
-                        m();
-                        p();
-                        return
-
+                
+                var next = function() {
+                    if (stack.length === 0) {
+                        // Gui.del();
+                        return destroy();          
                     }
-                    o = n.shift();
-                    o.count++;
-                    if (o.count > f) {
-                        if (a) {
-                            Error.report({
-                                message: "deadlock detected"
-                            }, "failed to load module: " + o.key);
-                            i[o.key] = true;
-                            h();
-                            return
-
+                    current = stack.shift();
+                    current.count++;
+                    if (current.count > round) {
+                        if (loop) {
+                            Error.report({'message':'deadlock detected'}, 'failed to load module: ' + current.key);
+                            failed[current.key] = true;
+                            return next();
                         }
-                        f++;
-                        a = true
+                        round++;
+                        loop = true;
                     }
-                    for (var e in o.dep) {
-                        if (!isDefined(r[e])) {
-                            if (Settings.get("scooby")) {
-                                console.log(o.key, "needs ", e)
-                            }
-                            n.push(o);
-                            h();
-                            return
-
+                    for (var module in current.dep) {
+                        if (!isDefined(loaded[module])) {
+                            if (TWDB.script.isDev()) { console.log(current.key, 'needs ', module); };
+                            stack.push(current);
+                            return next();
+                        };
+                    }
+                    // Gui.update();
+                    try { current.call(); }
+                    catch (e) {
+                        Error.report(e,'failed to load module: ' + current.key);
+                        failed[current.key] = true;
+                        return next();
+                    };
+                    locked = false;
+                    worker();
+                };
+                
+                var destroy = function() {
+                    w.clearInterval(interval);
+                    w.setTimeout(function(){delete(_self);}, 1e3);
+                };
+                
+                /*      --- Scoobys Loader Gui, not used atm
+                var Gui = (function($) {
+                    var _that = {};
+                    var gui = {};
+                    var total = 0;
+                    
+                    _that.add = function() {
+                        $('#ui_revision').hide();
+                        gui = $('<div style="color: white;display: block;font-size: 10px;font-weight: bold;line-height: 14px;padding: 0 4px 0 0; position: absolute;right: 0;text-align: right;text-shadow: 1px 1px 1px black;width: auto;z-index: 15;"/>');
+                        total = stack.length;
+                        $('#user-interface').append(gui);
+                    };
+                    
+                    _that.del = function() {
+                        var c = 0;
+                        for (var key in failed) { c++; };
+                        if (c > 0) {
+                            if (c = 1) { gui.html('ClothCalc Loader: ' + c + ' Module failed to load'); }
+                            else { gui.html('ClothCalc Loader: ' + c + ' Modules failed to load'); }
+                            gui.css({'color':'red','text-shadow': '1px 1px 1px white'});
+                        } else {
+                            $('#ui_revision').show();
+                            gui.remove();
                         }
-                    }
-                    v();
-                    try {
-                        o.call()
-                    } catch (t) {
-                        Error.report(t, "failed to load module: " + o.key);
-                        i[o.key] = true;
-                        h();
-                        return
-
-                    }
-                    u = false;
-                    l()
-                };
-                var p = function () {
-                    w.clearInterval(s);
-                    w.setTimeout(function () {
-                        delete t
-                    }, 1e3)
-                };
-                var d = function () {};
-                var v = function () {};
-                var m = function () {};
-                t.stack = n;
-                t.loaded = r;
-                t.failed = i;
-                t.current = o;
-                return t
-            }($);
-            Debugger.Loader = Loader;
-            
+                    };
+                    
+                    _that.update = function() {
+                        var txt = 'ClothCalc Loader: ';
+                        if (current !== false) { txt += current.txt; }
+                        txt += ' [' + String(total - stack.length) + '|' + total + ']';
+                        gui.html(txt);
+                    };
+                    return _that;
+                })($);
+                */
+                
+                _self.stack = stack;
+                _self.loaded = loaded;
+                _self.failed = failed;
+                _self.current = current;
+                return _self;
+            })($);
+            Debugger.Loader = Loader;            
             
             
   ///// complete ////////////////////////
@@ -5701,9 +5728,11 @@
                             "#minimap_worldmap").append(l)
                     };
                     var r = n;
+                    /*          --- forbidden gold job auto-add
                     if (Settings.get("scooby", false)) {
-                        r = window.Map.JobHandler.Featured
+                        r = window.Map.JobHandler.Featured;
                     }
+                    */
                     for (key in r) {
                         if (!r.hasOwnProperty(key)) {
                             continue
@@ -9130,7 +9159,7 @@
                             Character.twdb_setDuelProtection.apply(this, arguments);
                             if (changed) { EventHandler.signal('duelprotection_changed', []); }
                         };
-                    } else if (TWDB.script.check.search('dev_version')) {
+                    } else if (TWDB.script.isDev()) {
                         console.log('setDuelProtection changed');
                         new UserMessage('setDuelProtection changed').show();
                     }   // Check for listener ### end
