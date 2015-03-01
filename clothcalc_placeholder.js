@@ -29,21 +29,21 @@
     } else {
         TWDB = {};
         TWDB.script = new Object({
-            version: 38,
-            revision: 1,
+            version: 39,
+            revision: 4,
             name: "The West - tw-db.info Cloth Calc",
             update: "tw-db.info/cache/userscripts/clothcalc/dev_clothcalc_eng.user.js",
             check: "tw-db.info/cache/userscripts/clothcalc/dev_version",
             url: "tw-db.info",
             protocol: location.protocol.match(/^(.+):$/)[1],
-            gameversion: 2.16,
+            gameversion: 2.19,
             lang: "eng"
         });
         try { TWDB.script.notes = jQuery.parseJSON('[{\"version\":\"99\",\"notes\":\"DEV version\"}]');
         } catch (e) {};
 
         // START OF SCRIPT CODE THAT CAN BE EDITED IN A RELEASE
-        TheWestApi.version = Game.version = (parseInt(Game.version) ? Game.version : TWDB.script.gameversion);
+        TheWestApi.version = Game.version = (parseInt(Game.version, 10) ? Game.version : TWDB.script.gameversion);
         TWDB.script.isDev = function() {
             return (this.check.search('dev_version') !== -1);
         };
@@ -60,9 +60,8 @@
         
         if (!console) { console={}; }
         if (!console.log) { console.log = function(e){}; }
-        }
         
-        TWDB.images = new Object({
+        TWDB.images = {
             ClothCalcButton: "data:image/png;base64,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",
             iconName: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABMAAAATCAYAAAByUDbMAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAqBJREFUeNqslEtvElEUxy90gOHRDhQpDBIEaysKNQZpYpqiLroxaUjUrV/Bpd/BD6IrdySGmK5cVzf1sSgNgrzDAB0QBpgZxnPonYZSSLvwJj/unXMP/3vOfRyDpmnkfzUGf1Kp1Lw5A7BEwTYGVNpfaul0+kxsQbMAHOCmi/aBFtAF5IWRLbC7gLtPGOalPBpZG7J8cmKxHIDtN3AKaNcVw6gCYZNp/4XV+kaRJNKs16V3wSBG9pdyKTrjgr1aBsK7LPtqPBwStdsl1mbTGiuX98HuB6zzIpgnZgJuAHfWNc2ndjpEabcn3KtUtnERupfG64jZAH7XbN5bHg5ZVRTJT0Kq416PhATBsyJJUZj3AOarxPB7BQhuGo2Rcb9PTiVpcMDzuOnErCjMVqmUpKnarxLD1TxOgyF2X1F4TPHQbC4KNtug4HY30CFSrW5AFwKcswc4K4ar3YwbjU8xLQVSPOK4iUjW5xOw94miixfFBAy9s6kyc+5WOCHLG0qrRfqtlhLv93mcZGX53PdBsZisclwGhjlA0u8cM3O3vAFNiztrNccwlyOGdpvZPju9Cw1S9X+OxdZh+IO+itG0mH63go+bzWeD4+PJ3apxXPvChiqKabXXczgGAzaRz+99DYUOwVyeFdNTDNzK5dZQCDf8/c4OPp/vgAisAY/eZjLP8VTDjUYExHALHHRe08WwMrDJQuEhW6+zaMh7PFnoPgFH9Pngg69mvd5otFy+vVmr8RClq2W3W+hBqtNpDj2CsCQ4HGX40H75/R/A9g11cQ7A0xyD2EevKL4GH3WrWFz5Eoko9P/EgMUR6hk+oVVMkz4lrFsVSofWMIberQBNGX1qug/Us/PIVFpWMII/9Kgl+j2e8hGpraRnAwx0n38CDAD3lwpCS51YdAAAAABJRU5ErkJggg==",
             iconExperience: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABMAAAATCAYAAAByUDbMAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAz9JREFUeNqsVNlPE0Ecntltt3u00FqK2KIQQCKERAQxKqCJB8YjMdEXH1Bjor6YoNEYH/wDJP4HJvpkYkxMCB7REOIRPDAicgkVa1sKEtqypff22u06g9Nkg6I+OMmXmZ3j+32/a6GqquB/DfiXfUqzxlbzmvUvQ/cHMhpBT2Y8FASZ4Ldk1CpEeN+AICAUjzy6cn/iyYUXaM0SAfBfyQBRwyGYL3edbeMpsSUbm9t07+7tM9VVFcxqZLrfqILEPR7BEgp4LTxtsohL0/RSdr7U7fHpiQitq6o2wBQh1hNXjNg9BKvXOytAOUwp0ncgBn3lgsCbyTlWzhAvlnloTaDZqxdPrp+ccjFbN9dsSKeltWYTV9F97dgph8HlUJLfYUK2Whw1LQEIQbSlqU64fulE9dGDbUzv0zcxnGlIFGE1wp2bnR121tdiNfNNlmJzA6QZvUFdZNW4k1LisyANLUqGqQrTFOXPpqJyOBoxS2XnHwTStlvnznfN6IgyPAvxDGeji8ytptzHLVwsA1XaCPJyFuRzyDBFIb+idD4+WuILyCWukDGt2I442SgvSlIIZx5CTQmUINgPHti78/j+2tP1hsdV63hRB/KoTtUcwJ0STQIw6gFgLGDPxbltz98PT9+YnHS60DvsZqYQPJqQmr65vfTgyIzY0NpZazfFjBwMA0XOAQVxRhIAfAmaQJDZtzAwON7tdE4jahDHRLiYKdIiuKrTCMg2SC0uivGXAyPjRpNZTUpZMBsEIJz4mfciTgZqPjPn8czMkfuZQlcUyLKYhBzGjAIvHd5dWaYkpuHQVxkMeO3qRNC2rM7KpcAaQ0TP8xy+KxEyBWiKD3/kiDppe3MN214jNnx2LoDRcGNiItLkGhLbfe7kRglnysr4K/fu2WUhbwq9qupWVDE+SDXWOdhXrz+8D4JDtm9LYKyvv38C+Sj7O3Y7jjSXH2czn6311W2NPQAMr9ZOeWIp6ZuPON8Nmzwy9DOfRsZEWVaW26z3Ud9UKLT97UZHLbo4617594CaudCPxuIioYjneXbBv5gjRqCmbXJrS22p1h1blZ6HzxZIvNWVZIXiNZC5kBx1BZmqiW+WxHuZ7IcAAwAW9VeYOecN4AAAAABJRU5ErkJggg==",
@@ -120,7 +119,7 @@
             jobTime: "data:image/png;base64,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",
             pinItems: "data:image/jpg;base64,/9j/4AAQSkZJRgABAgEASABIAAD/wAARCAAuACkDASIAAhEBAxEB/9sAhAAFAwMEAwMFBAQEBQUFBgcNCAcHBwcQCwwJDRMQFBMSEBISFRceGRUWHBYSEhojGhwfICEiIRQZJSckICceISEgAQUFBQcGBw8ICA8gFRIVFSAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICD/xAGiAAABBQEBAQEBAQAAAAAAAAAAAQIDBAUGBwgJCgsQAAIBAwMCBAMFBQQEAAABfQECAwAEEQUSITFBBhNRYQcicRQygZGhCCNCscEVUtHwJDNicoIJChYXGBkaJSYnKCkqNDU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6g4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2drh4uPk5ebn6Onq8fLz9PX29/j5+gEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoLEQACAQIEBAMEBwUEBAABAncAAQIDEQQFITEGEkFRB2FxEyIygQgUQpGhscEJIzNS8BVictEKFiQ04SXxFxgZGiYnKCkqNTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqCg4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2dri4+Tl5ufo6ery8/T19vf4+fr/2gAMAwEAAhEDEQA/APLPGfxQ8V+GfFN7p2narcQWqH5E8wkAc9PQe1YS/GXxqAANZuPlJIPmP/jVXx9YT6p43vxEu985BLBVA+pwBVe38DXcn/HzqGi2m0f8ttQiz+Sk151OlFxTsd86jUmkzUPxe8aJDzrFyqYAx5z4/LdUEXxR8W3D4XVZ0OBkrI3H61JY+GYrqHMt3bpEN487dlWIOOPr/Wsjy7a3v4VaYGMSAMAeQM84FcvtY3ceXU+rjw77lOs6q5Gk3036I3tI+IfiU6tbafPqtxHbyPg+XI6kjqOh9a6b/hIvE3/QQv8A/wACW/xrhLS32+IrJVwSspUMP5/rmuy8ub/n4H501JSinboeTmWFWExc6MXon+aTKPiL4U+Jde8RXmo2tjdeRK+UP2aVsj14U1nN8FPFWQy6fcHPQC0m5+nyV6D8U/G+seEvHV5pui3EFnaCKJ1jEEb5LICxJZSeSTXKD4p+K8Y/tG3A5x/oUH/xFdUVKyszyW431RQPw48bWtj5Mei3kkYGVZbebAz7bKxl+GfitmwdJvs54xaTZ/8AQK64/EfxYsW8XtueNuBYw5A/74plv8Q/FN04V7y3AYf8+MIz9PkqYxUbyVvM7assViHToTTdlaKfZ9v8/wDIx9G8AeJo7+3vhpl7MIhzi2l7gjj5fet3/hE/Ev8A0BdU/wDAeX/4mtLQPEmr6z4lttI1a4iuLKWOSQolrGhO2N2HKqDwyjv2pvlah/z0Sk48yTT0MayqUakqdVPmT1Ivi1YrqXxKvka6t7f9xATJPIQB+6T0BP5Cs208JeHV41Dx3pURUcLb2txMfp9xR+tdbrvgzTfGutXGt3Oq3dm8xWPyo7RZANihOpkHXbnp3qjJ8JNGHP8AwkF/kD/oHJ/8dreMkkckotsNI8PaJcWKzXN/m0JkCSLH87YPB29sgg/jXMNNpdrq9u8L70jmBdefmXPPPTpXUS+BrWysmt4/EN35TDPOmrnn/ttWL/wgmjBtra5fnn/oHL/8erjjhE5tt6XPsK3FDhhqVOjG8lFKTa6rtbuX/DECDx5ZxxsCPLudhwMlTC/P5VL5Ef8Az3NO0TRtK8MXq6xDqF5eSQQyRiKS0WMNvjZM7hITxuz07VmeS3qv5H/GtYwVOKjc+fzDG/XsTLEctr2032SXl2P/2Q==",
             duelMotBar: "data:image/png;base64,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"
-        });
+        };
         TWDB.Util = (function($) {
             var _public = {};
             
@@ -139,9 +138,21 @@
             };
             _public.addCss = function(cssString, optionalId) { return _addCss(cssString, optionalId); };
             
+            /**
+             * Checks if the new ID system is already implemented.
+             * Relies on ItemManager being ready!!
+             *
+             * @return {Boolean} TRUE if new system
+             */            
+            var _isNewIDsystem = function() {
+                return (!isDefined(ItemManager.get(2)) || ItemManager.get(2).short !== "winebottle");
+            };
+            _public.isNewIDsystem = function() { return _isNewIDsystem(); };
+            
             return _public;
         })(jQuery);
-            
+        
+        // The BIG ClothCalc definition block
         TWDB.ClothCalc = {
             uid: "twdb_clothcalc",
             _sk4attr: {
@@ -252,137 +263,30 @@
             
             init: function() {
                 if (this.ready) { return; };
-                var e = this;
+                var _self = this;
                 this.jobs.setParent(this);
                 this.joblist.parent = this;
                 this.customs.setParent(this);
                 this.bag.setParent(this);
-                TWDB.Eventer.set("TWDBdataLoaded", function () {
-                    e.handleTWDBData()
-                });
+                TWDB.Eventer.set("TWDBdataLoaded", function(){ _self.handleTWDBData(); });
+                //define gui general
                 this.gui.copyright = jQuery('<div style="position:absolute;bottom:0px;left:0px;height:15px;display:block;font-size:10px;color:#000000;">.:powered by tw-db team:. | <a href="http://tw-db.info" style="font-weight:normal;color:#000000;" target="_blank">.:tw-db.info:.</a> | ' + (TWDB.script.version / 100 / 1 + " rev. " + TWDB.script.revision) + "</div>");
                 this.gui.cache = jQuery('<div style="position:absolute;top:10px;right:8px;width:20px;height:20px;cursor:pointer;" />');
                 this.gui.bag = jQuery('<div style="position:absolute;top:95px;left:1px;width:252px;height:186px;" />');
-                if (!Bag.loaded) {
-                    Bag.loadItems()
-                }
-                this.BagInt = window.setInterval(function () {
-                    e.finishInit()
-                }, 100);
-                this.data.custom = TWDB.Settings
-                    .get(
-                        "custom", {
-                            1: {
-                                id: 1,
-                                type: "speed",
-                                para: {},
-                                name: "Speed"
-                            },
-                            2: {
-                                id: 2,
-                                type: "custom",
-                                para: {
-                                    9: 1
-                                },
-                                name: "max Health"
-                            },
-                            3: {
-                                id: 3,
-                                type: "regen",
-                                para: {},
-                                name: "Health Regeneration"
-                            },
-                            4: {
-                                id: 4,
-                                type: "fort",
-                                para: {
-                                    att: 200,
-                                    def: 20,
-                                    health: 100,
-                                    type: 0
-                                },
-                                name: "Fortbattle Attacker (Att)"
-                            },
-                            5: {
-                                id: 5,
-                                type: "fort",
-                                para: {
-                                    att: 20,
-                                    def: 200,
-                                    health: 100,
-                                    type: 0
-                                },
-                                name: "Fortbattle Attacker (Def)"
-                            },
-                            6: {
-                                id: 6,
-                                type: "fort",
-                                para: {
-                                    att: 200,
-                                    def: 20,
-                                    health: 100,
-                                    type: 1
-                                },
-                                name: "Fortbattle Defender (Att)"
-                            },
-                            7: {
-                                id: 7,
-                                type: "fort",
-                                para: {
-                                    att: 20,
-                                    def: 200,
-                                    health: 100,
-                                    type: 1
-                                },
-                                name: "Fortbattle Defender (Def)"
-                            },
-                            8: {
-                                id: 8,
-                                type: "duel",
-                                para: {
-                                    12: 1,
-                                    15: 1,
-                                    16: 1,
-                                    24: 1
-                                },
-                                name: "Range Dueler (Att)"
-                            },
-                            9: {
-                                id: 9,
-                                type: "duel",
-                                para: {
-                                    12: 1,
-                                    15: 1,
-                                    16: 1,
-                                    21: 1
-                                },
-                                name: "Range Dueler (Def)"
-                            },
-                            10: {
-                                id: 10,
-                                type: "duel",
-                                para: {
-                                    6: 1,
-                                    7: 1,
-                                    11: 1,
-                                    15: 1
-                                },
-                                name: "Melee Dueler"
-                            }
-                        });
+                //load Bag if not already loaded and set initBag
+                if (!Bag.loaded) { Bag.loadItems(); }
+                this.BagInt = window.setInterval(function(){ _self.finishInit(); }, 100);
+		//get custom jobs or define default value  
+                this.data.custom = TWDB.Settings.get("custom", {1:{id:1,type:"speed",para:{},name:"Speed"},2:{id:2,type:"custom",para:{9:1},name:"max Health"},3:{id:3,type:"regen",para:{},name:"Health Regeneration"},4:{id:4,type:"fort",para:{att:200,def:20,health:100,type:0},name:"Fortbattle Attacker (Att)"},5:{id:5,type:"fort",para:{att:20,def:200,health:100,type:0},name:"Fortbattle Attacker (Def)"},6:{id:6,type:"fort",para:{att:200,def:20,health:100,type:1},name:"Fortbattle Defender (Att)"},7:{id:7,type:"fort",para:{att:20,def:200,health:100,type:1},name:"Fortbattle Defender (Def)"},8:{id:8,type:"duel",para:{12:1,15:1,16:1,24:1},name:"Range Dueler (Att)"},9:{id:9,type:"duel",para:{12:1,15:1,16:1,21:1},name:"Range Dueler (Def)"},10:{id:10,type:"duel",para:{6:1,7:1,11:1,15:1},name:"Melee Dueler"}});
+		// load cache if version didn't not changed  
                 if (!TWDB.Updater.wasUpdated()) {
-                    var t = TWDB.Cache.load("calcdata");
-                    if (typeof t == "object" && t != null && isDefined(t.loaded)) {
-                        this.calcdata = t
-                    }
+                    var data = TWDB.Cache.load("calcdata");
+                    if (typeof data == "object" && data !== null && isDefined(data.loaded)) { this.calcdata = data; }
                 }
             },
             
-            finishInit: function () {
-                if (typeof this.BagInt == "undefined") {
-                    return
-
-                }
+            finishInit: function() {
+                if (typeof this.BagInt == "undefined") { return; }
                 if (Bag.loaded) {
                     window.clearInterval(this.BagInt);
                     delete this.BagInt;
@@ -392,11 +296,8 @@
                 }
             },
             
-            addButton: function () {
-                if (this.ready === false) {
-                    return
-
-                }
+            addButton: function() {
+                if (this.ready === false) { return; }
                 var e = this;
                 var t = jQuery(
                         '<div title="tw-db.info ClothCalc " class="menulink" />')
@@ -471,14 +372,15 @@
             },
             
             checkItems: function() {
-                for (var key in this.data.items) {
+                var key;
+                for (key in this.data.items) {
                     if (typeof this.calcdata.items[key] == "undefined") {
                         if (this.isBetterItem(this.data.items[key].id)) {
                             return true;
                         };
                     };
                 };
-                for (var key in this.calcdata.items) {
+                for (key in this.calcdata.items) {
                     if (typeof this.data.items[key] == "undefined") {
                         if (!isDefined(ItemManager.get(key))) { console.log("Item ID="+key+" seems to be no more defined..."); }; // rare case that an item that was previously best for a job got removed from TW .. I'm curious
                         // if (this.isBetterItem(this.calcdata.items[key].id)) {	// check doesn't make sense - if our previous best item is gone, we need to update!
@@ -490,15 +392,15 @@
             },
             
             checkCustom: function () {
-                var e = 0;
-                for (var e in this.data.custom) {
+                var e, t;
+                for (e in this.data.custom) {
                     if (typeof this.calcdata.custom[e] == "undefined") {
                         return true
                     }
                     if (this.calcdata.custom[e].name != this.data.custom[e].name) {
                         return true
                     }
-                    for (var t in this.data.custom[e].para) {
+                    for (t in this.data.custom[e].para) {
                         if (typeof this.calcdata.custom[e].para[t] == "undefined") {
                             return true
                         }
@@ -518,6 +420,7 @@
                 var t = false; // this.checkSkill(); Dun
                 // disable skills change test
                 var n = this.checkCustom();
+                var i;
                 this.gui.cache.children().remove();
                 if (e || t || n) {
                     var r = "#DATA_OLD#";
@@ -530,10 +433,10 @@
                     if (n) {
                         r += " [#CUSTOM#]"
                     }
-                    var i = jQuery('<div title="' + r + '" style="position:absolute;top:0px;right:0px;width:20px;height:20px;background: url(' + TWDB.images.iconData + ')no-repeat 0px 0px;" />');
+                    i = jQuery('<div title="' + r + '" style="position:absolute;top:0px;right:0px;width:20px;height:20px;background: url(' + TWDB.images.iconData + ')no-repeat 0px 0px;" />');
                     this.up2date = false
                 } else {
-                    var i = jQuery('<div title="#DATA_OK#" style="position:absolute;top:0px;right:0px;width:20px;height:20px;background: url(' + TWDB.images.iconData + ')no-repeat -20px 0px;" /></div>');
+                    i = jQuery('<div title="#DATA_OK#" style="position:absolute;top:0px;right:0px;width:20px;height:20px;background: url(' + TWDB.images.iconData + ')no-repeat -20px 0px;" /></div>');
                     this.up2date = true
                 }
                 this.gui.cache.append(i);
@@ -545,7 +448,7 @@
             
             open: function (e, t) {
                 var n = this;
-                if (this.ready == false) {
+                if (this.ready === false) {
                     return;
                 }
                 if (TWDB.GameAPI.wman.getById(this.uid)) {
@@ -560,7 +463,7 @@
                             break;
                         case "default":
                             var r = null;
-                            break
+                            break;
                         }
                         if (isDefined(r)) { n.joblist.open(r); }
                     };
@@ -782,7 +685,7 @@
                     for (var n = 0; n < e.wear.length; n++) {
                         var r = ItemManager.get(e.wear[n]);
                         if (!this.isItemUsable(r.item_id)) {
-                            continue
+                            continue;
                         }
 
                         this.data.items[r.item_id] = {
@@ -793,7 +696,7 @@
                         for (var n in Bag.items[i]) {
                             var r = ItemManager.get(Number(n));
                             if (!this.isItemUsable(r.item_id)) {
-                                continue
+                                continue;
                             }
 
                             this.data.items[r.item_id] = {
@@ -2484,101 +2387,30 @@
                 }
                 return false
             }
-        };
+        };        // #### end of the BIG ClothCalc definition block
+
         (function ($) {
             var _base = TWDB;
             var w = window;
-            /* var _skill2id = {
-                strength: 1,
-                flexibility: 2,
-                dexterity: 3,
-                charisma: 4,
-                build: 5,
-                punch: 6,
-                tough: 7,
-                endurance: 8,
-                health: 9,
-                ride: 10,
-                reflex: 11,
-                dodge: 12,
-                hide: 13,
-                swim: 14,
-                aim: 15,
-                shot: 16,
-                pitfall: 17,
-                finger_dexterity: 18,
-                repair: 19,
-                leadership: 20,
-                tactic: 21,
-                trade: 22,
-                animal: 23,
-                appearance: 24
-            };
-            var _id2skill = {
-                1: "strength",
-                2: "flexibility",
-                3: "dexterity",
-                4: "charisma",
-                5: "build",
-                6: "punch",
-                7: "tough",
-                8: "endurance",
-                9: "health",
-                10: "ride",
-                11: "reflex",
-                12: "dodge",
-                13: "hide",
-                14: "swim",
-                15: "aim",
-                16: "shot",
-                17: "pitfall",
-                18: "finger_dexterity",
-                19: "repair",
-                20: "leadership",
-                21: "tactic",
-                22: "trade",
-                23: "animal",
-                24: "appearance"
-            };
-            var _type2id = {
-                animal: 1,
-                body: 2,
-                foot: 3,
-                head: 4,
-                left_arm: 5,
-                neck: 6,
-                right_arm: 7,
-                yield: 8,
-                pants: 9,
-                belt: 10
-            };
-            var _id2type = {
-                1: "animal",
-                2: "body",
-                3: "foot",
-                4: "head",
-                5: "left_arm",
-                6: "neck",
-                7: "right_arm",
-                8: "yield",
-                9: "pants",
-                10: "belt"
-            };
-            var _class2id = {
-                greenhorn: 1,
-                adventurer: 2,
-                duelist: 3,
-                worker: 4,
-                soldier: 5
-            }; */
             var Images = _base.images;
             var Script = _base.script;
             var ClothCalc = _base.ClothCalc;
-            var Debugger = function (e) {
-                var t = {};
-                return t
-            }($);
+            
+            
+            ///// complete ////////////////////////
+            //
+            //  Debugger Object: make the TWDB Objects visible for debugging
+            //  Init:         no need for init
+            //  Methodes:     
+            //
+            ///////////////////////////////////////
+            var Debugger = (function ($) {
+                var _self = {};
+                return _self;
+            })($);
             _base.Debugger = Debugger;
+            
+            
             var Error = function (e) {
                 var t = {};
                 var n = "twdb_error";
@@ -2627,6 +2459,7 @@
             }($);
             _base.Error = Error;
             Debugger.Error = Error;
+            
 
             ///// complete ////////////////////////
             //
@@ -2685,7 +2518,8 @@
                             (new UserMessage("TWDB-ClothCalc Script is deactivated until the Gameversion on your world is updated to 2.04. Sorry!", UserMessage.TYPE_FATAL)).show();
                             return destroy();
                         } */
-            /** if (Settings.get('scooby')) {   **/
+                        /** TODO: CHECK FOR IDs   **/
+                        loaded.Cache = true;    // we ran it manually - but dependency checking needs this set.
                         return next();
                     }
                     if (isDefined(failed[current.key])) {
@@ -2714,7 +2548,7 @@
                         String(Script.gameversion),
                         "scoobydoo, Dun, Petee, Bluep [tw-db.info]",
                         "http://tw-db.info");
-                    var PayPal = '<br><br><form action="https://www.paypal.com/cgi-bin/webscr" method="post">'
+                    var Paypal = '<br><br><form action="https://www.paypal.com/cgi-bin/webscr" method="post">'
                                + '<input name="cmd" value="_s-xclick" type="hidden">'
                                + '<input name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----" type="hidden">'
                                + '<input type="image" src="https://www.paypalobjects.com/en_US/DE/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">'
@@ -2833,7 +2667,7 @@
                             if (!w.west.gui.hasOwnProperty(key)) { continue; };
                             newName = key.toLowerCase();
                             gui[newName] = w.west.gui[key];
-                        };
+                        }
                     /* } else {
                         for (var key in w.tw2gui) {
                             if (!w.tw2gui.hasOwnProperty(key)) { continue; };
@@ -2842,7 +2676,7 @@
                         };
                     }; */
                 };
-                var wmanRef = function() { GameAPI.wman = wman };
+                var wmanRef = function(){ GameAPI.wman = wman };
                 loader = Loader.add("GameAPI", "tw-db GameAPI", init, {});
                 return _self;
             }($);
@@ -2850,113 +2684,83 @@
             Debugger.GameAPI = GameAPI;
             
             
-            var Cache = function (e) {
-                var t = {};
-                var n = {};
-                var r = "";
-                var i = {};
-                var s = function (e) {
-                    if (!i[e]) {
-                        i[e] = true;
-                        t.save("keys", i)
+            var Cache = (function ($) {
+                var _self = {};
+                var loader = {};
+                var uid = '';
+                var keys = {};
+                
+                var useKey = function(key) {
+                    if (!keys[key]) {
+                        keys[key] = true;
+                        _self.save('keys',keys);
                     }
                 };
-                var o = function () {
-                    if (n.ready) {
-                        return
-
-                    }
-                    r = "twdb_" + Character.playerId + "_";
-                    i = t.load("keys");
-                    if (!i) {
-                        i = {
-                            keys: true
-                        }
-                    }
-                    n.ready = true
+                
+                var init = function() {
+                    if (loader.ready) { return; };
+                    uid = 'twdb_' + Character.playerId + '_';
+                    keys = _self.load('keys');
+                    if (!keys) { keys = {'keys':true}; };
+                    loader.ready = true;
                 };
-                n = Loader.add("Cache", "tw-db Cachesystem", o);
-                t.load = function (n) {
-                    s(n);
+                // deactivated, we will init the Cache Object manually at the end of the definition...
+                // loader = Loader.add('Cache', 'tw-db Cachesystem', init );
+                
+                _self.load = function(key) {
+                    useKey(key);
+                    try { return $.parseJSON(decodeURIComponent(localStorage.getItem(uid+key))); }
+                    catch (e) {
+                        Error.report(e,'load ' + key + ' from cache');
+                        _self.save(key,null);
+                        return null;
+                    }
+                };
+                
+                _self.save = function(key,data) {
+                    useKey(key);
                     try {
-                        return e
-                            .parseJSON(decodeURIComponent(localStorage
-                                .getItem(r + n)))
-                    } catch (i) {
-                        Error.report(i, "load " + n + " from cache");
-                        t.save(n, null);
-                        return null
-                    }
+                        localStorage.setItem(uid+key, encodeURIComponent(JSON.stringify(data)));
+                        return true;
+                    } catch (e) {
+                        Error.report(e,'save ' + key + ' to cache');
+                        _self.save(key, null);
+                        return false;
+                    };
                 };
-                t.save = function (e, n) {
-                    s(e);
+                
+                _self.reset = function (confirm, type) {
                     try {
-                        localStorage.setItem(r + e,
-                            encodeURIComponent(JSON.stringify(n)));
-                        return true
-                    } catch (i) {
-                        Error.report(i, "save " + e + " to cache");
-                        t.save(e, null);
-                        return false
-                    }
-                };
-                t.reset = function (n, s) {
-                    try {
-                        if (n) {
-                            if (isDefined(s)) {
-                                localStorage.removeItem(s)
-                            } else {
-                                for (var o in i) {
-                                    localStorage.removeItem(r + o)
-                                }
-                            }
-                            (new UserMessage(
-                                "Reset Done, Site will now be reloaded",
-                                UserMessage.TYPE_SUCCESS)).show();
-                            location.href = location.href.replace(
-                                location.hash || "#", "")
+                        if (confirm) {
+                            if (isDefined(type)){ localStorage.removeItem(type); }
+                            else { for (var key in keys){ localStorage.removeItem(uid+key); } }
+                            (new UserMessage('Reset Done, page will now be reloaded', UserMessage.TYPE_SUCCESS)).show();
+                            location.href = location.href.replace(location.hash || '#', '');
                         } else {
-                            var u = e("<div><h2>#CACHE_RESET#</h2></div>");
-                            var a = (new GameAPI.gui.textfield(
-                                    "twdb_cache_key")).setSize(40)
-                                .setLabel("Key:");
-                            u.append(a.getMainDiv());
-                            var f = (new GameAPI.gui.checkbox(
-                                "all Keys")).setSelected(true);
-                            f.setCallback(function (e) {
-                                if (e) {
-                                    a.setValue("")
-                                }
-                            });
-                            e(a.getMainDiv()).find("span").css(
-                                "font-size", "12px");
-                            e(a.getMainDiv()).find("input").keyup(
-                                function () {
-                                    f.setSelected(false)
-                                });
-                            u
-                                .append(e(
-                                        '<div style="display:block;" />')
-                                    .append(f.getMainDiv()));
-                            (new GameAPI.gui.dialog(
-                                "tw-db Cache Reset", u,
-                                GameAPI.gui.dialog.SYS_QUESTION))
-                            .addButton("ok", function () {
-                                if (f.isSelected()) {
-                                    t.reset(true)
-                                } else {
-                                    t.reset(true, a.getValue())
-                                }
-                            }).addButton("cancel").show()
-                        }
-                    } catch (l) {
-                        Error.report(l, "cache reset")
-                    }
+                            var div = $('<div><h2>#CACHE_RESET#</h2></div>');
+                            var input = (new GameAPI.gui.textfield("twdb_cache_key")).setSize(40).setLabel('Key:');
+                            div.append(input.getMainDiv());
+                            var checkbox = (new GameAPI.gui.checkbox('all Keys')).setSelected(true);
+                            checkbox.setCallback(function(state){ if (state){ input.setValue(''); } });
+                            $(input.getMainDiv()).find('span').css('font-size','12px');
+                            $(input.getMainDiv()).find('input').keyup(function(){ checkbox.setSelected(false); });
+                            div.append(($('<div style="display:block;" />').append(checkbox.getMainDiv())));
+                            (new GameAPI.gui.dialog("tw-db Cache Reset", div, GameAPI.gui.dialog.SYS_QUESTION)).addButton("ok", function() {
+                                if (checkbox.isSelected()){ _self.reset(true); }
+                                else { _self.reset(true, input.getValue()); }
+                            }).addButton('cancel').show();
+                        };
+                    } catch (e) {
+                        Error.report(e,'cache reset');
+                    };
                 };
-                return t
-            }($);
+                // now init manually, Cache has no dependencies and for migration checks we need it before Loader starts init'ing
+                init();
+                return _self;
+            })($);
             _base.Cache = Cache;
             Debugger.Cache = Cache;
+  
             var Worker = function (e) {
                 var t = {};
                 var n = [];
@@ -3696,35 +3500,30 @@
             Debugger.Importer = Importer;
             
             
-  ///// complete ////////////////////////
-  //
-  //  Settings Object:  handles the Script Settings
-  //  Init:             should be loader after Window Module and Cache Module
-  //  Methodes:         - get (key,defValue) // get stored settingsvalue
-  //                        -> key: index
-  //                        -> key: defaultValue
-  //                        <- value
-  //                    - set (key,data) // set a settingsvalue
-  //                        -> key: index
-  //                        -> data: new value
-  //
-  /////////////////////////////
+            ///// complete ////////////////////////
+            //
+            //  Settings Object:  handles the Script Settings
+            //  Init:             should be loader after Window Module and Cache Module
+            //  Methodes:         - get (key,defValue) // get stored settingsvalue
+            //                        -> key: index
+            //                        -> key: defaultValue
+            //                        <- value
+            //                    - set (key,data) // set a settingsvalue
+            //                        -> key: index
+            //                        -> data: new value
+            //
+            /////////////////////////////
             var Settings = function ($) {
-                    var _self = {};                                  
-                    var settings = {};                               
-                    var wnd = null;                                  
-                    var loader = {};                                 
+                var _self = {};                                  
+                var settings = {};                               
+                var wnd = null;                                  
+                var loader = {};                                 
 
-                    var init = function (){                        
-                    if (loader.ready) {                          
-                      return;                                      
-                    };                                             
+                var init = function() {                        
+                    if (loader.ready) { return; }                                             
                     var tmp = Cache.load('settings');              
-                    if (typeof(tmp) == 'object' && tmp != null) {
-                      settings = tmp;                              
-                    } else {                                       
-                      settings = {};                               
-                    };                                             
+                    if (typeof(tmp) === 'object' && tmp !== null) { settings = tmp; }
+                    else { settings = {}; }                                             
                     wnd = Window.addTab('settings','#SETTINGS#','#SETTINGS#',open);
                     loader.ready = true;
                 };
@@ -8403,6 +8202,7 @@
                         f += '<input style="display:none" type="text" name="worldfull" value="' + window.location.host + '" />';
                         f += '<input style="display:none" type="text" name="protocol" value="' + Script.protocol + '" />';
                         f += '<input style="display:none" type="text" name="version" value="' + TheWestApi.version + '" />';
+                        f += '<input style="display:none" type="text" name="after_000_migration" value="' + TWDB.Util.isNewIDsystem() + '" />';
                         f += '<input style="display:none" type="text" name="nick" value="' + Character.name + '" />';
                         f += '<input style="display:none" type="text" name="level" value="' + Number(Character.level) + '" />';
                         f += '<input style="display:none" type="text" name="class" value="' + Number(TWDB.ClothCalc._class2id[Character.charClass]) + '" />';
