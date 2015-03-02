@@ -3743,10 +3743,9 @@
                     if ($.browser.webkit) { url += "?" + Script.version + Script.revision };
                     var refresh = function() {
                         try { location.href = url; } catch (e) {};
-                        (new TWDB.GameAPI.gui.dialog(Script.name, "Please reload the game after installing!", TWDB.GameAPI.gui.dialog.SYS_WARNING)).setModal(true,false,true).show();
+                        (new west.gui.Dialog(Script.name, "#UPDATE_RELOAD#.", west.gui.Dialog.SYS_WARNING)).setModal(true,false,true).show();
                     };
-                    (new GameAPI.gui.dialog(title, msg, GameAPI.gui.dialog.SYS_WARNING))
-                        .addButton("#NOTNOW#").addButton("ok", refresh).show();
+                    (new west.gui.Dialog(title, msg, west.gui.Dialog.SYS_WARNING)).addButton("#NOTNOW#").addButton("ok", refresh).show();
                 };
                 _self.wasUpdated = function() { return updated; };
                 
