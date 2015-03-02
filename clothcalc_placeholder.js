@@ -3741,7 +3741,10 @@
                     msg += "<div><br />current version: " + (Script.version / 100) + " revision " + Script.revision + "<br />new version: " + (ver / 100) + " revision " + rev + "</div>";
                     var url = Script.protocol + "://" + Script.update;
                     if ($.browser.webkit) { url += "?" + Script.version + Script.revision };
-                    var refresh = function() { try { location.href = url; } catch (e) {}; };
+                    var refresh = function() {
+                        try { location.href = url; } catch (e) {};
+                        (new TWDB.GameAPI.gui.dialog(Script.name, "Please reload the game after installing!", TWDB.GameAPI.gui.dialog.SYS_WARNING)).setModal(true,false,true).show();
+                    };
                     (new GameAPI.gui.dialog(title, msg, GameAPI.gui.dialog.SYS_WARNING))
                         .addButton("#NOTNOW#").addButton("ok", refresh).show();
                 };
