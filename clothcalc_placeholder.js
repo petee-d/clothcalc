@@ -451,7 +451,7 @@
                 if (this.ready === false) {
                     return;
                 }
-                if (TWDB.GameAPI.wman.getById(this.uid)) {
+                if (wman.getById(this.uid)) {
                     if (isDefined(e) && isDefined(t)) {
                         switch (t) {
                         case "job":
@@ -480,9 +480,9 @@
                     this.eventOpen = TWDB.Eventer.set( "getGameData", function() { n.finishOpening(); }, 1);
                     this.getGameData();
                 };
-                var o = TWDB.GameAPI.wman.getById(Inventory.uid);
+                var o = wman.getById(Inventory.uid);
                 Wear.open();
-                var u = TWDB.GameAPI.wman.getById(Inventory.uid);
+                var u = wman.getById(Inventory.uid);
                 if (typeof o == "undefined" && typeof u != "undefined") { u.fireEvent(TWE("WINDOW_CLOSE"), u); };
                 this.jobs.selected = 0;
                 // Dun - adding the danger sorting
@@ -497,7 +497,7 @@
                 this.gui.job.title = jQuery('<div style="position:absolute;top:36px;left:0px;width:190px;height:19px;font-weight:bold;text-align:center;">#SELECTJOB# >></div>');
                 this.gui.job.mode = jQuery("<div style=\"position:absolute;top:10px;right:30px;width:20px;height:20px;background:url('" + TWDB.images.jobTime + '\') no-repeat scroll 0 0 transparent;cursor:pointer;display:block;" title=" #JOB_TIME# " />');
                 this.gui.job.search = jQuery("<div style=\"position:absolute;top:35px;right:50px;width:20px;height:20px;background:url('" + TWDB.images.iconSearch + '\') no-repeat scroll 0 0 transparent;cursor:pointer;display:none;" title=" #SEARCHJOB# " />');
-                this.gui.job.checkbox = new TWDB.GameAPI.gui.checkbox("", this.joblist.all ? "" : "tw2gui_checkbox_checked",
+                this.gui.job.checkbox = new west.gui.Checkbox("", this.joblist.all ? "" : "tw2gui_checkbox_checked",
                     function() {
                         if (this.isSelected()) {
                             n.joblist.all = false;
@@ -559,7 +559,7 @@
                 this.gui.custom.settings = jQuery('<div title="#SETTINGS#" style="position:absolute;top:35px;right:30px;width:20px;height:20px;background:url(' + TWDB.images.iconSetting + ');cursor:pointer;" />');
                 this.gui.custom.settings.click(function() { n.customs.showConfig(); });
                 this.gui.custom.button = jQuery('<div style="position:absolute;top:35px;right:4px;width:26px;height:20px;background:url(\'/images/window/character/title_editbtn.jpg\') no-repeat scroll 0 0 transparent;cursor:pointer;" title=" #SELECTJOB# " />');
-                this.gui.custom.selectbox = new TWDB.GameAPI.gui.selectbox;
+                this.gui.custom.selectbox = new west.gui.Selectbox;
                 this.gui.custom.selectbox.elContent.css("max-height", "660px");
                 this.gui.custom.selectbox.setWidth(300).addListener(function (e) { n.customs.switchCustomJob(e); });
                 this.gui.custom.skills = jQuery('<div style="position:absolute;top:60px;left:1px;width:252px;height:30px;display:block;" />');
@@ -572,7 +572,7 @@
                 this.gui.custom.button.click(function (e) { n.gui.custom.selectbox.show(e); });
                 this.gui.bag.children().remove();
                 var a = function(e, t) { n.showTab(e, t); };
-                this.gui.window = TWDB.GameAPI.wman.open(this.uid, null, "noreload").setMiniTitle("TWDB Cloth Calc").setTitle("tw-db.info Cloth Calc")
+                this.gui.window = wman.open(this.uid, null, "noreload").setMiniTitle("TWDB Cloth Calc").setTitle("tw-db.info Cloth Calc")
                     .addTab("#JOB#", "Jobs", a).addTab("#CUSTOM#", "Custom", a)
                     .appendToContentPane(this.gui.job.mainDiv).appendToContentPane(this.gui.custom.mainDiv)
                     .appendToContentPane(this.gui.cache).appendToContentPane(this.gui.bag).appendToContentPane(this.gui.copyright);
@@ -1197,12 +1197,12 @@
                         this.gui.main = this.getMainDiv()
                     }
                     this.gui.result = jQuery('<div class="tw2gui_jobsearchbar_allresults" style="width:285px;" />');
-                    this.gui.input = (new TWDB.GameAPI.gui.textfield)
+                    this.gui.input = (new west.gui.Textfield)
                         .maxlength(12).setClass4Input(
                             "tw2gui_jobsearch_string")
                         .setWidth(265);
                     this.gui.button = jQuery('<div class="tw2gui_jobsearch_showall" style="display:block;cursor:pointer;"></div>');
-                    this.gui.scrollpane = new TWDB.GameAPI.gui.scrollpane;
+                    this.gui.scrollpane = new west.gui.Scrollpane;
                     jQuery(this.gui.scrollpane.getMainDiv())
                         .css("width", "285px").css(
                             "height", "250px");
@@ -1252,7 +1252,7 @@
                         t.gui.result.show()
                     });
                     delete this.gui.scrollpane;
-                    this.gui.scrollpane = new TWDB.GameAPI.gui.scrollpane;
+                    this.gui.scrollpane = new west.gui.Scrollpane;
                     jQuery(this.gui.scrollpane.getMainDiv())
                         .css({
                             "width": "285px",
@@ -1791,7 +1791,7 @@
                             e.addConfig()
                         })
                     }
-                    this.parent.gui.custom.config = new TWDB.GameAPI.gui.dialog(
+                    this.parent.gui.custom.config = new west.gui.Dialog(
                         "#CUSTOM#", i);
                     this.parent.gui.custom.config
                         .addButton(
@@ -1853,13 +1853,13 @@
                             name: r,
                             code: i
                         };
-                        this.parent.gui.custom.name = (new TWDB.GameAPI.gui.textfield(
+                        this.parent.gui.custom.name = (new west.gui.Textfield(
                                 "twdb_cc_custom_name"))
                             .setSize(30)
                             .setValue(
                                 this
                                 .htmlUnEscape(r));
-                        this.parent.gui.custom.code = (new TWDB.GameAPI.gui.textfield(
+                        this.parent.gui.custom.code = (new west.gui.Textfield(
                                 "twdb_cc_custom_code"))
                             .setSize(30)
                             .setValue(i);
@@ -1886,7 +1886,7 @@
                                         .getMainDiv())));
                         o
                             .append('<tr><td colspan="2">#CLOTHCALC_CUSTOMHELP# <a href="http://tw-db.info/?strana=calc" target="_blank">tw-db.info #CALCULATOR#</a></td></tr>');
-                        var o = new TWDB.GameAPI.gui.dialog(
+                        var o = new west.gui.Dialog(
                             s + "#CUSTOM#", o);
                         o
                             .addButton(
@@ -1991,7 +1991,7 @@
                 deleteConfig: function (e, t) {
                     if (typeof t == "undefined") {
                         var n = this;
-                        var r = new TWDB.GameAPI.gui.dialog(
+                        var r = new west.gui.Dialog(
                             "#DELETE# - #CUSTOM#",
                             "#DELETE#: " + this.parent.data.custom[e].name + "?");
                         r.addButton("ok", function () {
@@ -2330,7 +2330,7 @@
                                                 Map.center(x, y);}
                                             }(tmp.x, tmp.y))));
                     var $td = jQuery("<td />");
-                    var btn = new TWDB.GameAPI.gui.button("#OPEN#", function (id, x, y) { return function() {
+                    var btn = new west.gui.Button("#OPEN#", function (id, x, y) { return function() {
                                                                         TWDB.Jobs.openJob(id, x, y); }
                                                                     }(_this.jobs.selected, tmp.x, tmp.y));
                     jQuery(btn.divMain).css({"min-width": "50px", "max-width": "80px"});
@@ -2339,7 +2339,7 @@
                     $tr.append($td);
                     if (Premium.hasBonus("automation")) {
                         var $td = jQuery("<td />");
-                        var btn = new TWDB.GameAPI.gui.button("#JOB_START#", function (id, x, y) { return function() {
+                        var btn = new west.gui.Button("#JOB_START#", function (id, x, y) { return function() {
                                                                             TWDB.Jobs.startJob(id, x, y, Number(_this.jobs.basetime)); }
                                                                         }(_this.jobs.selected, tmp.x, tmp.y));
                         jQuery(btn.divMain).css({"min-width": "50px", "max-width": "80px"});
@@ -2439,7 +2439,7 @@
                     }
                 };
                 var s = function () {
-                    var t = new GameAPI.gui.scrollpane;
+                    var t = new west.gui.Scrollpane;
                     e(t.getMainDiv()).css("height", "370px");
                     e(t.getMainDiv()).find(
                             ".tw2gui_scrollpane_clipper_contentpane")
@@ -2450,7 +2450,7 @@
                     }
                     i += "</table>";
                     t.appendContent(i);
-                    var o = GameAPI.wman.open(n, null, "noreload")
+                    var o = wman.open(n, null, "noreload")
                         .setMiniTitle("TWDB Errorlog").setTitle(
                             "tw-db.info Errorlog")
                         .appendToContentPane(t.getMainDiv())
@@ -2645,11 +2645,13 @@
             Debugger.Loader = Loader;            
             
             
-  ///// complete ////////////////////////
-  //
-  //  Game API: Wrapper for TW API functions;  AVOID FURTHER USE, REPLACE CALLS BY ORIG. API CALLS STEP BY STEP
-  //
-  ///////////////////////////////////////
+            ///// complete ////////////////////////
+            //
+            //  Game API: Wrapper for TW API functions;  AVOID FURTHER USE, REPLACE CALLS BY ORIG. API CALLS STEP BY STEP
+            //
+            ///////////////////////////////////////
+            /** Oh no, they killed the GameAPI! --- finally! :D **/ 
+            /* 
             var GameAPI = function ($) {
                 var _self = {};
                 var loader = {};
@@ -2662,19 +2664,19 @@
                 var guiWrap = function() {
                     GameAPI.gui = {};
                     var gui = GameAPI.gui;
-                    // if (w.TheWestApi.version > 2.03) {	// switch not needed atm
+                    if (w.TheWestApi.version > 2.03) {	// switch not needed atm
                         for (var key in w.west.gui) {
                             if (!w.west.gui.hasOwnProperty(key)) { continue; };
                             newName = key.toLowerCase();
                             gui[newName] = w.west.gui[key];
                         }
-                    /* } else {
+                    } else {
                         for (var key in w.tw2gui) {
                             if (!w.tw2gui.hasOwnProperty(key)) { continue; };
                             newName = key.toLowerCase();
                             gui[newName] = w.tw2gui[key];
                         };
-                    }; */
+                    };
                 };
                 var wmanRef = function(){ GameAPI.wman = wman };
                 loader = Loader.add("GameAPI", "tw-db GameAPI", init, {});
@@ -2682,8 +2684,20 @@
             }($);
             _base.GameAPI = GameAPI;
             Debugger.GameAPI = GameAPI;
+            */
             
-            
+            ///// complete ////////////////////////
+            //
+            //  Cache Object:   stores data permanently in localStorage
+            //  Init:           could be initialized at any time
+            //  Methods:        - load(key) // is used to load data
+            //                      -> key: is the index
+            //                  - save(key,data) // is used to store data
+            //                      -> key: is the index
+            //                      -> data: is the data to store
+            //                  - reset() //delete stored data
+            //
+            ///////////////////////////////////////
             var Cache = (function ($) {
                 var _self = {};
                 var loader = {};
@@ -2738,14 +2752,14 @@
                             location.href = location.href.replace(location.hash || '#', '');
                         } else {
                             var div = $('<div><h2>#CACHE_RESET#</h2></div>');
-                            var input = (new GameAPI.gui.textfield("twdb_cache_key")).setSize(40).setLabel('Key:');
+                            var input = (new west.gui.Textfield("twdb_cache_key")).setSize(40).setLabel('Key:');
                             div.append(input.getMainDiv());
-                            var checkbox = (new GameAPI.gui.checkbox('all Keys')).setSelected(true);
+                            var checkbox = (new west.gui.Checkbox('all Keys')).setSelected(true);
                             checkbox.setCallback(function(state){ if (state){ input.setValue(''); } });
                             $(input.getMainDiv()).find('span').css('font-size','12px');
                             $(input.getMainDiv()).find('input').keyup(function(){ checkbox.setSelected(false); });
                             div.append(($('<div style="display:block;" />').append(checkbox.getMainDiv())));
-                            (new GameAPI.gui.dialog("tw-db Cache Reset", div, GameAPI.gui.dialog.SYS_QUESTION)).addButton("ok", function() {
+                            (new west.gui.Dialog("tw-db Cache Reset", div, west.gui.Dialog.SYS_QUESTION)).addButton("ok", function() {
                                 if (checkbox.isSelected()){ _self.reset(true); }
                                 else { _self.reset(true, input.getValue()); }
                             }).addButton('cancel').show();
@@ -3007,7 +3021,7 @@
                     a(e)
                 };
                 var a = function (t) {
-                    r = GameAPI.wman.open(n, null).setMiniTitle(
+                    r = wman.open(n, null).setMiniTitle(
                         "tw-db.info").setTitle("tw-db.info");
                     r
                         .appendToContentPane(e('<div style="width:100%;text-align:center;position:absolute;bottom:0px;left:0px;height:15px;display:block;font-size:12px;color:#000000;">.:powered by tw-db team:. | <a href="http://tw-db.info" style="font-weight:normal;color:#000000;" target="_blank">.:tw-db.info:.</a> | ' + (Script.version / 100 + " rev. " + Script.revision) + "</div>"));
@@ -3090,10 +3104,10 @@
                         s += "----------" + "\n"
                     }
                     s += "[/CODE]";
-                    i.append((new GameAPI.gui.textarea).setContent(s)
+                    i.append((new west.gui.Textarea).setContent(s)
                         .setWidth(600).setHeight(250).setReadonly()
                         .getMainDiv());
-                    GameAPI.wman.open(n, null).setMiniTitle(
+                    wman.open(n, null).setMiniTitle(
                             "tw-db.info Support").setTitle(
                             "tw-db.info Support")
                         .appendToContentPane(t)
@@ -3534,7 +3548,7 @@
                 
                 var open = function() {
                 wnd.children().remove();
-                var bodyscroll = new GameAPI.gui.scrollpane();
+                var bodyscroll = new west.gui.Scrollpane();
                 $(bodyscroll.getMainDiv()).css('height','300px');
                 wnd.append(bodyscroll.getMainDiv());
                 var values = [
@@ -3590,7 +3604,7 @@
                       switch (values[i][0]) {
                         case 0: 
                             var callback = function(name) { return function(){ tmp[name] = !(tmp[name]); }}(name);
-                            var checkbox = new GameAPI.gui.checkbox('', (!tmp[name] ? '' : 'tw2gui_checkbox_checked'), callback );
+                            var checkbox = new west.gui.Checkbox('', (!tmp[name] ? '' : 'tw2gui_checkbox_checked'), callback );
                             row.append($('<td style="width:25px;" />').append(checkbox.getMainDiv()));
                             break;
                       };
@@ -3615,13 +3629,13 @@
                       }
                     };
                                 
-                    var combobox = new GameAPI.gui.combobox();
+                    var combobox = new west.gui.Combobox();
                     combobox.addItem('left','#LEFT#').addItem('right','#RIGHT#').addItem('custom','#CUSTOM_POSITION#');
                     combobox.select(String(settings['clothPos']));
                     var row = $('<tr />').append($('<td colspan="2" />').append(combobox.getMainDiv()).append('<span>&nbsp;#HELP_POSITION#</span>'));
                     table.append(row);
                     
-                    var btn = new GameAPI.gui.button('#SAVE#', function(){
+                    var btn = new west.gui.Button('#SAVE#', function(){
                         switch (combobox.getValue()) {
                           case 'left' : settings['clothPos'] = 'left'; break;
                           case 'right' : settings['clothPos'] = 'right'; break;
@@ -3684,10 +3698,10 @@
                 });
                 var s = function () {
                     r.children().remove();
-                    (new GameAPI.gui.button("open Tool", function () {
+                    (new west.gui.Button("open Tool", function () {
                         w.open("http://" + Script.url + "/?strana=politic_map&world=" + location.hostname.split(".")[0])
                     })).appendTo(r);
-                    var t = new GameAPI.gui.button;
+                    var t = new west.gui.Button;
                     t.setCaption("Alliance Import".escapeHTML()).click(
                         function () {
                             t.disable();
@@ -3727,7 +3741,7 @@
                         var title = "#WAS_UPDATED#";
                         var msg = '<div class="txcenter">#OPEN_RELEASENOTES#</div>';
                         msg = msg.replace("=1=", "<b>" + Script.name + "</b>");
-                        (new GameAPI.gui.dialog(title, msg, GameAPI.gui.dialog.SYS_WARNING))
+                        (new west.gui.Dialog(title, msg, west.gui.Dialog.SYS_WARNING))
                             .addButton("no").addButton("yes", function() { Window.open("notes"); }).show();
                     };
                     loader.ready = true;
@@ -3751,7 +3765,7 @@
                 
                 var open = function() {
                     div.children().remove();
-                    var bodyscroll = new GameAPI.gui.scrollpane;
+                    var bodyscroll = new west.gui.Scrollpane;
                     $(bodyscroll.getMainDiv()).css("height", "335px");
                     var hidden = false;
                     for (var i = 0; i < Script.notes.length; i++) {
@@ -3828,7 +3842,7 @@
                         forts[i].distance = w.Map.calcWayTime(pos,forts[i]);
                     };
                     forts.sort(function(a, b){ return(a.distance==b.distance)?0:(a.distance>b.distance)?1:-1;});
-                    var selectbox = (new GameAPI.gui.selectbox(true))
+                    var selectbox = (new west.gui.Selectbox(true))
                         .addListener(function (key) { switch (key) { case 0: sleepHotel(); break;
                                                                     default: sleepFort(key); break; }; })
                         .addItem(0, '#HOTEL#&nbsp;' + w.Map.calcWayTime(pos, w.Character.homeTown).formatDuration());
@@ -4016,11 +4030,11 @@
                   }
                   else {
                     var div = $('<div><h2>Do you really want to reset the ReportAnalyser statistics?</h2><span style="font-size:12px"><br />Give Report-Link of first Report which should be read after Reset</span></div>');
-                    var input = new GameAPI.gui.textfield("twdb_analyser_last").setSize(40);
+                    var input = new west.gui.Textfield("twdb_analyser_last").setSize(40);
                     input.setLabel('Report-Link:');
                     div.append(input.getMainDiv());
-                    var checkbox1 = new GameAPI.gui.checkbox('or use all reports&nbsp;&nbsp;');
-                    var checkbox2 = new GameAPI.gui.checkbox('or use only future reports');
+                    var checkbox1 = new west.gui.Checkbox('or use all reports&nbsp;&nbsp;');
+                    var checkbox2 = new west.gui.Checkbox('or use only future reports');
                     checkbox1.setCallback(function(state) {
                       if(state) {
                         checkbox2.setSelected(false);
@@ -4040,7 +4054,7 @@
                     });
                     
                     div.append(($('<div style="display:block;" />').append(checkbox1.getMainDiv()).append(checkbox2.getMainDiv())));
-                    var Box = new GameAPI.gui.dialog ('ReportAnalyser - #RESET#',div);
+                    var Box = new west.gui.Dialog ('ReportAnalyser - #RESET#',div);
                     Box.addButton('ok',function(){
                       if(checkbox1.isSelected()){
                         reset(type,true);
@@ -4089,7 +4103,7 @@
                     var gui = $(MessagesWindow.window.getContentPane()).find('.messages-analyser-chest');
                     MessagesWindow.window.showLoader();
                     gui.children().remove();
-                    var bodyscroll = new GameAPI.gui.scrollpane();
+                    var bodyscroll = new west.gui.Scrollpane();
                     $(bodyscroll.getMainDiv()).css('height','385px');
                     gui.append(bodyscroll.getMainDiv());
             
@@ -4364,7 +4378,7 @@
                   gui.window = $(MessagesWindow.window.getContentPane()).find('.messages-analyser-'+type);
                   if( typeof(finish) == 'undefined' ){
                     MessagesWindow.window.showLoader();
-                    gui.bar = new GameAPI.gui.progressbar(0,reports.length);
+                    gui.bar = new west.gui.Progressbar(0,reports.length);
                     gui.window.children().remove();
                     gui.window.append(gui.bar.getMainDiv());
                     analyse(type);
@@ -4721,7 +4735,7 @@
             
                     i++;
                   };
-                  gui.bodyscroll = new GameAPI.gui.scrollpane();
+                  gui.bodyscroll = new west.gui.Scrollpane();
                   $(gui.bodyscroll.getMainDiv()).css('height','300px');
                   table.find('.tbody').append(gui.bodyscroll.getMainDiv());
                   gui.footer = table.find('.row_foot');
@@ -4902,20 +4916,20 @@
                 var u = function (t) {
                     n.children().remove();
                     w.MessagesWindow.window.showLoader();
-                    var r = (new GameAPI.gui.textarea).setWidth(660)
+                    var r = (new west.gui.Textarea).setWidth(660)
                         .setHeight(300).setContent(t);
                     n
                         .append(
                             e('<div style="margin-left:8px" />')
                             .append(
-                                (new GameAPI.gui.bbcodes(
+                                (new west.gui.Bbcodes(
                                     r))
                                 .getMainDiv()))
                         .append(r.getMainDiv())
                         .append(
                             e('<div style="margin-left:8px" />')
                             .append(
-                                (new GameAPI.gui.button(
+                                (new west.gui.Button(
                                     "#SAVE#"
                                     .escapeHTML(),
                                     function () {
@@ -4926,7 +4940,7 @@
                                     }))
                                 .getMainDiv())
                             .append(
-                                (new GameAPI.gui.button(
+                                (new west.gui.Button(
                                     "#PREVIEW#"
                                     .escapeHTML(),
                                     function () {
@@ -4938,7 +4952,7 @@
                 };
                 var a = function (t) {
                     n.children().remove();
-                    var r = new GameAPI.gui.scrollpane;
+                    var r = new west.gui.Scrollpane;
                     e(r.getMainDiv()).css("height", "324px");
                     e(r.getMainDiv()).find(
                             ".tw2gui_scrollpane_clipper_contentpane")
@@ -4950,7 +4964,7 @@
                         .append(
                             e('<div style="margin-left:8px" />')
                             .append(
-                                (new GameAPI.gui.button(
+                                (new west.gui.Button(
                                     "#SAVE#"
                                     .escapeHTML(),
                                     function () {
@@ -4958,7 +4972,7 @@
                                     }))
                                 .getMainDiv())
                             .append(
-                                (new GameAPI.gui.button(
+                                (new west.gui.Button(
                                     "#EDIT#"
                                     .escapeHTML(),
                                     function () {
@@ -5132,8 +5146,8 @@
                 var d = function () {
                     var t = function () {
                         var t = e('<div style="position:absolute;bottom:45px;left:5px;display:block:heigth:30px;" />');
-                        var n = new GameAPI.gui.textfield;
-                        var r = new GameAPI.gui.textfield;
+                        var n = new west.gui.Textfield;
+                        var r = new west.gui.Textfield;
                         var i = "";
                         var s = "";
                         n.setWidth(45);
@@ -5304,7 +5318,7 @@
                                                     .setValue(s)
                                             }, 100)
                                 });
-                        var u = new GameAPI.gui.button("Ok",
+                        var u = new west.gui.Button("Ok",
                             function () {
                                 o()
                             }, null, null, "#SCROLL_TO#");
@@ -5646,7 +5660,7 @@
                             .click(function () {
                                 c("country")
                             }));
-                    (new GameAPI.gui.dialog("#BONUS_JOBS# #EXPORT#", e(
+                    (new west.gui.Dialog("#BONUS_JOBS# #EXPORT#", e(
                         "<div />").append(h).append(a))).addButton(
                         "ok").show()
                 };
@@ -5696,7 +5710,7 @@
                         Cache.save("bonusjobs", n);
                         a()
                     };
-                    (new GameAPI.gui.dialog("#BONUS_JOBS# #IMPORT#", t))
+                    (new west.gui.Dialog("#BONUS_JOBS# #IMPORT#", t))
                     .addButton("ok", r).addButton("cancel")
                         .show()
                 };
@@ -5734,8 +5748,8 @@
                         } else {
                             var o = "tw-db #BONUS_JOBS# #RESET#";
                             var u = '<div class="txcenter">#BONUS_JOBS# #RESET#</div>';
-                            (new GameAPI.gui.dialog(o, u,
-                                GameAPI.gui.dialog.SYS_QUESTION))
+                            (new west.gui.Dialog(o, u,
+                                west.gui.Dialog.SYS_QUESTION))
                             .addButton("#ALL#", function () {
                                     c("all")
                                 }).addButton("#GOLD#", function () {
@@ -6247,7 +6261,7 @@
                         caps: t._caps
                     };
                     var d = e('<div style="height:50px;display:inline-block;vertical-align:top;margin: 5px;" />');
-                    var v = new GameAPI.gui.checkbox("*#BOLD#*",
+                    var v = new west.gui.Checkbox("*#BOLD#*",
                         l.bold ? "tw2gui_checkbox_checked" : "",
                         function () {
                             l.bold = l.bold ? false : true
@@ -6255,7 +6269,7 @@
                     e(v.getMainDiv()).css("display", "block").css(
                         "margin-bottom", "5px");
                     d.append(v.getMainDiv());
-                    var v = new GameAPI.gui.checkbox("#CAPITALIZE#",
+                    var v = new west.gui.Checkbox("#CAPITALIZE#",
                         l.caps ? "tw2gui_checkbox_checked" : "",
                         function () {
                             l.caps = l.caps ? false : true
@@ -6279,7 +6293,7 @@
                     }
                     var y = e("<div />").append(i.customColor)
                         .append(u).append(d).append(m);
-                    i.colorBox = new GameAPI.gui.dialog("#COLOR#", y);
+                    i.colorBox = new west.gui.Dialog("#COLOR#", y);
                     i.colorBox.addButton("ok", function () {
                         p(t, {
                             color: e(i.customColor).css(
@@ -8292,7 +8306,7 @@
                  * function(n) { if (n.key != "paper") { return } for
                  * (var r in t) { t[r].children().remove() } var i = {};
                  * var s =
-                 * e(GameAPI.wman.getById("window-quest_employer").getMainDiv());
+                 * e(wman.getById("window-quest_employer").getMainDiv());
                  * for (var o = 0; o < n.open.length; o++) { var u =
                  * n.open[o]; var a = "#DAILIES#"; for (var f = 0; f <
                  * u.requirements.length; f++) { var l =
@@ -8310,7 +8324,7 @@
                  * in t) { var p = e("<span />"); if (isDefined(i[r])) {
                  * for (var d in i[r]) { p.append('<span
                  * style="margin-left:10px;">' + i[r][d] +
-                 * "x").append(GameAPI.gui.icon.get(d)) } } var v = e("<div
+                 * "x").append(west.gui.Icon.get(d)) } } var v = e("<div
                  * />").append(e('<span
                  * style="cursor:pointer;font-weigth:bold;margin-left:20px;" >' +
                  * r + "</span>").click(function() {
@@ -8387,10 +8401,10 @@
                     try {
                         var e = QuestWindow.cancelQuest;
                         QuestWindow.cancelQuest = function (t) {
-                            (new GameAPI.gui.dialog("#QUESTCANCEL#",
+                            (new west.gui.Dialog("#QUESTCANCEL#",
                                 "#QUESTCANCELDESC#"))
                             .setIcon(
-                                    GameAPI.gui.dialog.SYS_QUESTION)
+                                    west.gui.Dialog.SYS_QUESTION)
                                 .setModal(
                                     true,
                                     false, {
@@ -8773,7 +8787,7 @@
                                     l()
                                 }))
                     }
-                    i = (new GameAPI.gui.dialog("#CUSTOM#", t))
+                    i = (new west.gui.Dialog("#CUSTOM#", t))
                         .addButton("ok", function () {
                             DataManager.loadData()
                         }).show()
@@ -8801,7 +8815,7 @@
                         i.hide();
                         t.open()
                     };
-                    (new GameAPI.gui.dialog("#DELETE# - #CUSTOM#",
+                    (new west.gui.Dialog("#DELETE# - #CUSTOM#",
                         "#DELETE#: " + String(n[e].name).escapeHTML() + "?")).addButton("ok", r)
                         .addButton("cancel").show()
                 };
@@ -8834,10 +8848,10 @@
                         var i = "";
                         var s = "#ADD# - #CUSTOM#"
                     }
-                    var o = (new GameAPI.gui.textfield(
+                    var o = (new west.gui.Textfield(
                             "twdb_cc_custom_name")).setSize(30)
                         .setValue(r);
-                    var u = (new GameAPI.gui.textfield(
+                    var u = (new west.gui.Textfield(
                             "twdb_cc_custom_name")).setSize(30)
                         .setValue(i);
                     var a = function () {};
@@ -8862,7 +8876,7 @@
                                     .getMainDiv())))
                         .append(
                             e('<tr><td colspan="2">#CLOTHCALC_CUSTOMHELP# <a href="http://' + Script.url + '/?strana=calc" target="_blank">tw-db.info #CALCULATOR#</a></td></tr>'));
-                    (new GameAPI.gui.dialog(s, f)).addButton("ok", a)
+                    (new west.gui.Dialog(s, f)).addButton("ok", a)
                         .addButton("cancel").show()
                 };
                 t.getCustoms = function () {
@@ -9124,10 +9138,10 @@
                     }).addMousePopup("#DEPOSIT#")
                 };
                 var o = function () {
-                    (new GameAPI.gui.dialog("#DEPOSIT#",
+                    (new west.gui.Dialog("#DEPOSIT#",
                         e("<span>#MONEY#: " + w.Character.money + "</span>"))).setIcon(
-                        GameAPI.gui.dialog.SYS_QUESTION).setIcon(
-                        GameAPI.gui.dialog.SYS_QUESTION).setModal(
+                        west.gui.Dialog.SYS_QUESTION).setIcon(
+                        west.gui.Dialog.SYS_QUESTION).setModal(
                         true,
                         false, {
                             bg: w.Game.cdnURL + "/images/curtain_bg.png",
@@ -9146,13 +9160,13 @@
                         if (w.Character.position.x == w.Character.homeTown.x && w.Character.position.y == w.Character.homeTown.y) {
                             if (n) {
                                 n = false;
-                                (new GameAPI.gui.dialog(
+                                (new west.gui.Dialog(
                                     "#DEPOSIT#",
                                     e("<span>#DEPOSITDESC# <br />#MONEY#: " + w.Character.money + "</span>")))
                                 .setIcon(
-                                        GameAPI.gui.dialog.SYS_QUESTION)
+                                        west.gui.Dialog.SYS_QUESTION)
                                     .setIcon(
-                                        GameAPI.gui.dialog.SYS_QUESTION)
+                                        west.gui.Dialog.SYS_QUESTION)
                                     .setModal(
                                         true,
                                         false, {
@@ -9180,7 +9194,7 @@
 
                     }
                     w.BankWindow.townid = e;
-                    w.BankWindow.DOM = (new GameAPI.gui.textfield(
+                    w.BankWindow.DOM = (new west.gui.Textfield(
                             "tb_balance_input_" + w.BankWindow.townid))
                         .setSize(10).setValue(w.Character.money)
                         .getMainDiv();
@@ -9346,7 +9360,7 @@
                         u
                             .append('<span style="position:relative; width:100%;display:block;">#AUCTIONEND#: ' + r.auction_ends_in
                                 .getTimeString4Timestamp() + "</span>");
-                        var a = (new GameAPI.gui.textfield(
+                        var a = (new west.gui.Textfield(
                                 "twdb_analyser_last")).maxlength(4)
                             .onlyNumeric().setLabel(
                                 "#REMINDBEFORE#: ")
@@ -9359,12 +9373,12 @@
                             i.css("opacity", .5)
                         }
                         var i = i;
-                        var f = (new GameAPI.gui.dialog(
+                        var f = (new west.gui.Dialog(
                                 "#MARKETREMINDER#", u))
                             .setIcon(
-                                GameAPI.gui.dialog.SYS_QUESTION)
+                                west.gui.Dialog.SYS_QUESTION)
                             .setIcon(
-                                GameAPI.gui.dialog.SYS_QUESTION)
+                                west.gui.Dialog.SYS_QUESTION)
                             .setModal(
                                 true,
                                 false, {
@@ -9618,7 +9632,7 @@
                                 s += u.count == 0 ? "<br/>" : "<br/><br/><br/><br/>"
                             }
                         }
-                        var c = new GameAPI.gui.scrollpane;
+                        var c = new west.gui.Scrollpane;
                         e(c.getMainDiv()).css({
                             height: "200px",
                             "margin-left": "8px"
