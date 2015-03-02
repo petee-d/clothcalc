@@ -7244,7 +7244,7 @@
                             entry.highlightBorder();
                             WestUi.NotiBar.add(entry);
                             TitleTicker.setNotifyMessage("#CRAFTING#");
-                            AudioController.play(AudioController.SOUND_NEWMSG);
+                            // AudioController.play(AudioController.SOUND_NEWMSG);
                         };	// ## weeklyCraftingNotice()
                         
                         var weeklyCraftingCheck = function () {
@@ -7268,17 +7268,19 @@
                             Ajax.remoteCall('crafting', '', {}, function(json) {
                                 if (json.error) { return new UserMessage(json.msg).show(); }
                                 if (json.hasOwnProperty('recipes_content') && json.recipes_content.length > 0) {
-                                    var i, timed_recipe = ({1:20099,2:20104,3:20114,4:20109})[w.Character.professionId];
+                                    var i;
+                                    /** TODO: Remove '?' expression when all worlds are migrated **/
+                                    var timed_recipes = TWDB.Util.isNewIDsystem() ? [20099000,20100000, 20104000,20105000, 20109000,20110000, 20114000,20115000] : [20099,20100, 20104,20105, 20109,20110, 20114,20115];
                                     for (i = 0; i < json.recipes_content.length; i++) {
-                                        if (json.recipes_content[i].item_id == timed_recipe) {
+                                        if (timed_recipes.indexOf(json.recipes_content[i].item_id) !== -1) {
                                             if (json.recipes_content[i].last_craft) {
                                                 TWDB.Cache.save('craftingCheck', {
-                                                    found: timed_recipe,
+                                                    found: json.recipes_content[i].item_id,
                                                     date:  new Date((new ServerDate).getTime() + parseInt(json.recipes_content[i].last_craft * 1e3)),
                                                     });
                                             } else {
                                                 TWDB.Cache.save('craftingCheck', {
-                                                    found: timed_recipe,
+                                                    found: json.recipes_content[i].item_id,
                                                     date:  new Date(null),
                                                     });
                                             }
@@ -7292,8 +7294,7 @@
                                     });
                                     /**TODO: add question if feature should be disabled **/
                             });
-                        }	// ##  weeklyCraftingGet
-                
+                        };	// ##  weeklyCraftingGet
                         weeklyCraftingCheck();
                     }
                 };
