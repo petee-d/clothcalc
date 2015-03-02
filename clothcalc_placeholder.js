@@ -151,7 +151,7 @@
             };
             _public.isNewIDsystem = function() { return _isNewIDsystem(); };
             
-            var backupData = function() {
+            var _backupData = function() {
                 var twdbKeys = [];
                 var key;
                 var newkey;
@@ -175,8 +175,9 @@
                 localStorage.setItem(uid + 'embackup', 'TRUE');
                 dialog.addButton("ok").show();
             };
+            _public.backupData = function() { return _backupData(); };
 
-            var dirtyBetaPatching = function() {
+            var _dirtyBetaPatching = function() {
                 if (Bag.items === undefined) {
                     Bag.items = {};
                     for (var type in Bag.items_by_type) {
@@ -187,6 +188,7 @@
                     }
                 }
             }            
+            _public.dirtyBetaPatching = function() { return _dirtyBetaPatching(); };
             return _public;
         })(jQuery);
         
@@ -9828,4 +9830,5 @@
         })(jQuery)
 
         // END OF EDITABLE AREA
+
 }});
