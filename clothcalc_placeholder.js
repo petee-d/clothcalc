@@ -3004,7 +3004,7 @@
                         div += '<span style="font-weight:bold;display:block;">' + job.name + '</span>'
                              + '<div class="job" style="position:relative;left:50%;margin:10px -25px;">'
                                  + '<div ' + (!isDefined(bonus) ? '' : 'class="featured ' + bonus + '"') + '></div>'
-                                 + '<img src="' + Game.cdnURL + "/images/jobs/" + i.shortname + '.png" class="job_icon" >'
+                                 + '<img src="' + Game.cdnURL + "/images/jobs/" + job.shortname + '.png" class="job_icon" >'
                              + '</div>';
                     }
                     return div += "</div>"
