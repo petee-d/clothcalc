@@ -1,53 +1,23 @@
-// be aware that the script release system ignores everything before // START OF ...
-
-/**
- * News on this update :
- * - 
- * - 
- * - 
- * - 
- * - 
- * -  
- * - 
- * */
- 
-(function(f) {
-    var d = document,
-        s = d.createElement('script');
-    s.setAttribute('type', 'application/javascript');
-    s.textContent = '(' + f.toString() + ')()';
-    (d.body || d.head || d.documentElement).appendChild(s);
-    s.parentNode.removeChild(s)
-})(function() {
-
-    // Dun : Just test if there is already a TWDB object in the DOM ,
-    // if it exists, there is another cc/lang installed, so do not
-    // start this one
-
-    if (isDefined(window.TWDB)) {
-        (new west.gui.Dialog(TWDB.script.name, '<div class="txcenter"><b><br>#CC_INSTALLED_TWICE#</br></b></div>', west.gui.Dialog.SYS_WARNING)).addButton("OK").show();
-    } else {
-        TWDB = {};
-        TWDB.script = new Object({
-            version: 39,
-            revision: 4,
-            name: "The West - tw-db.info Cloth Calc",
-            update: "tw-db.info/cache/userscripts/clothcalc/dev_clothcalc_eng.user.js",
-            check: "tw-db.info/cache/userscripts/clothcalc/dev_version",
-            url: "tw-db.info",
-            protocol: location.protocol.match(/^(.+):$/)[1],
-            gameversion: 2.19,
-            lang: "eng"
-        });
-        try { TWDB.script.notes = jQuery.parseJSON('[{\"version\":\"99\",\"notes\":\"DEV version\"}]');
-        } catch (e) {};
-
-        // START OF SCRIPT CODE THAT CAN BE EDITED IN A RELEASE
-        TheWestApi.version = Game.version = (parseInt(Game.version, 10) ? Game.version : TWDB.script.gameversion);
+// ==UserScript==
+// @name dev The West - tw-db.info Cloth Calc [de]
+// @version 0.41 Rev. 2
+// @description The West Script: Cloth Calculation for game version 1.34 or higher
+// @author scoobydoo [tw-db.info]
+// @namespace http://tw-db.info
+// @grant none
+// @website http://tw-db.info
+// @include http://*.the-west.*/game.php*
+// @include https://*.the-west.*/game.php*
+// @include http://*.tw.innogames.*/game.php*
+// @include https://*.tw.innogames.*/game.php*
+// @downloadURL https://tw-db.info/cache/userscripts/clothcalc/dev_clothcalc_de.user.js
+// @updateURL https://tw-db.info/cache/userscripts/clothcalc/dev_clothcalc_de.meta.js
+// ==/UserScript==
+(function(f){var d=document,s=d.createElement('script');s.setAttribute('type','application/javascript');s.textContent='('+f.toString()+')()';(d.body||d.head||d.documentElement).appendChild(s);s.parentNode.removeChild(s)})(function(){if(isDefined(window.TWDB)){new west.gui.Dialog(TWDB.script.name,'<div class="txcenter"><b><br>Das Userscript ClothCalc ist mehrfach installiert. Um korrekt zu funktionieren darf nur eine Version installiert sein!</br></b></div>',west.gui.Dialog.SYS_WARNING).addButton("OK").show();}else{TWDB = {};TWDB.script = new Object({version: 41,revision: 2,name: "The West - tw-db.info Cloth Calc",update: "tw-db.info/cache/userscripts/clothcalc/dev_clothcalc_de.user.js",check: "tw-db.info/cache/userscripts/clothcalc/dev_version",url: "tw-db.info",protocol: location.protocol.match(/^(.+):$/)[1],gameversion: 2.20,lang:"de"});try{TWDB.script.notes=jQuery.parseJSON('[{\"version\":\"41\",\"notes\":\"Initial support for the upcoming new item IDs\"},{\"version\":\"39\",\"notes\":\"Support for HTTPS <br \\\/>\\r\\nKO timer ready for beta protection system\"},{\"version\":\"38\",\"notes\":\"[pin items] feature to pin items in the recently used section of Inventory <br\\\/>\\n[analyser] job analyser can now switch to display all found products and items <br\\\/>\\n[bugfixes] selltip unequip <br\\\/>\"},{\"version\":\"37\",\"notes\":\"[bugfix] fix for self opening chat when chat extension was enabled <br>\\n[bugfix] fix for buy tip in the new shop <br>\\n[market] option to save your preferences in the market sell dialog <br>\\n[crafting] reminder for the level 600 crafting recipe waiting periods <br>\\n[settings] tiny improvements to the TW-DB settings dialog <br>\\n[misc] duel motivation bar is replaced by a K.O. timer when you died <br>\\n[misc] added option to avoid nuggets as default payment in event games (must be explicitly enabled) <br>\\n[misc] added option to skip the Premium dialog when using fetch all in the market (must be explicitly enabled)\"},{\"version\":\"36\",\"notes\":\"[main] ready for the new calculator engine (comming soon) <br \\\/>\\r\\n[main] actual bonus level shown in clothcalc window <br \\\/>\\r\\n[main] bugfixes (attribute images in customs, level based attributes NaN, ...)\"},{\"version\":\"35\",\"notes\":\"[main] Black Friday items work with the calculator now <br \\\/>\\r\\n[main] calculation data update is necessary less often (more work done on the client) <br \\\/>\\r\\n[main] ready for adding fair construction job\"},{\"version\":\"34\",\"notes\":\"[*NEW*] [buytip] fixed major bug, data update necessary!<br \\\/>\\r\\n[main] job list displays rewards for the best equipment, current reward for the selected job displayed separately <br \\\/>\\r\\n[main] various bugfixes, some performance issues addressed, more precise reward calculation <br \\\/>\\r\\n[main] fixed job reward calculation (+-1 precision formulas), data update needed! <br \\\/>\\r\\n[main] added sorting jobs by danger <br \\\/>\\r\\n[main] now checks for duplicit clothcalc installation <br \\\/>\\r\\n[sleep] added vertical scrollbar\"},{\"version\":\"33\",\"notes\":\"[main] ready for 2.08.1 <br \\\/>\\r\\n[questwiki] added option to switch between introduction \\\/ completion texts in the quest book (already last version) <br \\\/>\\r\\n[questwiki] added option to always show full quest texts (default OFF!) <br \\\/>\\r\\n[jobs] motivation calculation adjusted for 25% steps <br \\\/>\\r\\n[main] BUGFIXes: server data loading sometimes got stuck; CC not working for players below level 10 <br \\\/>\\r\\n[buytip] fix for the new Mobile Trader window\"},{\"version\":\"32\",\"notes\":\"small update for game version 2.06; hotfix for beta worlds\"},{\"version\":\"31\",\"notes\":\"tiny update for game version 2.05\"},{\"version\":\"30\",\"notes\":\"script is now ready for gameversion 2.04\\r\\nthere are still some fields to fix, but the most parts should work \"},{\"version\":\"25\",\"notes\":\"[bonusjobs] security query before reset<br \\\/>\\r\\n[bonusjobs] sorting of the export<br \\\/>\\r\\n[chestanalyser] some stats for future drops of chests, bags & collector cards<br \\\/>\\r\\n[marketreminder] add reminder for market offers<br \\\/>\\r\\n[other] button for deposit money<br \\\/>\"},{\"version\":\"24\",\"notes\":\"[ClothCalc] Bugfix, Motivation was not included at Wages<br \\\/>\\r\\nFeatures listed below comes from an other Userscript \\\"stewues The West Tools\\\"<br \\\/>\\r\\nAs he decided to stop Offering his tool, he has asked me to include this Features into our Script.<br \\\/>\\r\\nFirst at this Point <b>Thanks a lot!<\\\/b> Stewue for your hard Work and your Decision to Offer this Features now through this Script.<br \\\/>\\r\\n- button for sleeping into best hotel room or fort barrack<br \\\/>\\r\\n- confirmation prompt before quest cancel<br \\\/>\\r\\n- hint to deposit cash<br \\\/>\\r\\n- button for last post on ingameforum threads<br \\\/>\\r\\n- moved button for new post on ingameforum to upper menu<br \\\/>\\r\\n- add duelmotivation into userinterface<br \\\/>\\r\\n- remove automation pa hints, like the nugget picture on work queue<br \\\/>\\r\\n- activate Fortrecruitment also for non generals and captains<br \\\/>\\r\\n- enhance the Fortrecruitment through some more Features<br \\\/>\\r\\n- the market map<br \\\/>\"},{\"version\":\"23\",\"notes\":\"[general] script is ready for version 2.03, all features should be working<br \\\/>\\r\\n[clothcalc] added the wages values, honour to petee for his great work to find out the wage formula<br \\\/>\"},{\"version\":\"22\",\"notes\":\"[clothcalc] fixed Bug with faulty Detection of corrupted Cache<br \\\/>\\r\\n[questwiki] Show tw-db Link on Questwindow<br \\\/>\\r\\n[questswiki] Show total Amount of Items at Inventory<br \\\/>\\r\\n[questswiki] Button for Open the ClothCalc Window<br \\\/>\\r\\n[buytip] added new sets<br \\\/>\\r\\n[buytip] fort boni of natty where wrong<br \\\/>\"},{\"version\":\"21\",\"notes\":\"[general] fixed failed script start at gameversion 2.02<br \\\/>\\r\\n[errorlog] fixed Error through new Notification-Bar Object at gameversion 2.02<br \\\/>\\r\\n[settings] added Group for the SellTip Settings<br \\\/>\\r\\n[SellTip] add Option for never sell Set-Items<br \\\/>\\r\\n[bonusjobs] discovered Bonus Jobs are now cached<br \\\/>\\r\\n[bonusjobs] add Export and Import for discovered Bonus Jobs<br \\\/>\\r\\n[other] Option to remove the Game-Hints on Notification Bar, which could not be disabled through Game-Settings<br \\\/>\\r\\n[other] Option for a Scroll-To Inpute Field on Minimap<br \\\/>\\r\\n[ClothCalc] fixed the Bug, that Joblist is sometime not clickable<br \\\/>\\r\\n[ClothCalc] fixed the Bug, missing fastes animal on bestwears without animal<br \\\/>\\r\\n[chat] fixed bug for missing smiley and color inject on chat windows, which are already opend on gameloading<br \\\/>\\r\\n[general] removed script parts for gameversion 1.36\"},{\"version\":\"20\",\"notes\":\"[general] reworked the Script for the-west Version 2.0 <br \\\/>\\r\\n[general] Release Notes for Script is added ingame <br \\\/>\\r\\n[Importer] the Import Userscript is now included in ClothCalc Userscript (for Gameversion 1.36 you will still need it) <br \\\/>\\r\\n[Importer] the Alliance Import Script is now directly available through the script <br \\\/>\\r\\n[ClothCalc] Basic Function is working (showing best cloth) <br \\\/>\\r\\n[ClothCalc] <b>Values for Wages and Danger when sorting the Joblist are wrong!<\\\/b> , so temporarly this feature this sorting is removed until our date is up2date<br \\\/>\\r\\n[ClothCalc] preselecting the selected Job on Minimap is ready for Version 2.0 <br \\\/>\\r\\n[ClothCalc] the sorted job List (experience, wages) could be changed from normal mode to value per minute to value per energy point <br \\\/>\\r\\n[ClothCalc] Joblist is reworked, jobs could now be searched and jobs have little popup with complete job data <br \\\/>\\r\\n[FavoriteJob] this Feature has been removed because it now emulates a premium feature <br \\\/>\\r\\n[SearchJob]the jobsearch is Version 2.0 ready, the direct start of one of the four shown job is a pa automation only feature (innos decision]<br \\\/>\\r\\n[ReportAnalyser] the basic function is reworked for game version 2.0 <br \\\/>\\r\\n[ReportAnalyser] detailed job report and detailed item report will be added later <br \\\/>\\r\\n[Chat] is ready for Version 2.0 <br \\\/>\\r\\n[BuyTip] is ready for Version 2.0<br \\\/>\\r\\n[BuyTip] set bonus is now also included here<br \\\/>\\r\\n[BuyTip] also shown on market now<br \\\/>\\r\\n[Collector] is ready for Version 2.0<br \\\/>\\r\\n[Collector] also shown on market now<br \\\/>\\r\\n[SellTip] is ready for Version 2.0<br \\\/>\\r\\n[BonusJobs]Bonus Jobs you\\u2019ve found are now shown on minimap<br \\\/>\"},{\"version\":\"10\",\"notes\":\"[ClothCalc] added Favorite Job Feature (petee)<br \\\/>disabled script for TW2.0\"},{\"version\":\"9\",\"notes\":\"[Chat] added popup on permanent whisper icon<br \\\/>\\r\\n[Chat] history ist now saved on localStorage (color, whisper)<br \\\/>\\r\\n[Chat] added permanent whisper to player menu<br \\\/>\\r\\n[Chat] added inputfield to direct input color number<br \\\/>\\r\\n[Chat] added bold and captialize options<br \\\/>\\r\\n[analyser] added table footer with overall values<br \\\/>\\r\\n[analyser] added statistics reset function<br \\\/>\\r\\n[analyser] exclude questitems from item statistic<br \\\/>\\r\\n[analyser] granular report for items (Item-Report), click on items at new table footer<br \\\/>\\r\\n[calc] added option to switch position of cloth calc window between left and right<br \\\/>\\r\\n[enhancements] added feature so you can hold the +\\\/- buttons in the skills window to change the value faster<br \\\/>\\r\\n\"},{\"version\":\"8\",\"notes\":\"added settings window<br \\\/>\\r\\nadded chat features (permanent wisper, color, smilies)<br \\\/>\\r\\nadded Report Analyser<br \\\/>\\r\\nadded second Buytip Icon if item gives bonus for current selected job<br \\\/>\\r\\nfixed with * marker for new items on market<br \\\/>\\r\\nfixed several small bugs on job search feature<br \\\/>\\r\\nfixed buyTip was not shown without calcdata update<br \\\/>\"},{\"version\":\"7\",\"notes\":\"add new feature jobsearch (petee)<br \\\/>\\r\\n\\\"new\\\" Icon will now also look at Wear Items (thx Inno optimizing your Wear Object)<br \\\/>\\r\\nchanged max gameversion to 1.36 for coming new gameversion (no problems found with new gameversion)<br \\\/>\\r\\nadded new Script Loader with Info on footer (next to servertime)<br \\\/>\"},{\"version\":\"6\",\"notes\":\"code cleaning and optimising<br \\\/>\\r\\nupdate minimap on jobchange if minimap is opend<br \\\/>\\r\\nset limit for custom jobs from 10 to 15<br \\\/>\\r\\nfixed several problems with attributes on customs<br \\\/>\\r\\nadded images for fort-customs and for attributes on customs<br \\\/>\\r\\nadded icon on Traders with tooltip for which jobs this item would give a better bonus<br \\\/>\\r\\nadded icon on Inventory with tooltip of bonus on selected job<br \\\/>\\r\\non rev. 59 added colored tooltip for better visibility<br \\\/>\\r\\non rev. 59 added icon for unused items on inventory<br \\\/>\"},{\"version\":\"5\",\"notes\":\"eleminating browser freezes<br \\\/>\\r\\nmaking custom section customisable<br \\\/>\\r\\nshowing best and current \\\"job\\\" values on custom section<br \\\/>\\r\\nchanges on cache system<br \\\/>\\r\\ncorrected code verification on rev. 34<br \\\/>\"},{\"version\":\"4\",\"notes\":\"fixed removed indexedDB.setVersion on Mozilla<br \\\/>\\r\\nbetter error handling of indexedDB, click on \\\"cache error\\\" icon will initiate a reset of indexedDB<br \\\/>\\r\\nsolution for Cache Problem on Scriptupdate with Chrome (not working on this update :( )<br \\\/>\\r\\nearlier button add, opacity to 50% until initializing isn\\u0027t finished<br \\\/>\\r\\nten second sleeper on initializing to handle chrome freezes<br \\\/>\\r\\nadded marker for items on traders which are not at own inventory<br \\\/>\\r\\nadded \\\"*\\\" prefix on market for all items which are not at own inveontory<br \\\/>\\r\\nfixed wrong levelbonus for soldiers<br \\\/>\\r\\nprevent script from be active in more than one language<br \\\/>\"},{\"version\":\"3\",\"notes\":\"fixed problem with need of cache update<br \\\/>\\r\\nfixed problem that inventory window was closed<br \\\/>\\r\\nadded best animal to every job<br \\\/>\\r\\nadded mark of weared items\"},{\"version\":\"0\",\"notes\":\"** please enter some notes for this version **\"}]');}catch(e){};TheWestApi.version = Game.version = (parseInt(Game.version, 10) ? Game.version : TWDB.script.gameversion);
         TWDB.script.isDev = function() {
             return (this.check.search('dev_version') !== -1);
         };
-        
+
         Number.prototype.round = function(e) {
             var t = Math.pow(10, e);
             return Math.round(this * t) / t
@@ -146,10 +116,36 @@
              */
             var _isNewIDsystemCache = null;
             var _isNewIDsystem = function() {
-                if (_isNewIDsystemCache === null) { _isNewIDsystemCache = (!isDefined(ItemManager.get(2)) || ItemManager.get(2).short !== "winebottle"); }
+                if (_isNewIDsystemCache === null) { _isNewIDsystemCache = isDefined(ItemManager.getByBaseId); }
                 return _isNewIDsystemCache;
             };
             _public.isNewIDsystem = function() { return _isNewIDsystem(); };
+            
+            var backupData = function() {
+                var twdbKeys = [];
+                var key;
+                var newkey;
+                var uid = 'twdb_' + Character.playerId + '_';
+                if (localStorage.getItem(uid + 'embackup') == 'TRUE') { return; }
+                var dialog = (new west.gui.Dialog(TWDB.script.name, "The West Beta was updated sooner than our migration function was ready. :( As an emergency solution, your data will be backed up right now so that we can restore them with the next update. Sorry for the inconveniences!", west.gui.Dialog.SYS_WARNING)).setModal(true,false,true).show();
+                for (var i=0; i<localStorage.length; i++) {
+                    key = localStorage.key(i);
+                    if (key.search(uid) === 0) {
+                        twdbKeys.push({
+                                key: key,
+                                newkey: 'backup_' + key,
+                                val: localStorage.getItem(key),
+                        });
+                    }
+                }
+                for (var i=0; i<twdbKeys.length; i++) {
+                    localStorage.setItem(twdbKeys[i].newkey, twdbKeys[i].val);
+                    console.log('key ' + twdbKeys[i].key.substr(uid.length) + ' saved.');
+                }
+                localStorage.setItem(uid + 'embackup', 'TRUE');
+                dialog.addButton("ok").show();
+            };
+
             
             return _public;
         })(jQuery);
@@ -276,7 +272,7 @@
                 this.gui.cache = jQuery('<div style="position:absolute;top:10px;right:8px;width:20px;height:20px;cursor:pointer;" />');
                 this.gui.bag = jQuery('<div style="position:absolute;top:95px;left:1px;width:252px;height:186px;" />');
                 //load Bag if not already loaded and set initBag
-                if (!Bag.loaded) { Bag.loadItems(); }
+                //if (!Bag.loaded) { Bag.loadItems(); }
                 this.BagInt = window.setInterval(function(){ _self.finishInit(); }, 100);
 		//get custom jobs or define default value  
                 this.data.custom = TWDB.Settings.get("custom", {1:{id:1,type:"speed",para:{},name:"Speed"},2:{id:2,type:"custom",para:{9:1},name:"max Health"},3:{id:3,type:"regen",para:{},name:"Health Regeneration"},4:{id:4,type:"fort",para:{att:200,def:20,health:100,type:0},name:"Fortbattle Attacker (Att)"},5:{id:5,type:"fort",para:{att:20,def:200,health:100,type:0},name:"Fortbattle Attacker (Def)"},6:{id:6,type:"fort",para:{att:200,def:20,health:100,type:1},name:"Fortbattle Defender (Att)"},7:{id:7,type:"fort",para:{att:20,def:200,health:100,type:1},name:"Fortbattle Defender (Def)"},8:{id:8,type:"duel",para:{12:1,15:1,16:1,24:1},name:"Range Dueler (Att)"},9:{id:9,type:"duel",para:{12:1,15:1,16:1,21:1},name:"Range Dueler (Def)"},10:{id:10,type:"duel",para:{6:1,7:1,11:1,15:1},name:"Melee Dueler"}});
@@ -2508,6 +2504,9 @@
                             return;
                         };
                         try {
+                /** DEBUG **/
+                    if (TWDB.script.isDev()) {console.log('updater & register')};         
+                /** DEBUG **/
                             Updater.query();
                             registerScript();
                         } catch (e) {
@@ -2536,7 +2535,10 @@
                 };
                 
                 var checkGame = function() {
-                    if (!isDefined(w.jQuery) || !isDefined(w.TheWestApi) || !isDefined(w.TheWestApi.version) || !w.ItemManager.isLoaded()) {
+                /** DEBUG **/
+                    if (TWDB.script.isDev()) {console.log('in checkGame',!isDefined(w.jQuery),!isDefined(w.TheWestApi),!isDefined(w.TheWestApi.version),(w.ItemManager.get(2000) === undefined))};         
+                /** DEBUG **/
+                    if (!isDefined(w.jQuery) || !isDefined(w.TheWestApi) || !isDefined(w.TheWestApi.version) || (w.ItemManager.get(2000) === undefined)) {
                         return false;
                     } else {
                         return true;
@@ -4337,7 +4339,7 @@
                       }
                       var count = data.items[id];
                       var item = ItemManager.get(id);
-                      if ( Jobs.isProduct(id) !== -1  ) {
+                      if ( Jobs.isProduct(id) !== -1  ) {               // products
                         if ( !jobstats.products[id] ) {
                           jobstats.products[id] = {'last':0};
                         };
@@ -4351,7 +4353,7 @@
                           tmp[last]++;
                         };
                       }
-                      else if ( item.price == 0 ) {
+                      else if ( item.price == 0 ) {                     // ??? eventually quest drops..?
                         if ( !stats.extraitems[id] ) {
                           stats.extraitems[id] = 0;
                         };
@@ -8067,13 +8069,10 @@
                     if (isDefined(l) && isDefined(l.skills) && isDefined(l.items)) {
                         a = l
                     }
-                    if (!window.Bag.loaded) {
+                    if (!window.Bag.loaded && window.Bag.loadItems) {
                         window.Bag.loadItems()
                     }
                     var h = window.setInterval(function () {
-                        // Dun : the Wear.loaded was deprecated by inno
-                        // at 11/02,
-                        // the condition test just the Bag init
                         if (window.Bag.loaded) {
                             window.clearInterval(h);
                             c.ready = true
@@ -9787,12 +9786,13 @@
                 return t
             }($);
             Debugger.CCstarter = CCstarter;
-            if ((w.location.href.indexOf(".the-west.") != -1 || w.location.href
-                .indexOf(".tw.innogames.") != -1) && w.location.href.indexOf("game.php") != -1) {
-                Loader.init()
+            if ((w.location.href.indexOf(".the-west.") != -1 || w.location.href.indexOf(".tw.innogames.") != -1) && w.location.href.indexOf("game.php") != -1) {
+                /** DEBUG **/
+                    if (TWDB.script.isDev()) {console.log('trying to start - Loader.init();')};         
+                /** DEBUG **/
+                Loader.init();
             }
         })(jQuery)
 
         // END OF EDITABLE AREA
-    }
-});
+}});
