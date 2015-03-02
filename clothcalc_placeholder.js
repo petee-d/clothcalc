@@ -132,7 +132,7 @@
              */            
             var _addCss = function(cssString, optionalId) {
                 var id = "twdb_css";
-                if (typeof optionalId != "undefined" && typeof optionalId == "string") { id += "_" + optionalId.replace(/\w+/g, "")};
+                if (typeof optionalId != "undefined" && typeof optionalId == "string") { id += "_" + optionalId.replace(/\W+/g, "")};
                 if ($("head style#" + id).append('\n'+cssString).length == 1) { return; }
                 else { $("head").append($('<style type="text/css" id="' + id +'">').text(cssString)) };
             };
