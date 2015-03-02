@@ -3243,7 +3243,7 @@
                                 // st patrick set and initiate with last
                                 // level values
 
-                                for (var intInd = parseInt(lastlevel) + 1; intInd <= level; ++intInd) {
+                                for (var intInd = parseInt(lastlevel, 10) + 1; intInd <= level; ++intInd) {
 
                                     bonuss[intInd] = JSON
                                         .parse(JSON
@@ -4002,11 +4002,11 @@
                       };
                     };
                     
-                    if ( isNaN(parseInt(last)) ) {
+                    if ( isNaN(parseInt(last, 10)) ) {
                       var id = 0;
                     } 
                     else {
-                      var id = parseInt(last)-1;
+                      var id = parseInt(last, 10)-1;
                     };
                     
                     switch ( type ) {
@@ -4106,7 +4106,7 @@
                     $(bodyscroll.getMainDiv()).css('height','385px');
                     gui.append(bodyscroll.getMainDiv());
             
-                    // 680 breite
+                    // 680 width
                     for ( var chest in statistic.chest ) {
                       var stat = statistic.chest[chest];
                       var item = new tw2widget.Item(ItemManager.get(chest) , 'item_inventory').setCount(stat.count);
@@ -4120,8 +4120,8 @@
                         item.getImgEl().addClass('item_inventory_img');
                         div.append(item.getMainDiv());
                       }
-                      div.css('height', (parseInt(count/10)+1)*61 + 'px');
-                      bodyscroll.appendContent('<div style="float:left;position:relative;width:10px;height:' + String((parseInt(count/10)+1)*61 + 10 ) + 'px;background: url(' + Game.cdnURL + '/images/window/report/devider_report.png) repeat-x scroll 0 0 transparent;" />');
+                      div.css('height', (parseInt(count/10, 10)+1)*61 + 'px');
+                      bodyscroll.appendContent('<div style="float:left;position:relative;width:10px;height:' + String((parseInt(count/10, 10)+1)*61 + 10 ) + 'px;background: url(' + Game.cdnURL + '/images/window/report/devider_report.png) repeat-x scroll 0 0 transparent;" />');
                       bodyscroll.appendContent( div );
                       
                       bodyscroll.appendContent('<div style="clear:both;position:relative;width:100%;height:10px;display:block;background: url(' + Game.cdnURL + '/images/window/dailyactivity/wood_devider_horiz.png) repeat-x scroll 0 0 transparent;" />');
@@ -4248,24 +4248,24 @@
                       var str = $.trim($(this).children('span:last-child').html());
                       str = str.split('&nbsp;').join(' ');
                       switch (index) {
-                        case 0 :	data.motivation = parseInt(str.slice(0,str.indexOf(' ')));
+                        case 0 :	data.motivation = parseInt(str.slice(0,str.indexOf(' ')), 10);
                                   break;
                         case 1 :	var tmp = str.replace('h',' * 3600 + '); 
                                   tmp = tmp.replace('m',' * 60 + '); 
                                   tmp = tmp.replace('s',' * 1 + ');
                                   tmp += '0';
                                   try {
-                                    data.duration = parseInt(eval(tmp));
+                                    data.duration = parseInt(eval(tmp), 10);
                                   }
                                   catch (e) {
                                     throw {message:"unrecognized time on report: " + str};
                                   }
                                   break;
-                        case 2 :	data.wage = parseInt(str.slice(str.indexOf(' ')+1));
+                        case 2 :	data.wage = parseInt(str.slice(str.indexOf(' ')+1), 10);
                                   break;
-                        case 3 :	data.bond = parseInt(str);
+                        case 3 :	data.bond = parseInt(str, 10);
                                   break;
-                        case 4 :	data.experience = parseInt(str.slice(0,str.indexOf(' ')));
+                        case 4 :	data.experience = parseInt(str.slice(0,str.indexOf(' ')), 10);
                                   break;
                       };
                     });
@@ -4325,7 +4325,9 @@
                     
                     for ( var key in data.items ) {
                       var id = Number(key);
-                      if ( id === 138 ) {
+                      /** TODO: Do we still check for it??? Remove '?' expression when all worlds are migrated **/
+                      var geronimoID = TWDB.Util.isNewIDsystem() ? 138000 : 138;
+                      if ( id === geronimoID ) {
                         if ( !isDefined(statistic.extra) ) {
                           statistic.extra = {'count':0};
                           _self.extra = true;
@@ -4847,6 +4849,7 @@
                   tmp.data('avg-t','&Oslash; $' + String((sum.luck/sum.count).round(2)));
                   gui.footer.append(tmp);
                   
+                  /** TODO: make that SWITCH_REWARDS_ITEMS on demand only **/
                   var div = $('<div style="margin: 0px 6px 0px 6px;width:680px;" />')
                     .append(
                         $('<a href="#">#SWITCH_REWARDS_ITEMS#</a>')
@@ -5522,8 +5525,8 @@
                         .remove();
                     var t = function (t, n, r, i, s) {
                         var o = .00513;
-                        var u = parseInt(t * o) - 3;
-                        var a = parseInt(n * o) + 2;
+                        var u = parseInt(t * o, 10) - 3;
+                        var a = parseInt(n * o, 10) + 2;
                         var f = "";
                         if (i > 1) {
                             f = "-moz-transform:rotate(45deg);-webkit-transform:rotate(45deg);-o-transform:rotate(45deg);-ms-transform:rotate(45deg);transform:rotate(45deg);"
@@ -5919,13 +5922,13 @@
                 var c = function (e) {
                     var t = e.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
                     if (t) {
-                        return String(parseInt(t[1] * 9 / 255 + .5)) + String(parseInt(t[2] * 9 / 255 + .5)) + String(parseInt(t[3] * 9 / 255 + .5))
+                        return String(parseInt(t[1] * 9 / 255 + .5, 10)) + String(parseInt(t[2] * 9 / 255 + .5, 10)) + String(parseInt(t[3] * 9 / 255 + .5, 10))
                     } else {
                         return "000"
                     }
                 };
                 var h = function (e) {
-                    return "rgb(" + parseInt(e[0] * 255 / 9) + "," + parseInt(e[1] * 255 / 9) + "," + parseInt(e[2] * 255 / 9) + ")"
+                    return "rgb(" + parseInt(e[0] * 255 / 9, 10) + "," + parseInt(e[1] * 255 / 9, 10) + "," + parseInt(e[2] * 255 / 9, 10) + ")"
                 };
                 var p = function (e, t) {
                     if (isDefined(t.color)) {
@@ -7259,7 +7262,7 @@
                                 if (timediff < 180000) {	// if less than 3 mins	=>	set direct timer
                                     w.setTimeout(function(){weeklyCraftingNotice(craftingCheck.found)}, timediff);
                                 } else {	// 3m < t < 24h		=>	check again in t/2 since JS timers tend to go askew
-                                    w.setTimeout(function(){weeklyCraftingCheck()}, parseInt(timediff/2));
+                                    w.setTimeout(function(){weeklyCraftingCheck()}, parseInt(timediff/2, 10));
                                 }
                             } // else, if > 24hrs, do nothing. You can't stay logged in that long ^^
                         }	// ##  weeklyCraftingCheck
@@ -7276,7 +7279,7 @@
                                             if (json.recipes_content[i].last_craft) {
                                                 TWDB.Cache.save('craftingCheck', {
                                                     found: json.recipes_content[i].item_id,
-                                                    date:  new Date((new ServerDate).getTime() + parseInt(json.recipes_content[i].last_craft * 1e3)),
+                                                    date:  new Date((new ServerDate).getTime() + parseInt(json.recipes_content[i].last_craft * 1e3, 10)),
                                                     });
                                             } else {
                                                 TWDB.Cache.save('craftingCheck', {
@@ -9308,7 +9311,7 @@
                         }(e), r)
                     };
                     var s = function (e, r, s) {
-                        var o = parseInt(r.getValue());
+                        var o = parseInt(r.getValue(), 10);
                         if (isNaN(o) || o < 1) {
                             t.create(e, s);
                             return
