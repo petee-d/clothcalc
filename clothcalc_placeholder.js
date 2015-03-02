@@ -133,7 +133,7 @@
             var _addCss = function(cssString, optionalId) {
                 var id = "twdb_css";
                 if (typeof optionalId != "undefined" && typeof optionalId == "string") { id += "_" + optionalId.replace(/\w+/g, "")};
-                if ($("head style#" + id).append(cssString).length == 1) { return; }
+                if ($("head style#" + id).append('\n'+cssString).length == 1) { return; }
                 else { $("head").append($('<style type="text/css" id="' + id +'">').text(cssString)) };
             };
             _public.addCss = function(cssString, optionalId) { return _addCss(cssString, optionalId); };
@@ -143,9 +143,11 @@
              * Relies on ItemManager being ready!!
              *
              * @return {Boolean} TRUE if new system
-             */            
+             */
+            var _isNewIDsystemCache = null;
             var _isNewIDsystem = function() {
-                return (!isDefined(ItemManager.get(2)) || ItemManager.get(2).short !== "winebottle");
+                if (_isNewIDsystemCache === null) { _isNewIDsystemCache = (!isDefined(ItemManager.get(2)) || ItemManager.get(2).short !== "winebottle"); }
+                return _isNewIDsystemCache;
             };
             _public.isNewIDsystem = function() { return _isNewIDsystem(); };
             
@@ -2810,173 +2812,170 @@
                 };
                 return t
             }($);
-            Debugger.Worker = Worker;
-            var Jobs = function (e) {
-                var t = {};
-                var n = {};
-                var r = [];
-                var i = {};
-                var s = {};
-                var o = [1828, 1829, 1830, 2e3, 2003, 2006, 2009];
-                var u;
-                var a = {};
-                var f = function () {
-                    if (n.ready) {
-                        return
-
-                    }
-                    var t = 0;
-                    var f = 0;
-                    var c = {};
+            Debugger.Worker = Worker;            
+            
+            
+            ///// complete ////////////////////////
+            //
+            //  Job Object:   Object that should handle all job relevant stuff
+            //  Init:         should be loader after Cache Module
+            //  Methodes:     - getJobByName(name)        -> get the Jobdata by the long Name of the Job
+            //                - getJobByShortName(name)   -> get the Jobdata by the short Name of the Job
+            //                - getJobById(id)            -> get the Jobdata by Id of the Job
+            //                                              - drop rate is adjusted through char and pa bonus
+            //
+            //                - openJob(id,x,y)           -> open the Job Window
+            //                - getAllJobs                -> return array of all jobs
+            //                - startJob(id,x,y,duration) -> direct start the Job
+            //                - isProduct(id)             -> checks if the given Item is a Job Product
+            //                - getPopup(id,bonus)        -> get a popup for the given job (id), bonus is empty, silver or gold
+            //
+            ///////////////////////////////////////
+            var Jobs = (function ($) {
+                var _self = {};
+                var loader = {};
+                var AllJobs = [];
+                var Name2Id = {};
+                var Shortname2Id = {};
+                /** TODO: Add other random yields? Remove '?' expression when all worlds are migrated **/
+                // uncut_ruby , uncut_emerald , uncut_diamond , habanero_chilis , cobra_fangs , cossack_saddle_blanket , gilded_cogs
+                var Products = TWDB.Util.isNewIDsystem() ? [1828000, 1829000, 1830000, 2000000, 2003000, 2006000, 2009000] : [1828, 1829, 1830, 2000, 2003, 2006, 2009]; 
+                var construction;
+                /** TODO: Find reason of existence of  var jobdata **/                
+                var jobdata = {};
+                
+                var init = function() {
+                    if (loader.ready){ return; }
+                    var i = 0;
+                    var state = 0;
+                    var unique = {};
                     while (true) {
-                        t++;
-                        var h = w.JobList.getJobById(t);
-                        if (!h) {
-                            f++;
-                            if (f > 5) {
-                                break
-                            }
-                            continue
+                        i++;
+                        var job = w.JobList.getJobById(i);
+                        if (!job) {
+                            state++;
+                            if (state > 5) { break; }
+                            continue;
                         }
-                        f = 0;
-                        r.push(h.id);
-                        i[h.name.toLowerCase()] = h.id;
-                        s[h.shortname.toLowerCase()] = h.id;
-                        for (var p in h.yields) {
-                            if (isNaN(p)) {
-                                continue
-                            }
-                            if (c[p]) {
-                                continue
-                            }
-                            c[p] = true;
-                            o.push(Number(p))
+                        state = 0;
+                        AllJobs.push(job.id);
+                        Name2Id[(job.name).toLowerCase()] = job.id;
+                        Shortname2Id[(job.shortname).toLowerCase()] = job.id;
+                        for (var key in job.yields) {
+                            if ( isNaN(key) || unique[key]) { continue; }
+                            unique[key] = true;
+                            Products.push(Number(key));
                         }
                     }
-                    u = function (e) {
-                        var t = {};
-                        t.description = "";
-                        t.duration = 1800;
-                        t.energy = 6;
-                        t.groupid = null;
-                        t.id = 1e3;
-                        t.malus = 0;
-                        t.name = "#CONSTRUCTION#";
-                        t.randomyields = [];
-                        t.shortname = "construction";
-                        t.skills = {
-                            build: 3,
-                            repair: 1,
-                            leadership: 1
+        
+                    // hardcoded Costruction Job
+                    construction = (function ($) {
+                        var _self = {
+                            description: '',
+                            duration: 1800,
+                            energy: 6,
+                            groupid: null,
+                            id: 255,
+                            malus: 0,
+                            name: '#CONSTRUCTION#',
+                            randomyields: [],
+                            shortname: 'construction',
+                            skills: {build:3, repair:1, leadership:1},
+                            yields: {},
+                            calcJobPoints: function(){ return 0; },
+                            canDo: function(){ return true; },
                         };
-                        t.yields = [];
-                        t.calcJobPoints = function () {
-                            return 0
-                        };
-                        t.canDo = function () {
-                            return true
-                        };
-                        return t
-                    }(e);
-                    r.push(1e3);
-                    i[u.name.toLowerCase()] = 1e3;
-                    s[u.shortname.toLowerCase()] = 1e3;
-                    var d = function (e, t) {
-                        var n = e == 1e3 ? u : w.JobList.getJobById(e);
-                        var r = t == 1e3 ? u : w.JobList.getJobById(t);
-                        return n.name > r.name
-                    };
-                    r.sort(d);
-                    o.sort();
-                    a = Cache.load("jobdata");
-                    if (a == null || typeof a != "object") {
-                        a = {}
-                    }
-                    Eventer.set("TWDBdataLoaded", function () {
-                        l()
-                    });
+                        return _self;
+                    })($);
+                    AllJobs.push(255);
+                    Name2Id[(construction.name).toLowerCase()] = 255;
+                    Shortname2Id[(construction.shortname).toLowerCase()] = 255;
+                    // end hardcoded Construction Job
 
-                    n.ready = true
+                    var sortingFunc = function(x, y) {
+                        var job1 = x===255 ? construction : w.JobList.getJobById(x);
+                        var job2 = y===255 ? construction : w.JobList.getJobById(y);
+                        return job1.name > job2.name;
+                    };
+                    
+                    AllJobs.sort(sortingFunc);
+                    Products.sort();
+
+                    jobdata = Cache.load("jobdata");
+                    if (jobdata === null || typeof jobdata != "object") { jobdata = {}; }
+                    Eventer.set("TWDBdataLoaded", function() { clearJobdata(); });
+                    loader.ready = true;
                 };
-                n = Loader.add("Jobs", "tw-db Jobsystem", f, {
-                    Cache: true
-                });
-                t.getJobByName = function (n) {
-                    n = e.trim(n).toLowerCase();
-                    if (!i[n]) {
-                        return null
-                    }
-                    return t.getJobById(i[n])
+                loader = Loader.add('Jobs', 'tw-db Jobsystem', init, {Cache:true});
+                
+                var clearJobdata = function () {
+                    jobdata = {};
+                    Cache.save("jobdata", jobdata)
                 };
-                t.getJobByShortname = function (n) {
-                    n = e.trim(n).toLowerCase();
-                    if (!s[n]) {
-                        return null
-                    }
-                    return t.getJobById(s[n])
+                
+                _self.getJobByName = function(name) {
+                    name = ($.trim(name)).toLowerCase();
+                    if (!isDefined(Name2Id[name])) { return null; }
+                    return _self.getJobById(Name2Id[name]);
                 };
-                t.getJobById = function (t) {
-                    if (t == 1e3) {
-                        var n = u
+                
+                _self.getJobByShortname = function(name) {
+                    name = ($.trim(name)).toLowerCase();
+                    if (!isDefined(Shortname2Id[name])) { return null; }
+                    return _self.getJobById(Shortname2Id[name]);
+                };
+                
+                _self.getJobById = function(id) {
+                    var job;
+                    if (id === 255) {
+                        job = construction;
                     } else {
-                        var n = w.JobList.getJobById(t);
-                        if (!n) {
-                            return n
+                        job = w.JobList.getJobById(id);
+                        if (!job) { return job; }
+                    }
+                    var data = $.extend(true, {}, job);
+                    
+                    var quote = 1;
+                    if (w.Character.charClass == 'adventurer') {
+                        if (w.Premium.hasBonus('character')) { quote *= 1.2; }
+                        else { quote *= 1.1; }
+                    }
+                    if (w.Premium.hasBonus('money')) { quote *= 1.5; }
+                    
+                    for (var i=0; i<data.randomyields.length; i++) {
+                        data.randomyields[i] = (data.randomyields[i]*quote).round(2);
+                    };
+                    if (typeof(data.yields.length) == 'undefined') {
+                        for (var itemid in data.yields) {
+                            data.yields[itemid].prop = (data.yields[itemid].prop*quote).round(2);
                         }
+                    }                    
+                    return data;
+                };
+                
+                _self.openJob = function (id, x, y) { w.JobWindow.open(id, x, y) };
+                _self.startJob = function(id, x, y, duration) { w.JobWindow.startJob(id, x, y, Number(duration)||3600 ); };
+                _self.getAllJobs = function() { return AllJobs; };
+                _self.isProduct = function(id) { return $.inArray(Number(id), Products); };
+                _self.getPopup = function(jobid, bonus) {
+                    var div = '<div style="min-width:60px;text-align:center" >';
+                    var job = _self.getJobById (jobid);
+                    if (isDefined(job)) {
+                        div += '<span style="font-weight:bold;display:block;">' + job.name + '</span>'
+                             + '<div class="job" style="position:relative;left:50%;margin:10px -25px;">'
+                                 + '<div ' + (!isDefined(bonus) ? '' : 'class="featured ' + bonus + '"') + '></div>'
+                                 + '<img src="' + Game.cdnURL + "/images/jobs/" + i.shortname + '.png" class="job_icon" >'
+                             + '</div>';
                     }
-                    var r = e.extend(true, {}, n);
-                    var i = 1;
-                    if (w.Character.charClass == "adventurer") {
-                        if (w.Premium.hasBonus("character")) {
-                            i *= 1.2
-                        } else {
-                            i *= 1.1
-                        }
-                    }
-                    if (w.Premium.hasBonus("money")) {
-                        i *= 1.5
-                    }
-                    for (var s = 0; s < r.randomyields.length; s++) {
-                        r.randomyields[s] = (r.randomyields[s] * i)
-                            .round(2)
-                    }
-                    if (typeof r.yields.length == "undefined") {
-                        for (var o in r.yields) {
-                            r.yields[o].prop = (r.yields[o].prop * i)
-                                .round(2)
-                        }
-                    }
-                    return r
+                    return div += "</div>"
                 };
-                t.openJob = function (e, t, n) {
-                    w.JobWindow.open(e, t, n)
-                };
-                t.startJob = function(id, x, y, duration) {
-                    w.JobWindow.startJob(id, x, y, Number(duration)||3600 );	// Bluep - set default to 1h
-                };
-                t.getAllJobs = function () {
-                    return r
-                };
-                t.isProduct = function (t) {
-                    return e.inArray(Number(t), o)
-                };
-                var l = function () {
-                    a = {};
-                    Cache.save("jobdata", a)
-                };
-                t.getPopup = function (e, n) {
-                    var r = '<div style="min-width:60px;text-align:center" >';
-                    var i = t.getJobById(e);
-                    if (isDefined(i)) {
-                        r += '<span style="font-weight:bold;display:block;">' + i.name + "</span>";
-                        r += '<div class="job" style="position:relative;left:50%;margin:10px -25px;"><div ' + (!isDefined(n) ? "" : 'class="featured ' + n + '"') + '></div><img src="' + Game.cdnURL + "/images/jobs/" + i.shortname + '.png" class="job_icon" ></div>'
-                    }
-                    return r += "</div>"
-                };
-                return t
-            }($);
+                return _self;
+            })($);
             _base.Jobs = Jobs;
             Debugger.Jobs = Jobs;
+            
+            
+            
             var Window = function (e) {
                 var t = {};
                 var n = "twdb_window";
@@ -9791,6 +9790,5 @@
         })(jQuery)
 
         // END OF EDITABLE AREA
-
     }
 });
