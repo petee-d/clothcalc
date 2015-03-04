@@ -1046,32 +1046,33 @@
 
                 },
                 mode: function (e) {
-                    var t = this;
+                    var _this = this;
                     // check the minimal allowed duration
-                    var minDur = 2, J = t.parent.data.jobs.jobs;
-                    for (var i in this.parent.data.jobs.jobs) { minDur = Math.min(J[i].durations.length - 1,minDur); };
-                    if (minDur < e) { return this.mode(0); }; // Dun - correcting for level < 20
+                    var minDur = 2, J = _this.parent.data.jobs.jobs;
+                    for (var i in _this.parent.data.jobs.jobs) { minDur = Math.min(J[i].durations.length - 1,minDur); };
+                    if (minDur < e) { return _this.mode(0); }; // Dun - correcting for level < 20
                     
-
-                    this.parent.gui.job.mode.unbind("click");
+                    /** TODO: fix this error! **/
+                    try { _this.parent.gui.job.mode.unbind("click"); }          // -> Uncaught TypeError: Cannot read property 'unbind' of undefined
+                    catch (err) {}
                     switch (e) {
                     case 0:
-                        this.base = 0;
-                        this.basetime = 15;
-                        this.parent.gui.job.mode.css("background-position", "0px 0px")
-                            .click(function() { t.mode(1); t.parent.joblist.update(); });
+                        _this.base = 0;
+                        _this.basetime = 15;
+                        _this.parent.gui.job.mode.css("background-position", "0px 0px")
+                            .click(function() { _this.mode(1); _this.parent.joblist.update(); });
                         break;
                     case 1:
-                        this.base = 1;
-                        this.basetime = 600;
-                        this.parent.gui.job.mode.css("background-position", "-20px 0px")
-                            .click(function() { t.mode(2); t.parent.joblist.update(); });
+                        _this.base = 1;
+                        _this.basetime = 600;
+                        _this.parent.gui.job.mode.css("background-position", "-20px 0px")
+                            .click(function() { _this.mode(2); _this.parent.joblist.update(); });
                         break;
                     case 2:
-                        this.base = 2;
-                        this.basetime = 3600;
-                        this.parent.gui.job.mode.css("background-position", "-40px 0px")
-                            .click(function() { t.mode(0); t.parent.joblist.update(); });
+                        _this.base = 2;
+                        _this.basetime = 3600;
+                        _this.parent.gui.job.mode.css("background-position", "-40px 0px")
+                            .click(function() { _this.mode(0); _this.parent.joblist.update(); });
                         break;
                     };
                 },
