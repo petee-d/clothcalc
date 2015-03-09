@@ -18,7 +18,7 @@
 
 
 var idMigrator = function() {
-    //  security check.. we don't want to migrate twice or too early
+    //  security checks.. we don't want to migrate twice or too early
     if (!TWDB.Util.isNewIDsystem()) { return; }
     var migInf = TWDB.Cache.load("migration") || {};
     migInf.itemid = migInf.itemid || {}; 
@@ -26,6 +26,7 @@ var idMigrator = function() {
     
     // delete an old unused value first
     try { localStorage.removeItem('twdb_' + Character.playerId + '_lastDeath'); } catch (e) {};
+    // TWDB.Cache.load("craftingCheck") || {found: false, date: null};
     
     var tdc = function(object) {
         // tricky deep copy
@@ -232,14 +233,19 @@ var backupData = function() {
 backupData();
 
 
-var dirtyBetaPatching = function() {
-    if (Bag.items === undefined) {
-        Bag.items = {};
-        for (var type in Bag.items_by_type) {
-            Bag.items[type] = {};
-            for (var i=0; i < Bag.items_by_type[type].length; i++) {
-                Bag.items[type][Bag.items_by_type[type][i]] = Bag.getItemByItemId(Bag.items_by_type[type][i]);
-            }
-        }
+(function() {
+    var skeys = ["betteritems","calcdata","datamanager"];
+    var temp = {};
+    var cont;
+    var key;
+    for (var i=0; i < skeys.length; i++) {
+        key = skeys[i];
+        cont = TWDB.Cache.load(key);
+        console.log(key, cont, temp);
+        temp[key] = cont;
     }
-}
+    window.twd_deb = JSON.stringify(temp);
+})()
+
+calcdata.items = replace(/(['"])(\d+)\1\s?:\s?\{\s?\1id\1\s?:\s?\2\s?\}/g, '$1$2'+'000$1:{$1id$1:$2'+'000}');
+
