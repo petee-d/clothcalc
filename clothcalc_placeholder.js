@@ -332,31 +332,13 @@
             addButton: function() {
                 if (this.ready === false) { return; }
                 var e = this;
-                var t = jQuery(
-                        '<div title="tw-db.info ClothCalc " class="menulink" />')
-                    .css(
-                        "background-image",
-                        "url(" + TWDB.images.button + ")")
-                    .css("background-position", "0px -25px")
-                    .mouseenter(
-                        function () {
-                            jQuery(this)
-                                .css(
-                                    "background-position",
-                                    "-25px -25px")
-                        })
-                    .mouseleave(
-                        function () {
-                            jQuery(this)
-                                .css(
-                                    "background-position",
-                                    "0px -25px")
-                        }).click(function () {
-                        e.open()
-                    });
-                jQuery(
-                        "#TWDB_ClothCalc_menubuttons .menucontainer_bottom")
-                    .before(t);
+                var t = jQuery('<div title="tw-db.info ClothCalc " class="menulink" />')
+                        .css("background-image", "url(" + TWDB.images.button + ")")
+                        .css("background-position", "0px -25px")
+                        .mouseenter( function() { jQuery(this).css("background-position", "-25px -25px"); })
+                        .mouseleave( function() { jQuery(this).css("background-position", "0px -25px"); })
+                        .click(function(){ e.open(); });
+                jQuery("#TWDB_ClothCalc_menubuttons .menucontainer_bottom").before(t);
                 // jQuery("#ui_menubar").append(jQuery('<div
                 // class="ui_menucontainer"
                 // id="TWDB_ClothCalc_menubuttons"
@@ -722,13 +704,8 @@
                     this.data.items = {};
                     for (var n = 0; n < e.wear.length; n++) {
                         var r = ItemManager.get(e.wear[n]);
-                        if (!this.isItemUsable(r.item_id)) {
-                            continue;
-                        }
-
-                        this.data.items[r.item_id] = {
-                            id: r.item_id
-                        }
+                        if (!this.isItemUsable(r.item_id)) { continue; }
+                        this.data.items[r.item_id] = { id: r.item_id };
                     }
                     /** TODO: remove branching when all worlds use the new system **/
                     if (TWDB.Util.isNewIDsystem()) {
@@ -8145,7 +8122,7 @@
                 t.getUp2Date = function () {
                     return f
                 };
-                /* unused atm, see Dun's edit below
+                
                 var p = function () {
                     try {
                         var t = e.extend(true, {}, a.skills);
@@ -8175,44 +8152,37 @@
                         var t = e.extend(true, {}, a.items);
                         i = {};
                         o = [];
-                        for (var n in Bag.items) {
-                            for (var r in Bag.items[n]) {
-                                var s = Number(r);
-                                if (ClothCalc.isItemUsable(s)) {
-                                    i[s] = true;
-                                    if (n == "animal") {
-                                        o
-                                            .push({
-                                                id: s,
-                                                speed: Bag.items[n][s].obj.speed
-                                            })
-                                    }
-                                    if (isDefined(t[s])) {
-                                        delete t[s]
-                                    } else {
-                                        f.items = false
+
+                        /** TODO: remove branching when all worlds use the new system **/
+                        if (TWDB.Util.isNewIDsystem()) {
+                            for (var id in Bag.items_by_id) {
+                                var item = Bag.items_by_id[id].obj;
+                                if (ClothCalc.isItemUsable(item.item_id)) {
+                                    i[item.item_id] = true;
+                                    if (item.type === "animal") { o.push({ id: item.item_id, speed: item.speed }); }
+                                    if (isDefined(t[item.item_id])) { delete t[item.item_id]; } else { f.items = false; }
+                                }
+                            }
+                        } else {    // old system, old code
+                            for (var n in Bag.items) {
+                                for (var r in Bag.items[n]) {
+                                    var s = Number(r);
+                                    if (ClothCalc.isItemUsable(s)) {
+                                        i[s] = true;
+                                        if (n == "animal") { o.push({ id: s, speed: Bag.items[n][s].obj.speed }); }
+                                        if (isDefined(t[s])) { delete t[s]; } else { f.items = false; }
                                     }
                                 }
                             }
                         }
+                        
                         for (var n in Wear.wear) {
                             var s = Number(Wear.wear[n].getId());
-                            if (isDefined(i[s])) {
-                                continue
-                            }
+                            if (isDefined(i[s])) { continue; }
                             if (ClothCalc.isItemUsable(s)) {
                                 i[s] = true;
-                                if (n == "animal") {
-                                    o.push({
-                                        id: s,
-                                        speed: Wear.wear[n].obj.speed
-                                    })
-                                }
-                                if (isDefined(t[s])) {
-                                    delete t[s]
-                                } else {
-                                    f.items = false
-                                }
+                                if (n == "animal") { o.push({ id: s, speed: Wear.wear[n].obj.speed }); }
+                                if (isDefined(t[s])) { delete t[s]; } else { f.items = false; }
                             }
                         }
                         if (!e.isEmptyObject(t)) {
@@ -8226,14 +8196,14 @@
                         Error.report(l, "DataManager loadItems")
                     }
                 };
-                */
+
                 t.loadData = function (e) {
-                    // p();
-                    // d();
+                    p();
+                    d();
                     if (e === true) {
                         // if (!f.items || !f.skills || e === true ||           <== disabled automatic recalculation
                         // Analyser.extra) {
-                        v()
+                        v();
                     }
                 };
                 var v = function () {

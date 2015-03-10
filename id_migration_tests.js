@@ -19,14 +19,32 @@
 
 var idMigrator = function() {
     //  security checks.. we don't want to migrate twice or too early
-    if (!TWDB.Util.isNewIDsystem()) { return; }
-    var migInf = TWDB.Cache.load("migration") || {};
+    //if (!TWDB.Util.isNewIDsystem()) { return; }
+    /*
+    var sl = function(k) { return $.parseJSON(localStorage.getItem(k)); }
+    var ss = function(k ,data) {
+        try {
+            localStorage.setItem(k, JSON.stringify(data)));
+            return true;
+        } catch (e) {
+            Error.report(e,'save ' + key + ' to cache');
+            _self.save(key, null);
+            return false;
+        };
+    }
+    */
+    // to tidy up, we only keep keys which are used in the script and should be kept or converted
+    var KEEPKEYS = ["barracks", "bonusdisplay", "bonusjobs", "chathistory", "marketreminder", "migration", "msdsettings", "notes", "settings", "statistic"];
+    var usedkeys  = {'keys':true};
+    
+    var twdbKeys = [];
+    var key;
+    var content;
+    
+    var uid = 'twdb_' + Character.playerId + '_';
+    var migInf = TWDB.Cache.load('migration') || {};
     migInf.itemid = migInf.itemid || {}; 
     if (migInf.itemid.migcomplete === true) { return; }
-    
-    // delete an old unused value first
-    try { localStorage.removeItem('twdb_' + Character.playerId + '_lastDeath'); } catch (e) {};
-    // TWDB.Cache.load("craftingCheck") || {found: false, date: null};
     
     var tdc = function(object) {
         // tricky deep copy
@@ -34,11 +52,69 @@ var idMigrator = function() {
         // since we have only previously JSONed data, we can use it safely.
         return JSON.parse(JSON.stringify(object));
     };
-    var cId = function(id, reverse) {
-        if (reverse) { return parseInt(id, 10) / 1000; }        // for testing
-        else { return parseInt(id, 10) * 1000; }
+    
+    var cv = function(value) { return parseInt(value, 10)*1000; }
+    
+    // find all twdb_ keys for the current user first...
+    for (var i=0; i<localStorage.length; i++) {
+        key = localStorage.key(i);
+        if (key.search(uid) === 0) { twdbKeys.push(key.substr(uid.length)); }
     }
-    var skeys = 
+    
+    for (var i=0; i<twdbKeys.length; i++) {
+        key = twdbKeys[i];
+        if (KEEPKEYS.indexOf(key) === -1) {     // those to delete
+            // localStorage.removeItem(uid + key);
+            console.log('removing ' + uid + key);
+        } else {
+            switch (key) {
+                default:
+                    console.log('leave alone ' + uid + key);
+                    break;
+                    
+                case "marketreminder":
+                    if (migInf.itemid[key] === true) { break; } // already processed that
+                    content = TWDB.Cache.load(key) || {};
+                    for (var mid in content) {
+                        if (content[mid].item) { content[mid].item = cv(content[mid].item); }
+                    }
+                    TWDB.Cache.save(key, content);
+                    migInf.itemid[key] = true;
+                    TWDB.Cache.save('migration', migInf);
+                    break;
+                    
+                case "notes":
+                    if (migInf.itemid[key] === true) { break; } // already processed that
+                    content = TWDB.Cache.load(key) || '';
+                    content.replace(/\[item=(\d+)\]/gi, function(m,dig){ return '[item=' + cv(dig)+']';} );
+                    TWDB.Cache.save(key, content);                    
+                    migInf.itemid[key] = true;
+                    TWDB.Cache.save('migration', migInf);
+                    break;
+                    
+                case "settings":
+                    if (migInf.itemid[key] === true) { break; } // already processed that
+                    content = TWDB.Cache.load(key);
+                    if (isDefined(content.pinnedItems) && isDefined(content.pinnedItems.length)) {      // only change (and save) if this is an existing array
+                        for (var mid=0; mid < content.pinnedItems.length; mid++) { content.pinnedItems[mid] = cv(content.pinnedItems[mid]); }
+                        TWDB.Cache.save(key, content);
+                    }                    
+                    migInf.itemid[key] = true;
+                    TWDB.Cache.save('migration', migInf);
+                    break;
+                    
+                case "statistic":
+                    if (migInf.itemid[key] === true) { break; } // already processed that
+                    
+                    migInf.itemid[key] = true;
+                    TWDB.Cache.save('migration', migInf);
+                    break;
+            }
+            usedkeys[key] = true;
+        }
+    }
+    TWDB.Cache.save('keys', usedkeys);
+}
     
 
 var clbi = TWDB.Cache.load("betteritems");
@@ -50,6 +126,50 @@ for (key in clbi) {
     }
 }
 
+
+
+var backupData = function() {
+    var twdbKeys = [];
+    var key;
+    var newkey;
+    var uid = 'twdb_' + Character.playerId + '_';
+    if (localStorage.getItem(uid + 'embackup') == 'TRUE') { return; }
+    var dialog = (new west.gui.Dialog(TWDB.script.name, "The West Beta was updated sooner than our migration function was ready. :( As an emergency solution, your data will be backed up right now so that we can restore them with the next update. Sorry for the inconveniences!", west.gui.Dialog.SYS_WARNING)).setModal(true,false,true).show();
+    for (var i=0; i<localStorage.length; i++) {
+        key = localStorage.key(i);
+        if (key.search(uid) === 0) {
+            twdbKeys.push({
+                    key: key,
+                    newkey: 'backup_' + key,
+                    val: localStorage.getItem(key),
+            });
+        }
+    }
+    for (var i=0; i<twdbKeys.length; i++) {
+        localStorage.setItem(twdbKeys[i].newkey, twdbKeys[i].val);
+        console.log('key ' + twdbKeys[i].key.substr(uid.length) + ' saved.');
+    }
+    localStorage.setItem(uid + 'embackup', 'TRUE');
+    dialog.addButton("ok").show();
+};
+backupData();
+
+
+(function() {
+    var skeys = ["betteritems","calcdata","datamanager"];
+    var temp = {};
+    var cont;
+    var key;
+    for (var i=0; i < skeys.length; i++) {
+        key = skeys[i];
+        cont = TWDB.Cache.load(key);
+        console.log(key, cont, temp);
+        temp[key] = cont;
+    }
+    window.twd_deb = JSON.stringify(temp);
+})()
+
+calcdata.items = replace(/(['"])(\d+)\1\s?:\s?\{\s?\1id\1\s?:\s?\2\s?\}/g, '$1$2'+'000$1:{$1id$1:$2'+'000}');
 
 /*
 betteritems : Object {38: Array[0], 42: Array[0], ...}
@@ -204,48 +324,4 @@ statistic : Object {ver: 4, job: Object, duel: Object, chest: Object}
                     789: Object
                         ...
 */
-
-
-var backupData = function() {
-    var twdbKeys = [];
-    var key;
-    var newkey;
-    var uid = 'twdb_' + Character.playerId + '_';
-    if (localStorage.getItem(uid + 'embackup') == 'TRUE') { return; }
-    var dialog = (new west.gui.Dialog(TWDB.script.name, "The West Beta was updated sooner than our migration function was ready. :( As an emergency solution, your data will be backed up right now so that we can restore them with the next update. Sorry for the inconveniences!", west.gui.Dialog.SYS_WARNING)).setModal(true,false,true).show();
-    for (var i=0; i<localStorage.length; i++) {
-        key = localStorage.key(i);
-        if (key.search(uid) === 0) {
-            twdbKeys.push({
-                    key: key,
-                    newkey: 'backup_' + key,
-                    val: localStorage.getItem(key),
-            });
-        }
-    }
-    for (var i=0; i<twdbKeys.length; i++) {
-        localStorage.setItem(twdbKeys[i].newkey, twdbKeys[i].val);
-        console.log('key ' + twdbKeys[i].key.substr(uid.length) + ' saved.');
-    }
-    localStorage.setItem(uid + 'embackup', 'TRUE');
-    dialog.addButton("ok").show();
-};
-backupData();
-
-
-(function() {
-    var skeys = ["betteritems","calcdata","datamanager"];
-    var temp = {};
-    var cont;
-    var key;
-    for (var i=0; i < skeys.length; i++) {
-        key = skeys[i];
-        cont = TWDB.Cache.load(key);
-        console.log(key, cont, temp);
-        temp[key] = cont;
-    }
-    window.twd_deb = JSON.stringify(temp);
-})()
-
-calcdata.items = replace(/(['"])(\d+)\1\s?:\s?\{\s?\1id\1\s?:\s?\2\s?\}/g, '$1$2'+'000$1:{$1id$1:$2'+'000}');
 
