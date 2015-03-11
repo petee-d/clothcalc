@@ -6,7 +6,7 @@
         }
     }
     console.log(JSON.stringify(twdbKeys));
-})()
+})();
 
 (function() {
     var skeys = ["betteritems","calcdata","datamanager","marketreminder","notes","settings","statistic"];
@@ -14,25 +14,15 @@
         var cont = TWDB.Cache.load(skeys[i]);
         console.log(skeys[i], cont);
     }
-})()
+})();
+
+/* ######################################################################################### */
 
 
 var idMigrator = function() {
     //  security checks.. we don't want to migrate twice or too early
-    //if (!TWDB.Util.isNewIDsystem()) { return; }
-    /*
-    var sl = function(k) { return $.parseJSON(localStorage.getItem(k)); }
-    var ss = function(k ,data) {
-        try {
-            localStorage.setItem(k, JSON.stringify(data)));
-            return true;
-        } catch (e) {
-            Error.report(e,'save ' + key + ' to cache');
-            _self.save(key, null);
-            return false;
-        };
-    }
-    */
+    // if (!TWDB.Util.isNewIDsystem()) { return; }
+    
     // to tidy up, we only keep keys which are used in the script and should be kept or converted
     var KEEPKEYS = ["barracks", "bonusdisplay", "bonusjobs", "chathistory", "marketreminder", "migration", "msdsettings", "notes", "settings", "statistic"];
     var usedkeys  = {'keys':true};
@@ -40,6 +30,8 @@ var idMigrator = function() {
     var twdbKeys = [];
     var key;
     var content;
+    var temp;
+    var tmpId;
     
     var uid = 'twdb_' + Character.playerId + '_';
     var migInf = TWDB.Cache.load('migration') || {};
@@ -53,7 +45,7 @@ var idMigrator = function() {
         return JSON.parse(JSON.stringify(object));
     };
     
-    var cv = function(value) { return parseInt(value, 10)*1000; }
+    var cv = function(value) { return parseInt(value, 10)*1000; };
     
     // find all twdb_ keys for the current user first...
     for (var i=0; i<localStorage.length; i++) {
@@ -61,23 +53,21 @@ var idMigrator = function() {
         if (key.search(uid) === 0) { twdbKeys.push(key.substr(uid.length)); }
     }
     
+    
     for (var i=0; i<twdbKeys.length; i++) {
         key = twdbKeys[i];
         if (KEEPKEYS.indexOf(key) === -1) {     // those to delete
-            // localStorage.removeItem(uid + key);
-            console.log('removing ' + uid + key);
+            localStorage.removeItem(uid + key);
+            debLog('removing ' + uid + key);
         } else {
-            switch (key) {
-                default:
-                    console.log('leave alone ' + uid + key);
-                    break;
-                    
+            switch (key) {                    
                 case "marketreminder":
                     if (migInf.itemid[key] === true) { break; } // already processed that
                     content = TWDB.Cache.load(key) || {};
                     for (var mid in content) {
                         if (content[mid].item) { content[mid].item = cv(content[mid].item); }
                     }
+                    debLog(key, TWDB.Cache.load(key), content);
                     TWDB.Cache.save(key, content);
                     migInf.itemid[key] = true;
                     TWDB.Cache.save('migration', migInf);
@@ -86,8 +76,11 @@ var idMigrator = function() {
                 case "notes":
                     if (migInf.itemid[key] === true) { break; } // already processed that
                     content = TWDB.Cache.load(key) || '';
-                    content.replace(/\[item=(\d+)\]/gi, function(m,dig){ return '[item=' + cv(dig)+']';} );
-                    TWDB.Cache.save(key, content);                    
+                    temp = content.replace(/\[item=(\d+)\]/gi, function(m,dig){ return '[item=' + cv(dig)+']';} );
+                    if (temp !== content) {
+                        debLog(key, content, temp);
+                        TWDB.Cache.save(key, temp);
+                    }
                     migInf.itemid[key] = true;
                     TWDB.Cache.save('migration', migInf);
                     break;
@@ -97,6 +90,7 @@ var idMigrator = function() {
                     content = TWDB.Cache.load(key);
                     if (isDefined(content.pinnedItems) && isDefined(content.pinnedItems.length)) {      // only change (and save) if this is an existing array
                         for (var mid=0; mid < content.pinnedItems.length; mid++) { content.pinnedItems[mid] = cv(content.pinnedItems[mid]); }
+                        debLog(key, TWDB.Cache.load(key).pinnedItems, content.pinnedItems);
                         TWDB.Cache.save(key, content);
                     }                    
                     migInf.itemid[key] = true;
@@ -105,17 +99,66 @@ var idMigrator = function() {
                     
                 case "statistic":
                     if (migInf.itemid[key] === true) { break; } // already processed that
+                    content = TWDB.Cache.load(key);
+                    temp = {};
+                    for (var box in content.chest) {    // chest stats
+                        tmpId = cv(box);
+                        temp[tmpId] = tdc(content.chest[box]);
+                        temp[tmpId].items = {};
+                        for (var item in content.chest[box].items) {
+                            temp[tmpId].items[cv(item)] = content.chest[box].items[item];
+                        }
+                    }
+                    debLog(content.chest, temp);
+                    content.chest = tdc(temp);          // chest stats end ####
                     
+                    for (var j in content.job) {        // job id (mostly)
+                        if (!JobList.getJobById(j)){ continue; }   // leave 'last' and that unused 'items' alone                            
+                        temp = {};
+                        for (var m in content.job[j]) { // motivation, products (&more)
+                            temp[m] = {};
+                            if (m == 'products') {
+                                for (var p in content.job[j][m]) { temp[m][cv(p)] = tdc(content.job[j][m][p]); }
+                            } else if ($.isNumeric(m)) {        // motivations
+                                for (var s in content.job[j][m]) {      // various stats, including items & extraitems
+                                    if (s == 'items' || s == 'extraitems') {
+                                        temp[m][s] = {};
+                                        for (var item in content.job[j][m][s]) {
+                                            temp[m][s][cv(item)] = content.job[j][m][s][item];
+                                        }                                        
+                                        //debLog(content.job[j][m][s], temp[m][s]);
+                                    } else {
+                                        temp[m][s] = tdc(content.job[j][m][s]);
+                                    }
+                                    //debLog(content.job[j][m], temp[m]);
+                                }
+                            } else {
+                                temp[m] = tdc(content.job[j][m]);
+                            }
+                        }
+                        debLog(content.job[j], temp);
+                        content.job[j] = tdc(temp);
+                    }
+                    
+                    debLog(key, TWDB.Cache.load(key), content);
+                    TWDB.Cache.save(key, content);
                     migInf.itemid[key] = true;
                     TWDB.Cache.save('migration', migInf);
                     break;
-            }
+                    
+                default:
+                    debLog('leave alone ' + uid + key);
+                    break;
+            };
             usedkeys[key] = true;
         }
     }
     TWDB.Cache.save('keys', usedkeys);
-}
+    migInf.itemid.migcomplete = true;
+    TWDB.Cache.save('migration', migInf);
+};
     
+/* ######################################################################################### */
 
 var clbi = TWDB.Cache.load("betteritems");
 var arr, obj, key;
@@ -141,7 +184,7 @@ var backupData = function() {
             twdbKeys.push({
                     key: key,
                     newkey: 'backup_' + key,
-                    val: localStorage.getItem(key),
+                    val: localStorage.getItem(key)
             });
         }
     }
@@ -153,6 +196,31 @@ var backupData = function() {
     dialog.addButton("ok").show();
 };
 backupData();
+
+
+var simpleRestore = function(remove) {
+    if (localStorage.getItem('twdb_' + Character.playerId + '_embackup') != 'TRUE') { return; }
+    var twdbKeys = [];
+    var key;
+    var newkey;
+    var uid = 'backup_twdb_' + Character.playerId + '_';
+    for (var i=0; i<localStorage.length; i++) {
+        key = localStorage.key(i);
+        if (key.search(uid) === 0) {
+            twdbKeys.push(key);
+        }
+    }
+    if (remove === true) {
+        for (var i=0; i<twdbKeys.length; i++) {
+            localStorage.removeItem(twdbKeys[i]);
+        }
+        localStorage.removeItem('twdb_' + Character.playerId + '_embackup');
+    } else {
+        for (var i=0; i<twdbKeys.length; i++) {
+            localStorage.setItem(twdbKeys[i].substr(7), localStorage.getItem(twdbKeys[i]));
+        }
+    }
+};
 
 
 (function() {
@@ -167,76 +235,9 @@ backupData();
         temp[key] = cont;
     }
     window.twd_deb = JSON.stringify(temp);
-})()
-
-calcdata.items = replace(/(['"])(\d+)\1\s?:\s?\{\s?\1id\1\s?:\s?\2\s?\}/g, '$1$2'+'000$1:{$1id$1:$2'+'000}');
+})();
 
 /*
-betteritems : Object {38: Array[0], 42: Array[0], ...}
-    ...
-    11311: Array[5]
-        0: Object
-            job: 16
-            more: 13
-            newlp: 1089
-        1: Object ....
-
-        
-calcdata : Object {skills: Object, items: Object, jobs: Object, custom: Object, ...}
-    
-    custom: Object
-        1: Object
-            cloth: Object
-                1: Object
-                    id: 638
-                    lp: 0
-                2: Object
-                ...
-                10: Object
-                    id: 11137
-                    lp: 0
-            
-    items: Object
-        1: Object
-            id: 1
-        2: Object
-        4: Object       <= non-continous!
-        5: Object
-        ...
-        13: Object
-            id: 13
-    
-    jobs: Object        <= same structure as custom
-        1: Object
-            cloth: Object
-                1: Object
-                    id: 638
-                    lp: 0
-                2: Object
-                ...
-                10: Object
-                    id: 11137
-                    lp: 0
-    
-    used: Object
-        50: 1
-        188: 1
-        253: 1
-        369: 1
-        429: 1
-        ...
-        
-datamanager : Object {items: Object, skills: Object}
-    items: Object
-        1: true
-        2: true
-        4: true       <= non-continous!
-        5: true
-        ...
-        13: true        
-        
-####   lastDeath : delete!      #####
-
 marketreminder : Object {2337442: Object, 2338397: Object}
     2337442: Object
         ends: 1425666450.8177
@@ -309,8 +310,8 @@ statistic : Object {ver: 4, job: Object, duel: Object, chest: Object}
                 .       309: 1
                 .       316: 1
                 .       ...
-                .       killed: 0
-                        wage: 11575
+            .       killed: 0
+                    wage: 11575
                 count: 133
                 products: Object              AND products:
                     707: Object                   each key {}

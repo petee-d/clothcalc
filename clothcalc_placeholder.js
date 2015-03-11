@@ -162,7 +162,6 @@
                 var newkey;
                 var uid = 'twdb_' + Character.playerId + '_';
                 if (localStorage.getItem(uid + 'embackup') == 'TRUE') { return; }
-                var dialog = (new west.gui.Dialog(TWDB.script.name, "The West Beta was updated sooner than our migration function was ready. :( As an emergency solution, your data will be backed up right now so that we can restore them with the next update. Sorry for the inconveniences!", west.gui.Dialog.SYS_WARNING)).setModal(true,false,true).show();
                 for (var i=0; i<localStorage.length; i++) {
                     key = localStorage.key(i);
                     if (key.search(uid) === 0) {
@@ -178,10 +177,164 @@
                     console.log('key ' + twdbKeys[i].key.substr(uid.length) + ' saved.');
                 }
                 localStorage.setItem(uid + 'embackup', 'TRUE');
-                dialog.addButton("ok").show();
             };
             _public.backupData = function() { return _backupData(); };
 
+            var _idMigrator = function() {
+                //  security checks.. we don't want to migrate twice or too early
+                if (!TWDB.Util.isNewIDsystem()) { return; }
+                
+                // to tidy up, we only keep keys which are used in the script and should be kept or converted
+                var KEEPKEYS = ["barracks", "bonusdisplay", "bonusjobs", "chathistory", "embackup", "marketreminder", "migration", "msdsettings", "notes", "settings", "statistic"];
+                var usedkeys  = {'keys':true};
+                
+                var twdbKeys = [];
+                var key;
+                var content;
+                var temp;
+                var tmpId;
+                
+                var uid = 'twdb_' + Character.playerId + '_';
+                var migInf = TWDB.Cache.load('migration') || {};
+                migInf.itemid = migInf.itemid || {}; 
+                if (migInf.itemid.migcomplete === true) { return; }
+                
+                var tdc = function(object) {
+                    // tricky deep copy
+                    // tricky, because it works only on data types which are specified in JSON;
+                    // since we have only previously JSONed data, we can use it safely.
+                    return JSON.parse(JSON.stringify(object));
+                };
+                
+                var cv = function(value) { return parseInt(value, 10)*1000; };
+                
+                // find all twdb_ keys for the current user first...
+                for (var i=0; i<localStorage.length; i++) {
+                    key = localStorage.key(i);
+                    if (key.search(uid) === 0) { twdbKeys.push(key.substr(uid.length)); }
+                }                
+                
+                for (var i=0; i<twdbKeys.length; i++) {
+                    key = twdbKeys[i];
+                    if (KEEPKEYS.indexOf(key) === -1) {     // those to delete
+                        localStorage.removeItem(uid + key);
+                    } else {
+                        if (migInf.itemid[key] === true) {  // already processed that
+                            usedkeys[key] = true;
+                            continue;
+                        }
+                        switch (key) {                    
+                        case "marketreminder":
+                            content = TWDB.Cache.load(key) || {};
+                            for (var mid in content) {
+                                if (content[mid].item) { content[mid].item = cv(content[mid].item); }
+                            }
+                            TWDB.Cache.save(key, content);
+                            migInf.itemid[key] = true;
+                            TWDB.Cache.save('migration', migInf);
+                            break;
+                            
+                        case "notes":
+                            content = TWDB.Cache.load(key) || '';
+                            temp = content.replace(/\[item=(\d+)\]/gi, function(m,dig){ return '[item=' + cv(dig)+']';} );
+                            if (temp !== content) {
+                                TWDB.Cache.save(key, temp);
+                            }
+                            migInf.itemid[key] = true;
+                            TWDB.Cache.save('migration', migInf);
+                            break;
+                            
+                        case "settings":
+                            content = TWDB.Cache.load(key);
+                            if (isDefined(content.pinnedItems) && isDefined(content.pinnedItems.length)) {      // only change (and save) if this is an existing array
+                                for (var mid=0; mid < content.pinnedItems.length; mid++) { content.pinnedItems[mid] = cv(content.pinnedItems[mid]); }
+                                TWDB.Cache.save(key, content);
+                            }                    
+                            migInf.itemid[key] = true;
+                            TWDB.Cache.save('migration', migInf);
+                            break;
+                            
+                        case "statistic":
+                            content = TWDB.Cache.load(key);
+                            temp = {};
+                            for (var box in content.chest) {    // chest stats
+                                tmpId = cv(box);
+                                temp[tmpId] = tdc(content.chest[box]);
+                                temp[tmpId].items = {};
+                                for (var item in content.chest[box].items) {
+                                    temp[tmpId].items[cv(item)] = content.chest[box].items[item];
+                                }
+                            }
+                            content.chest = tdc(temp);          // chest stats end ####
+                            
+                            for (var j in content.job) {        // job id (mostly)
+                                if (!JobList.getJobById(j)){ continue; }   // leave 'last' and that unused 'items' alone                            
+                                temp = {};
+                                for (var m in content.job[j]) { // motivation, products (&more)
+                                    temp[m] = {};
+                                    if (m == 'products') {
+                                        for (var p in content.job[j][m]) { temp[m][cv(p)] = tdc(content.job[j][m][p]); }
+                                    } else if ($.isNumeric(m)) {        // motivations
+                                        for (var s in content.job[j][m]) {      // various stats, including items & extraitems
+                                            if (s == 'items' || s == 'extraitems') {
+                                                temp[m][s] = {};
+                                                for (var item in content.job[j][m][s]) {
+                                                    temp[m][s][cv(item)] = content.job[j][m][s][item];
+                                                }                                        
+                                            } else {
+                                                temp[m][s] = tdc(content.job[j][m][s]);
+                                            }
+                                        }
+                                    } else {
+                                        temp[m] = tdc(content.job[j][m]);
+                                    }
+                                }
+                                content.job[j] = tdc(temp);
+                            }
+                            
+                            TWDB.Cache.save(key, content);
+                            migInf.itemid[key] = true;
+                            TWDB.Cache.save('migration', migInf);
+                            break;
+                            
+                        default:
+                            break;
+                        };
+                        usedkeys[key] = true;
+                    }
+                }
+                TWDB.Cache.save('keys', usedkeys);
+                migInf.itemid.migcomplete = true;
+                TWDB.Cache.save('migration', migInf);
+            };            
+            _public.idMigrator = function() { return _idMigrator(); };
+            
+            var _simpleRestore = function(remove) {
+                if (localStorage.getItem('twdb_' + Character.playerId + '_embackup') != 'TRUE') { return; }
+                var twdbKeys = [];
+                var key;
+                var newkey;
+                var uid = 'backup_twdb_' + Character.playerId + '_';
+                for (var i=0; i<localStorage.length; i++) {
+                    key = localStorage.key(i);
+                    if (key.search(uid) === 0) {
+                        twdbKeys.push(key);
+                    }
+                }
+                if (remove === true) {
+                    for (var i=0; i<twdbKeys.length; i++) {
+                        localStorage.removeItem(twdbKeys[i]);
+                    }
+                    localStorage.removeItem('twdb_' + Character.playerId + '_embackup');
+                } else {
+                    for (var i=0; i<twdbKeys.length; i++) {
+                        localStorage.setItem(twdbKeys[i].substr(7), localStorage.getItem(twdbKeys[i]));
+                    }
+                }
+            };
+            _public.simpleRestore = function(r) { return _simpleRestore(r); };
+
+            
             return _public;
         })(jQuery);
 
@@ -2540,7 +2693,20 @@
                             (new UserMessage("TWDB-ClothCalc Script is deactivated until the Gameversion on your world is updated to 2.04. Sorry!", UserMessage.TYPE_FATAL)).show();
                             return destroy();
                         } */
-                        /** TODO: CHECK FOR IDs   **/
+                        
+                        // check for kID & try migration if it's not the already messed up public beta
+                        if (TWDB.Util.isNewIDsystem() && window.location.href.indexOf(".beta.the-west.net") === -1) {
+                            try { TWDB.Util.backupData(); } catch (e) {};       // no time for handling a failed backup :(
+                            try {
+                                TWDB.Util.idMigrator();
+                                (new UserMessage('Converting TW-DB data to new item ID system successful.', UserMessage.TYPE_SUCCESS)).show();
+                                TWDB.Util.simpleRestore(true);  // delete backup 
+                            } catch (e) {
+                                Error.report(e, 'Item ID conversion failed.');
+                                (new UserMessage('Item ID conversion failed. Do not use the ANALYSERS if you want to save your data!', UserMessage.TYPE_FATAL)).show();
+                                TWDB.Util.simpleRestore();  // restore backup 
+                            };
+                        }
                         return next();
                     }
                     if (isDefined(failed[current.key])) {
