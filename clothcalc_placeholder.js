@@ -8264,7 +8264,7 @@
                                 background: 'url(//westzzs.innogamescdn.com/images/window/messages/post-head.jpg) -16px 0' })
                             .before(
                                 $('<div class="telegram-source"><div>BB</div></div>')
-                                .attr('title', '#HELP_SWITCH_TELEGRAM_SOURCE#')
+                                .attr('title', '#SWITCH_TELEGRAM_SOURCE#')
                                 .click(function () {
                                     var active = $(this).toggleClass('active').hasClass('active');
                                     $(this).closest('.telegram-head').next('.telegram-post').html(active
