@@ -7117,6 +7117,7 @@
                         GameInject.injectInventoryAddItemsPinItems();
                         GameInject.injectInventoryAddItemDivToInvPinItems();
                     }
+                    if (Settings.get("telegramsource", true)) GameInject.injectTelegramWindowAppendTelegramDisplaySource();
                     loader.ready = true;
                 };
                 loader = Loader.add("LpInfo", "tw-db LpInfo", init, { Settings: true });
@@ -8253,7 +8254,6 @@
                 // display telegram source - button to switch a telegram to source mode
                 // ====================================================================
                 _self.injectTelegramWindowAppendTelegramDisplaySource = function (e) {
-                    if (!Settings.get('telegramsource', true)) return;
                     try {
                         TelegramWindow.__CCDTS__appendTelegram = TelegramWindow.__CCDTS__appendTelegram || TelegramWindow.appendTelegram;
                         TelegramWindow.appendTelegram = function (p, e) {
