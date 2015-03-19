@@ -639,6 +639,7 @@
                     return;
                 }
                 if (wman.getById(this.uid)) {
+                    wman.reopen(this.uid);      // maximize when needed & bring to top
                     if (isDefined(e) && isDefined(t)) {
                         switch (t) {
                         case "job":
@@ -667,10 +668,14 @@
                     this.eventOpen = TWDB.Eventer.set( "getGameData", function() { n.finishOpening(); }, 1);
                     this.getGameData();
                 };
-                var o = wman.getById(Inventory.uid);
-                Wear.open();
-                var u = wman.getById(Inventory.uid);
-                if (typeof o == "undefined" && typeof u != "undefined") { u.fireEvent(TWE("WINDOW_CLOSE"), u); };
+                
+                if (!isDefined(wman.getById(Wear.uid))) {       // only needed if we have no wear window yet
+                    var o = wman.getById(Inventory.uid);
+                    Wear.open();
+                    wman.minimize(Wear.uid, true);
+                    var u = wman.getById(Inventory.uid);
+                    if (typeof o == "undefined" && typeof u != "undefined") { u.fireEvent(TWE("WINDOW_CLOSE"), u); };
+                }
                 this.jobs.selected = 0;
                 // Dun - adding the danger sorting
                 this.gui.job.sort = jQuery('<div style="position:absolute;top:10px;left:0px;height:20px;" />')
@@ -3876,15 +3881,15 @@
                         JobWindow.prototype.getBestWearButton  = function() {
                             var $div = JobWindow.prototype.__twdb__getBestWearButton.apply(this, arguments);
                             var _this = this;
-                            return $div.after($('<div class="twdb_bestwear" title="#SHOWJOBATCC#">').click(function(ev){
+                            return $div.append($('<div class="twdb_bestwear" title="#SHOWJOBATCC#">').click(function(ev){
                                     ev.stopImmediatePropagation(); TWDB.ClothCalc.open(_this.job.id, 'job');
                             }));
                         };
 
                         var css_ccBest = "div.job_bestwearbutton {left: 15px!important;}\n"
                         + "div.twdb_bestwear {background: url('" + TWDB.images.bestwear + "') no-repeat top left; "
-                        + "height: 55px; position: relative; left: 208px; top: -55px; cursor: pointer;}\n"
-                        + "div.twdb_bestwear:hover {background-position: bottom left;}";
+                        + "height: 55px; position: relative; left: 195px; top: -15px;}\n"
+                        + "div.job_bestwearbutton:hover .twdb_bestwear {background-position: bottom left;}";
                         TWDB.Util.addCss(css_ccBest,'bestwear');
                     } catch (err) {
                         Error.report(err, "manipulate JobWindow.prototype.getBestWearButton");
@@ -4047,6 +4052,7 @@
                     // Settings.addOption( '#INTERFACE#' , 'directsleep', 0 ,'#HELP_DIRECTSLEEP#');	// for new settings system only
                     if (Settings.get('directsleep', true)) {
                         var sleepCss = "ul.tw2gui_selectbox_content.twdb_sleepmenu {max-width: 320px!important; white-space: nowrap; overflow-y: auto; overflow-x: hidden;}"
+                                     + "ul.tw2gui_selectbox_content.twdb_sleepmenu > div.tw2gui_scrollpane {width: 320px!important}"
                                      + "ul.tw2gui_selectbox_content.twdb_sleepmenu > li {padding-right: 20px!important;}";
                         TWDB.Util.addCss(sleepCss);
                         cache = Cache.load('barracks');
@@ -4082,11 +4088,6 @@
                             selectbox.addItem(forts[i].id, '#STAGE#&nbsp;' + forts[i].stage + '&nbsp;' + forts[i].distance.formatDuration() + '&nbsp;|&nbsp;' + forts[i].name);
                         };
                     };
-                    // Dun - Add auto vertical scollbar
-                    // $(selectbox.elContent).css({"max-height": "270px", "width": "250px", "overflow-y": 'auto'});
-
-                    // Bluep thinks that's better...{max-width: 320px!important; overflow-y: auto; overflow-x: hidden; white-space: nowrap;}
-                    // > <li> padding-right: 20px!important;
                     $(selectbox.elContent).addClass("twdb_sleepmenu");
                     selectbox.show(e);
                 };
@@ -5380,15 +5381,20 @@
                 t.loadMap = function () {
                     p()
                 };
-                var d = function () {
-                    var t = function () {
-                        var t = e('<div style="position:absolute;bottom:45px;left:5px;display:block:heigth:30px;" />');
+                var d = function () {   // minimap - coordinates bar
+                    var css = 'div#mmap_twdb_coords {position: absolute; bottom: 35px; left: 1px; display: block;}\n'
+                            + 'div#mmap_twdb_coords > img {cursor:pointer; opacity:0.5; position:relative;}';
+                    TWDB.Util.addCss(css,'minimap');
+
+                    var t = function() {
+                        var t = e('<div id="mmap_twdb_coords" />');
                         var n = new west.gui.Textfield;
                         var r = new west.gui.Textfield;
                         var i = "";
                         var s = "";
                         n.setWidth(45);
                         r.setWidth(45).setMaxLength(5);
+                        
                         var o = function () {
                             var e = Number(n.getValue());
                             var t = Number(r.getValue());
@@ -5396,97 +5402,42 @@
                             n.setValue("");
                             r.setValue("")
                         };
-                        e(n.getMainDiv())
-                            .find("input")
-                            .keyup(
-                                function (t) {
-                                    window
-                                        .setTimeout(
-                                            function () {
-                                                if (t.ctrlKey && t.keyCode == 86 && !t.altKey) {
-                                                    var u = (new RegExp(
-                                                            "^([0-9]{1,5})([^0-9]+)([0-9]{1,5})$"))
-                                                        .exec(e
-                                                            .trim(n
-                                                                .getValue()));
-                                                    if (u) {
-                                                        n
-                                                            .setValue(u[1]);
-                                                        r
-                                                            .setValue(u[3]);
-                                                        e(
-                                                                r
-                                                                .getMainDiv())
-                                                            .find(
-                                                                "input")
-                                                            .focus();
-                                                        i = n
-                                                            .getValue();
-                                                        s = r
-                                                            .getValue();
-                                                        return
-
-                                                    }
-                                                    var u = (new RegExp(
-                                                            "^([0-9]{1,5})$"))
-                                                        .exec(e
-                                                            .trim(n
-                                                                .getValue()));
-                                                    if (u) {
-                                                        n
-                                                            .setValue(u[1]);
-                                                        e(
-                                                                r
-                                                                .getMainDiv())
-                                                            .find(
-                                                                "input")
-                                                            .focus();
-                                                        i = n
-                                                            .getValue();
-                                                        return
-
-                                                    }
-                                                    n
-                                                        .setValue(i)
-                                                }
-                                                if (t.keyCode == 13) {
-                                                    o();
-                                                    return
-
-                                                }
-                                                if (String(e
-                                                    .trim(n
-                                                        .getValue())).length == 0) {
-                                                    i = n
-                                                        .getValue();
-                                                    return
-
-                                                }
-                                                var u = (new RegExp(
-                                                        "^([0-9]{1,5})$"))
-                                                    .exec(e
-                                                        .trim(n
-                                                            .getValue()));
-                                                if (u) {
-                                                    n
-                                                        .setValue(u[1]);
-                                                    if (String(u[1]).length == 5) {
-                                                        e(
-                                                                r
-                                                                .getMainDiv())
-                                                            .find(
-                                                                "input")
-                                                            .focus()
-                                                    }
-                                                    i = n
-                                                        .getValue();
-                                                    return
-
-                                                }
-                                                n
-                                                    .setValue(i)
-                                            }, 100)
-                                });
+                        
+                        e(n.getMainDiv()).find("input").keyup(function(t) {
+                            window.setTimeout(function() {
+                                var u;
+                                if (t.ctrlKey && t.keyCode === 86 && !t.altKey) {
+                                    u = (new RegExp("^([0-9]{1,5})([^0-9]+)([0-9]{1,5})$")).exec(e.trim(n.getValue()));
+                                    if (u) {
+                                        n.setValue(u[1]);
+                                        r.setValue(u[3]);
+                                        e(r.getMainDiv()).find("input").focus();
+                                        i = n.getValue();
+                                        s = r.getValue();
+                                        return;
+                                    }
+                                    u = (new RegExp("^([0-9]{1,5})$")).exec(e.trim(n.getValue()));
+                                    if (u) {
+                                        n.setValue(u[1]);
+                                        e(r.getMainDiv()).find("input").focus();
+                                        i = n.getValue();
+                                        return;
+                                    }
+                                    n.setValue(i);
+                                }
+                                if (t.keyCode === 13) { return o(); }
+                                if (String(e.trim(n.getValue())).length === 0) { i = n.getValue(); return; }
+                                u = (new RegExp("^([0-9]{1,5})$")).exec(e.trim(n.getValue()));
+                                if (u) {
+                                    n.setValue(u[1]);
+                                    if (String(u[1]).length === 5) { e(r.getMainDiv()).find("input").focus(); }
+                                    i = n.getValue();
+                                    return;
+                                }
+                                n.setValue(i);
+                            }, 100)
+                        });
+                        
                         e(r.getMainDiv())
                             .find("input")
                             .keyup(
@@ -5555,36 +5506,24 @@
                                                     .setValue(s)
                                             }, 100)
                                 });
-                        var u = new west.gui.Button("Ok",
-                            function () {
-                                o()
-                            }, null, null, "#SCROLL_TO#");
-                        u.setWidth("50");
-                        var a = e(
-                                '<img title="#SHOW_COORDS#" src="' + Images.iconCount + '" style="cursor:pointer;opacity:0.5;position:relative;vertical-align:top;position:relative;top:6px;" />')
-                            .click(function () {
-                                if (e(this).css("opacity") == 1) {
-                                    e(this).css("opacity", "0.5");
-                                    window.Map.hideCoords()
-                                } else {
-                                    e(this).css("opacity", "1");
-                                    window.Map.showCoords()
-                                }
-                            });
-                        var f = e(
-                                '<span style="position:relative;top:-5px" />')
-                            .append(n.getMainDiv()).append(
-                                "<span>|</span>").append(
-                                r.getMainDiv());
-                        t.append(a).append(f).append(u.getMainDiv());
-                        e(MinimapWindow.window.divMain).find(
-                            ".minimap-right").append(t)
+                            
+                        var u = (new west.gui.Button("Ok", function() { o(); }, null, null, "#SCROLL_TO#")).setWidth("48");
+                        var a = e('<img title="#SHOW_COORDS#" src="' + Images.iconCount + '" />')
+                                .click(function() {
+                                    if (e(this).css("opacity") === 1) {
+                                        e(this).css("opacity", "0.5");
+                                        window.Map.hideCoords();
+                                    } else {
+                                        e(this).css("opacity", "1");
+                                        window.Map.showCoords();
+                                    }
+                                });
+                        t.append(a, n.getMainDiv(), "<span>|</span>", r.getMainDiv(), e(u.getMainDiv()).css('top','6px'));
+                        e(".minimap-right", MinimapWindow.window.divMain).append(t);
                     };
-                    GameInject.injectMinimap(function () {
-                        t()
-                    })
+                    GameInject.injectMinimap(function() { t(); })
                 };
-                return t
+                return t;
             }($);
             _base.Map = Map;
             Debugger.Map = Map;
@@ -5693,73 +5632,36 @@
                         e(t)
                     })
                 };
-                var u = function () {
-                    var t = function () {
-                        var t = e(
-                                '<div style="position:absolute;top:40px;right:10px;display:block:heigth:30px;" />')
-                            .append(
-                                e(
-                                    '<input title="#HELP_GOLD#" type="checkbox" ' + (i.gold ? 'checked="checked"' : "") + ' style="vertical-align:top;margin-left:5px;margin-right:5px;" />')
-                                .change(
-                                    function () {
-                                        if (e(this)
-                                            .attr(
-                                                "checked")) {
-                                            i.gold = true
-                                        } else {
-                                            i.gold = false
-                                        }
-                                        a()
-                                    }))
-                            .append(
-                                '<div title="#HELP_GOLD#" style="position:relative;display:inline-block;height:9px;width:9px;background-color:yellow;border:1px solid red;margin:1px;"></div>')
-                            .append(
-                                e(
-                                    '<input title="#HELP_SILVER#" type="checkbox" ' + (i.silver ? 'checked="checked"' : "") + 'style="vertical-align:top;margin-left:5px;margin-right:5px;" />')
-                                .change(
-                                    function () {
-                                        if (e(this)
-                                            .attr(
-                                                "checked")) {
-                                            i.silver = true
-                                        } else {
-                                            i.silver = false
-                                        }
-                                        a()
-                                    }))
-                            .append(
-                                '<div title="#HELP_SILVER#" style="position:relative;display:inline-block;height:9px;width:9px;background-color:white;border:1px solid black;margin:1px;"></div>')
-                            .append(
-                                e(
-                                    '<img title="#BONUS_JOBS# #EXPORT#" style="margin-left:3px;cursor:pointer;position:relative;display:inline-block;height:16px;width:16px;vertical-align:top;top:-2px;" src="' + Images.iconExport + '" />')
-                                .click(function () {
-                                    f()
-                                }))
-                            .append(
-                                e(
-                                    '<img title="#BONUS_JOBS# #IMPORT#" style="margin-left:3px;cursor:pointer;position:relative;display:inline-block;height:16px;width:16px;vertical-align:top;top:-2px;" src="' + Images.iconImport + '" />')
-                                .click(function () {
-                                    l()
-                                }))
-                            .append(
-                                e(
-                                    '<img title="#BONUS_JOBS# #RESET#" style="margin-left:3px;cursor:pointer;position:relative;display:inline-block;height:16px;width:16px;vertical-align:top;top:-2px;" src="' + Images.iconReset2 + '" />')
-                                .click(function () {
-                                    c()
-                                }));
-                        e(MinimapWindow.window.divMain).find(
-                            ".minimap-right").append(t);
-                        a()
+                
+                var u = function () {   // minimap - bonus job bar
+                    var css = 'div#mmap_twdb_bonusjobs {position:absolute; top:40px; right:10px;}\n'
+                            + 'div#mmap_twdb_bonusjobs > input[type="checkbox"] {margin-left:6px; cursor:pointer;}\n'
+                            + 'div#mmap_twdb_bonusjobs > div {position:relative; display:inline-block; height:9px; width:9px; margin:1px;}\n'
+                            + 'div#mmap_twdb_bonusjobs > img {margin-left:3px; cursor:pointer; position:relative; display:inline-block; height:16px; width:16px; top:-4px;}';
+                    TWDB.Util.addCss(css,'minimap');
+                    var t = function() {
+                        var t = e('<div id="mmap_twdb_bonusjobs" />')
+                            .append(e('<input title="#HELP_GOLD#" type="checkbox" ' + (i.gold ? 'checked="checked"' : "") + ' />')
+                                .change(function() { i.gold = (e(this).attr("checked")); a(); }))
+                            .append('<div title="#HELP_GOLD#" style="background-color:yellow; border:1px solid red;" />')
+                            .append(e('<input title="#HELP_SILVER#" type="checkbox" ' + (i.silver ? 'checked="checked"' : "") + ' />')
+                                .change(function() { i.silver = (e(this).attr("checked")); a(); }))
+                            .append('<div title="#HELP_SILVER#" style="background-color:white; border:1px solid black;" />')
+                            .append(e('<img title="#BONUS_JOBS# #EXPORT#" src="' + Images.iconExport + '" />')
+                                .click(function() { f(); }))
+                            .append( e( '<img title="#BONUS_JOBS# #IMPORT#" src="' + Images.iconImport + '" />')
+                                .click(function() { l(); }))
+                            .append(e('<img title="#BONUS_JOBS# #RESET#" src="' + Images.iconReset2 + '" />')
+                                .click(function() { c(); }));
+                        e(MinimapWindow.window.divMain).find(".minimap-right").append(t);
+                        a();
                     };
-                    GameInject.injectMinimap(function () {
-                        t()
-                    })
+                    GameInject.injectMinimap(function() { t(); });
                 };
+                
                 var a = function () {
                     Cache.save("bonusdisplay", i);
-                    e(MinimapWindow.window.divMain).find(
-                            "#minimap_worldmap").find(".TWDBbonusjob")
-                        .remove();
+                    e("#minimap_worldmap > div.TWDBbonusjob", MinimapWindow.window.divMain).remove();
                     var t = function (t, n, r, i, s) {
                         var o = .00513;
                         var u = parseInt(t * o, 10) - 3;
@@ -5788,41 +5690,31 @@
                     }
                     */
                     for (key in r) {
-                        if (!r.hasOwnProperty(key)) {
-                            continue
-                        }
+                        if (!r.hasOwnProperty(key)) { continue; }
                         var s = r[key];
                         var o = false;
                         var u = 0;
                         var a = [];
                         for (var f in s) {
-                            if (!s.hasOwnProperty(f)) {
-                                continue
-                            }
+                            if (!s.hasOwnProperty(f)) { continue; }
                             if (s[f].gold) {
-                                if (!i.gold) {
-                                    continue
-                                }
+                                if (!i.gold) { continue; }
                                 o = true;
-                                u++
+                                u++;
                             }
                             if (s[f].silver) {
-                                if (!i.silver) {
-                                    continue
-                                }
-                                u++
+                                if (!i.silver) { continue; }
+                                u++;
                             }
                             var l = s[f].x;
                             var c = s[f].y;
                             job = JobList.getJobById(s[f].job_id);
-                            a.push(Jobs.getPopup(s[f].job_id,
-                                s[f].gold ? "gold" : "silver"))
+                            a.push(Jobs.getPopup(s[f].job_id, s[f].gold ? "gold" : "silver"))
                         }
-                        if (u > 0) {
-                            t(l, c, o, u, a)
-                        }
+                        if (u > 0) { t(l, c, o, u, a); }
                     }
                 };
+                
                 var f = function () {
                     var t = [];
                     for (var r in n) {
@@ -5991,9 +5883,9 @@
                                 west.gui.Dialog.SYS_QUESTION))
                             .addButton("#ALL#", function () {
                                     c("all")
-                                }).addButton("#GOLD#", function () {
+                                }).addButton("#JOBS_GOLD#", function () {
                                     c("silver")
-                                }).addButton("#SILVER#",
+                                }).addButton("#JOBS_SILVER#",
                                     function () {
                                         c("gold")
                                     }).addButton("cancel")
@@ -6034,7 +5926,9 @@
                     "T.T": "cry",
                     "el pollo diablo!": "elpollodiablo",
                     "!el pollo diablo": "elpollodiablo_mirror",
-                    "el pollo diablo?!": "elpollodiablo_front"
+                    "el pollo diablo?!": "elpollodiablo_front",
+                    "add me": "sheep.gif",
+                    "add me!": "sheep_rainbow.gif"
                 };
                 var s = [];
                 var o = {};
@@ -6121,21 +6015,17 @@
                     }
                 };
                 var l = function (t) {
+                    var img;
                     var n = e('<span style="padding:3px;display:none;width:160px;position:absolute;bottom:20px;left:-3px;" />');
                     for (var r in i) {
-                        n
-                            .append(e(
-                                    '<img src="' + Game.cdnURL + "/images/chat/emoticons/" + i[r] + '.png?1" title="' + r + '" style="cursor:pointer;margin:1px;" />')
-                                .click(
-                                    function (e) {
-                                        return function () {
-                                            t.input
-                                                .val(t.input
-                                                    .val() + " " + e);
+                        img = (i[r].indexOf('.gif') === -1) ? i[r] + 'png' : i[r];
+                        n.append(e('<img src="' + Game.cdnURL + "/images/chat/emoticons/" + i[r] + '?1" title="' + r + '" style="cursor:pointer;margin:1px;" />')
+                                .click(function(e) { return function() {
+                                            t.input.val(t.input.val() + " " + e);
                                             t.input.focus();
-                                            n.hide()
+                                            n.hide();
                                         }
-                                    }(r)))
+                                    }(r)));
                     }
                     var s = false;
                     t.mainDiv
@@ -7118,7 +7008,7 @@
                     }
                     loader.ready = true;
                 };
-                loader = Loader.add("LpInfo", "tw-db LpInfo", init, { Settings: true });
+                loader = Loader.add("Snippets", "tw-db code Snippets", init, { Settings: true });
                 
                 var trustTWDB = function() {
                     try {
@@ -9820,11 +9710,10 @@
                             }
                         }
                         n += "</div>";
-                        e("<img />")
+                        e("<img src='" + Images.point.red + "' />")
                             .css({
                                 left: t.x / (181 * window.Map.tileSize) * 770 - 8 + "px",
-                                top: t.y / (79 * window.Map.tileSize) * 338 - 8 + "px",
-                                "background-image": "url(" + Images.point.red + ")"
+                                top: t.y / (79 * window.Map.tileSize) * 338 - 8 + "px"
                             }).attr({
                                 "class": "mmap_mappoint",
                                 id: town_id,
@@ -9835,10 +9724,9 @@
                                 }
                             }(t)).appendTo(r)
                     }
-                    e("<img />").css({
+                    e("<img src='" + Images.point.blue + "' />").css({
                         left: Character.position.x / (181 * window.Map.tileSize) * 770 - 8 + "px",
-                        top: Character.position.y / (79 * window.Map.tileSize) * 338 - 8 + "px",
-                        "background-image": "url(" + Images.point.blue + ")"
+                        top: Character.position.y / (79 * window.Map.tileSize) * 338 - 8 + "px"
                     }).attr({
                         "class": "mmap_mappoint",
                         id: "mmap_icon_pos",
