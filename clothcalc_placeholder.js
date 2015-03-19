@@ -3746,6 +3746,7 @@
                         [0, "duelmotivation", "#HELP_DUELMOTIVATION#", false],
                         [0, "directsleep", "#HELP_DIRECTSLEEP#", false],
                         [0, "deposit", "#HELP_DEPOSIT#", false],
+                        [0, "noshopsale", "#HELP_DISABLE_SALE#", false],
 
                         [9, "", "#MINIMAP_CAP#", false],                        // Mini map
                         [0, "showbonusjobs", "#HELP_SHOWBONUSJOBS#", false],
@@ -4931,8 +4932,9 @@
                     tmp.data('avg-t','&Oslash; ' + String(((row.products/row.count)*100).round(2)) + '% [' + (targetQuote*100) + '%]');
                     dom.append(tmp);
                     sum.products += row.products;
-
+                    
                     var tmp = $('<div class="cell_9 view-items" style="width:63px; text-align:center;cursor:pointer;" ></div>');
+                    /* time intensive!! */
                     var items = $.map(row.all_products, function(count, itemid) {
                       return new tw2widget.Item(ItemManager.get(itemid)).setCount(count).getMainDiv();
                     });
@@ -4949,6 +4951,7 @@
                     sum.items += row.items;
 
                     var tmp = $('<div class="cell_10 view-items" style="width:390px; text-align:center;cursor:pointer;" ></div>');
+                    /* time intensive!! */
                     var items = $.map(row.all_items, function(count, itemid) {
                       return new tw2widget.Item(ItemManager.get(itemid)).setCount(count).getMainDiv();
                     });
@@ -6019,10 +6022,10 @@
                     var img;
                     var n = e('<span style="padding:3px;display:none;width:160px;position:absolute;bottom:20px;left:-3px;" />');
                     for (var r in i) {
-                        img = (i[r].indexOf('.gif') === -1) ? i[r] + 'png' : i[r];
-                        n.append(e('<img src="' + Game.cdnURL + "/images/chat/emoticons/" + i[r] + '?1" title="' + r + '" style="cursor:pointer;margin:1px;" />')
+                        img = (i[r].indexOf('.gif') === -1) ? i[r] + '.png' : i[r];
+                        n.append(e('<img src="' + Game.cdnURL + "/images/chat/emoticons/" + img + '?1" title="' + r + '" style="cursor:pointer;margin:1px;" />')
                                 .click(function(e) { return function() {
-                                            t.input.val(t.input.val() + " " + e);
+                                            t.input.val(t.input.val() + " " + e + " ");
                                             t.input.focus();
                                             n.hide();
                                         }
@@ -7008,6 +7011,7 @@
                         GameInject.injectInventoryAddItemDivToInvPinItems();
                     }
                     if (Settings.get("telegramsource", true)) GameInject.injectTelegramWindowAppendTelegramDisplaySource();
+                    if (Settings.get("noshopsale", false)) { supressOnGoingEntries(); }
                     loader.ready = true;
                 };
                 loader = Loader.add("Snippets", "tw-db code Snippets", init, { Settings: true });
@@ -7021,7 +7025,44 @@
                     } catch (e) {}
                 };
 
+                var supressOnGoingEntries = function() {
+                    var dontLikes = ['shop_sale'];      // extendable
+                    
+                    var killEntries = function(classes) {
+                        if ($.isArray(classes)) {
+                            for (var i = 0; i < classes.length; i++) {
+                                killEntries(classes[i]);
+                            }
+                        } else if (typeof classes === "string") {
+                            var list = WestUi.NotiBar.main.list;
+                            for (var i = 0; i < list.length; i++) {
+                                if ($(list[i].element).children().is('div.image.' + classes)) { WestUi.NotiBar.remove(list[i]); }
+                            }
+                        }
+                    };
+                    
+                    /** TODO: move me to GameInject! **/
+                    var injectWestUiNotiBarAdd = function(filters) {
+                        try {
+                            WestUi.NotiBar.__twdb__add = WestUi.NotiBar.__twdb__add || WestUi.NotiBar.add;
+                            WestUi.NotiBar.add = function(entry) {
+                                var $img = $(".image", entry.element);
+                                for (var i = 0; i < filters.length; i++) {
+                                    if ($img.hasClass(filters[i])) { return; }
+                                }
+                                WestUi.NotiBar.__twdb__add.apply(this, arguments);
+                            }
+                        } catch (e) {
+                            Error.report(t, "manipulate WestUi.NotiBar.add");
+                        }
+                    };
+                    
+                    injectWestUiNotiBarAdd(dontLikes);
+                    killEntries(dontLikes);
+                };
+                
                 var InstantHotel = function() {
+                    /** TODO: move me to GameInject! **/
                     try {
                         w.Map.Component.Town.prototype.__twdb__getContent = w.Map.Component.Town.prototype.__twdb__getContent || w.Map.Component.Town.prototype.getContent;
 			w.Map.Component.Town.prototype.getContent = function() {
