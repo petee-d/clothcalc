@@ -3747,7 +3747,7 @@
                         [0, "directsleep", "#HELP_DIRECTSLEEP#", false],
                         [0, "deposit", "#HELP_DEPOSIT#", false],
                         [0, "noshopsale", "#HELP_DISABLE_SALE#", false],
-                        [0, "expbarvalues", "#HELP_EXPBAR#<br />#HELP_CREDITS#  <a href='https://greasyfork.org/scripts/3935-the-west-script-suite'>Leones/Slygoxx</a>", false],
+                        [0, "expbarvalues", "#HELP_EXPBAR#; #HELP_CREDITS# Leones/Slygoxx", false],
 
                         [9, "", "#MINIMAP_CAP#", false],                        // Mini map
                         [0, "showbonusjobs", "#HELP_SHOWBONUSJOBS#", false],
