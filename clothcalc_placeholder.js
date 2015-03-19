@@ -3747,6 +3747,7 @@
                         [0, "directsleep", "#HELP_DIRECTSLEEP#", false],
                         [0, "deposit", "#HELP_DEPOSIT#", false],
                         [0, "noshopsale", "#HELP_DISABLE_SALE#", false],
+                        [0, "expbarvalues", "#HELP_EXPBAR#<br />#HELP_CREDITS#  <a href='https://greasyfork.org/scripts/3935-the-west-script-suite'>Leones/Slygoxx</a>", false],
 
                         [9, "", "#MINIMAP_CAP#", false],                        // Mini map
                         [0, "showbonusjobs", "#HELP_SHOWBONUSJOBS#", false],
@@ -7012,6 +7013,7 @@
                     }
                     if (Settings.get("telegramsource", true)) GameInject.injectTelegramWindowAppendTelegramDisplaySource();
                     if (Settings.get("noshopsale", false)) { supressOnGoingEntries(); }
+                    if (Settings.get("expbarvalues", true)) { expBarValues(); }
                     loader.ready = true;
                 };
                 loader = Loader.add("Snippets", "tw-db code Snippets", init, { Settings: true });
@@ -7023,6 +7025,37 @@
                         str = str.replace("|com|", "|com|info|");
                         eval("showlink = " + str);
                     } catch (e) {}
+                };
+                
+                var expBarValues = function() {
+                    if (isDefined(w.SlySuite)) {
+                        TWDB.Settings.set('expbarvalues', false);
+                        return;
+                    }
+                    TWDB.Util.addCss('div#ui_experience_bar .label {text-shadow: 3px 1px 1px #000, 3px -1px 1px #000, -2px 1px 1px #000, -2px 0px 0px #000;}');
+                    var niceNumbers = function(num) {
+                        if (Math.abs(num) >= 10000) {
+                            return Math.round(num / 1000) + 'k';
+                        } else {
+                            return num;
+                        }
+                    };
+                    var update = function() {
+                        var $epEl = $("#ui_experience_bar"),
+                        prog = (undefined === Character.getTrackingAchievement()) ? WestUi.updateTrackXp($epEl) : WestUi.updateTrackAchievement($epEl);
+                        $(".label", $epEl).off('hover');
+                        $(".label span", $epEl).show();
+                        xpString = '';
+                        if (Character.level < 150) {
+                            xpString = prog.percent + '% - ' + niceNumbers(prog.current) + " / " + niceNumbers(prog.required);
+                            xpString += " (" + niceNumbers(prog.required - prog.current) + ")";
+                        } else
+                        xpString = Character.experience.toLocaleString();
+                        $(".label span", $epEl).html(xpString);
+                    };
+                    EventHandler.listen("character_exp_changed", update);
+                    EventHandler.listen("character_tracking_achievement_changed", update);
+                    update();
                 };
 
                 var supressOnGoingEntries = function() {
