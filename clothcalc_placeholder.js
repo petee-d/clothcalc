@@ -3767,6 +3767,7 @@
                         [0, "nofetchallpa", "#HELP_NOFETCHALLPA#", "#PREMIUM_SETTINGS#"],
                         [0, "nowofnuggets", "#HELP_NOWOFNUGGETS#", "#PREMIUM_SETTINGS#"],
                         [0, "instanthotel", "#HELP_INSTHOTEL#", false],
+                        [0, "telegramsource", "#HELP_TELEGRAM_SOURCE_SWITCH#", false],
                     ];
                     var tmp = {};
                     var table = $('<table />');
@@ -7006,6 +7007,7 @@
                         GameInject.injectInventoryAddItemsPinItems();
                         GameInject.injectInventoryAddItemDivToInvPinItems();
                     }
+                    if (Settings.get("telegramsource", true)) GameInject.injectTelegramWindowAppendTelegramDisplaySource();
                     loader.ready = true;
                 };
                 loader = Loader.add("Snippets", "tw-db code Snippets", init, { Settings: true });
@@ -8135,6 +8137,51 @@
                         TWDB.Util.addCss('#bag > .pinned > .item { background: rgba(125, 125, 125, 0.4); border-radius: 4px; }');
                     } catch (t) {
                         Error.report(t, "manipulate Inventory.addItemDivToInv (pin items)")
+                    }
+                };
+
+                // ====================================================================
+                // display telegram source - button to switch a telegram to source mode
+                // ====================================================================
+                _self.injectTelegramWindowAppendTelegramDisplaySource = function (e) {
+                    try {
+                        TelegramWindow.__CCDTS__appendTelegram = TelegramWindow.__CCDTS__appendTelegram || TelegramWindow.appendTelegram;
+                        TelegramWindow.appendTelegram = function (p, e) {
+                            TelegramWindow.__CCDTS__appendTelegram.apply(this, arguments);
+                            
+                            e.contentPane.find('.telegram-head:last .author')
+                            .css({ left: '81px', width: '140px', 
+                                background: 'url(//westzzs.innogamescdn.com/images/window/messages/post-head.jpg) -16px 0' })
+                            .before(
+                                $('<div class="telegram-source"><div>BB</div></div>')
+                                .attr('title', '#SWITCH_TELEGRAM_SOURCE#')
+                                .click(function () {
+                                    var active = $(this).toggleClass('active').hasClass('active');
+                                    $(this).closest('.telegram-head').next('.telegram-post').html(active
+                                        ? p.text.replace(/<(b|i|u|del)>/g, "[$1]").replace(/<\/(b|i|u|del)>/g, "[/$1]")
+                                                .replace(/<a href="[^"]+PlayerProfileWindow[^"]+">([^<]+)<\/a>/g, "[player]$1[/player]")
+                                                .replace(/<a href="[^"]+TownWindow[^"]+">([^<]+)<\/a>/g, "[town]$1[/town]")
+                                                .replace(/<a href="[^"]+FortWindow[^"]+">([^<]+)<\/a>/g, "[fort]$1[/fort]")
+                                                .replace(/<a href="[^"]+AllianceWindow[^"]+">([^<]+)<\/a>/g, "[alliance]$1[/alliance]")
+                                                .replace(/<a class="external_link" href="[^=]+=redirect[^=]+=([^"]+)" target="_blank">([^<]+)<\/a>/g,
+                                                    function (s, encodedURL, description) {
+                                                        return "[url=" + decodeURIComponent(encodedURL) + "]" + description + "[/url]";
+                                                })
+                                        : Game.TextHandler.parse(p.text)
+                                    );
+                                })
+                            );
+                        }
+                        TWDB.Util.addCss(
+                              '.telegram-source { position: absolute; width: 24px; height: 24px; cursor: pointer; '
+                                + 'background: url(//westzzs.innogamescdn.com/images/window/messages/icons.png) 72px -3px; '
+                                + 'left: 52px; }\n'
+                            + '.telegram-source div { display: inline-block; width: 14px; height: 11px; color: white; '
+                                + 'background: black; font-size: 10px; margin: 4px; padding: 0px 0 5px 2px; line-height: 16px; '
+                                + 'font-family: Impact, sans-serif; font-weight: normal; }\n'
+                            + '.telegram-source.active div { background: blue; }\n');
+                    } catch (t) {
+                        Error.report(t, "manipulate TelegramWindow.appendTelegram (display telegram source)")
                     }
                 };
 
