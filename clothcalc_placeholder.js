@@ -8268,7 +8268,15 @@
                                 .click(function () {
                                     var active = $(this).toggleClass('active').hasClass('active');
                                     $(this).closest('.telegram-head').next('.telegram-post').html(active
-                                        ? p.text
+                                        ? p.text.replace(/<(b|i|u|del)>/g, "[$1]").replace(/<\/(b|i|u|del)>/g, "[/$1]")
+                                                .replace(/<a href="[^"]+PlayerProfileWindow[^"]+">([^<]+)<\/a>/g, "[player]$1[/player]")
+                                                .replace(/<a href="[^"]+TownWindow[^"]+">([^<]+)<\/a>/g, "[town]$1[/town]")
+                                                .replace(/<a href="[^"]+FortWindow[^"]+">([^<]+)<\/a>/g, "[fort]$1[/fort]")
+                                                .replace(/<a href="[^"]+AllianceWindow[^"]+">([^<]+)<\/a>/g, "[alliance]$1[/alliance]")
+                                                .replace(/<a class="external_link" href="[^=]+=redirect[^=]+=([^"]+)" target="_blank">([^<]+)<\/a>/g,
+                                                    function (s, encodedURL, description) {
+                                                        return "[url=" + decodeURIComponent(encodedURL) + "]" + description + "[/url]";
+                                                })
                                         : Game.TextHandler.parse(p.text)
                                     );
                                 })
