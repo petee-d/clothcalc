@@ -791,6 +791,7 @@
                     var l = TWDB.Settings.get("clothPosition", {x: 0, y: 0});
                     break;
                 }
+                if (l.x < -150) {l.x = 0;} else if (l.x > ($('body').width() - 150)) {l.x = ($('body').width() - 150);}
                 this.gui.window.restoreAppearance({h: 410, w: 310, x: l.x, y: l.y});
                 return;
             },
