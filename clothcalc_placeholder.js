@@ -166,7 +166,7 @@
                 if (localStorage.getItem(uid + 'embackup') == 'TRUE') { return; }
                 for (var i=0; i<localStorage.length; i++) {
                     key = localStorage.key(i);
-                    if (key.search(uid) === 0) {
+                    if (key.search(uid) === 0 && key.search(/(marketreminder|notes|settings|statistic)$/i) !== -1) {
                         twdbKeys.push({
                                 key: key,
                                 newkey: 'backup_' + key,
@@ -494,6 +494,8 @@
                     this.loaded = true;
                     this.ready = true;
                     this.addButton();
+                    var _this = this;
+                    HotkeyManager.register(new Hotkey("twdbcc", "", "tw-db ClothCalc", function() { _this.open(); }));
                     if (isDefined(this.open_param)) {
                         this.open(this.open_param[0], this.open_param[1]);
                         delete this.open_param;
@@ -631,7 +633,23 @@
                     TWDB.DataManager.loadData(true)
                 })
             },
+            
+            openWear: function () {
+                var oldInv = wman.getById(Inventory.uid);       // Inventory already existing?
+                if (TWDB.Settings.get("wear_openmin", false)) {
+                    if (!isDefined(wman.getById(Wear.uid))) {       // if we have no wear window yet
+                        Wear.open();
+                        wman.minimize(Wear.uid, true);
+                    }
+                } else {
+                    if (!isDefined(wman.getById(Wear.uid))) { Wear.open(); }      // we have no wear window yet
+                    else { wman.reopen(Wear.uid); }
+                }
+                var newInv = wman.getById(Inventory.uid);
+                if (typeof oldInv == "undefined" && typeof newInv != "undefined") { newInv.fireEvent(TWE("WINDOW_CLOSE"), newInv); }; // if we openend a new Inventory: close it again
+            },
 
+            // ClothCalc.open()
             open: function (e, t) {
                 var n = this;
                 if (this.ready === false) {
@@ -640,6 +658,7 @@
                 }
                 if (wman.getById(this.uid)) {
                     wman.reopen(this.uid);      // maximize when needed & bring to top
+                    this.openWear();
                     if (isDefined(e) && isDefined(t)) {
                         switch (t) {
                         case "job":
@@ -668,14 +687,8 @@
                     this.eventOpen = TWDB.Eventer.set( "getGameData", function() { n.finishOpening(); }, 1);
                     this.getGameData();
                 };
+                this.openWear();
                 
-                if (!isDefined(wman.getById(Wear.uid))) {       // only needed if we have no wear window yet
-                    var o = wman.getById(Inventory.uid);
-                    Wear.open();
-                    wman.minimize(Wear.uid, true);
-                    var u = wman.getById(Inventory.uid);
-                    if (typeof o == "undefined" && typeof u != "undefined") { u.fireEvent(TWE("WINDOW_CLOSE"), u); };
-                }
                 this.jobs.selected = 0;
                 // Dun - adding the danger sorting
                 this.gui.job.sort = jQuery('<div style="position:absolute;top:10px;left:0px;height:20px;" />')
@@ -3766,11 +3779,13 @@
                         [0, "autodeposit", "#HELP_AUTODEPOSIT#", false],
                         [0, "chestanalyser", "#HELP_CHESTANALYSER#", false],
                         [0, "weeklycrafting", "#CRAFTNOTICE#", false],
-                        [0, "noworkqueuepa", "#HELP_NOWORKQUEUEPA#", "#PREMIUM_SETTINGS#"],
-                        [0, "nofetchallpa", "#HELP_NOFETCHALLPA#", "#PREMIUM_SETTINGS#"],
-                        [0, "nowofnuggets", "#HELP_NOWOFNUGGETS#", "#PREMIUM_SETTINGS#"],
+                            [0, "noworkqueuepa", "#HELP_NOWORKQUEUEPA#", "#PREMIUM_SETTINGS#"],
+                            [0, "nofetchallpa", "#HELP_NOFETCHALLPA#", "#PREMIUM_SETTINGS#"],
+                            [0, "nowofnuggets", "#HELP_NOWOFNUGGETS#", "#PREMIUM_SETTINGS#"],
                         [0, "instanthotel", "#HELP_INSTHOTEL#", false],
                         [0, "telegramsource", "#HELP_TELEGRAM_SOURCE_SWITCH#", false],
+                        [8, "clothPos"],         // placeholder
+                        [0, "wear_openmin", "#HELP_MIN_EQUIP#", false],
                     ];
                     var tmp = {};
                     var table = $('<table />');
@@ -3782,6 +3797,11 @@
                       // basic captions
                       if (values[i][0] === 9) {
                           row.append($('<td colspan="2" />').append($('<span class="twdb_sett_capt" />').text((values[i][2]+"").twdb_twiceHTMLUnescape()))); /**TODO: get rid of unescape **/
+                          table.append(row);
+                          continue;                          
+                      }
+                      if (values[i][0] === 8) {         // placeholder
+                          row.addClass('placeholder_' + values[i][1]);
                           table.append(row);
                           continue;                          
                       }
@@ -3816,8 +3836,9 @@
                     var combobox = new west.gui.Combobox();
                     combobox.addItem('left','#LEFT#').addItem('right','#RIGHT#').addItem('custom','#CUSTOM_POSITION#');
                     combobox.select(String(settings['clothPos']));
-                    var row = $('<tr />').append($('<td colspan="2" />').append(combobox.getMainDiv()).append('<span>&nbsp;#HELP_POSITION#</span>'));
-                    table.append(row, $('<tr><td>&nbsp;</td></tr>'));
+                    $('tr.placeholder_clothPos', table).removeClass('placeholder_clothPos').append($('<td colspan="2" />').append(combobox.getMainDiv(), '<span>&nbsp;#HELP_POSITION#</span>'));
+                    
+                    table.append($('<tr><td>&nbsp;</td></tr>'));        // empty row at the end of the table
 
                     var btn = new west.gui.Button('#SAVE#', function(){
                         switch (combobox.getValue()) {
@@ -7219,7 +7240,7 @@
 
                 var removeWorkQueuePA = function() {
                     try {
-                        $("body").append('<style>#queuedTasks .buyPremiumTask {background: url("//public.beta.the-west.net/images/transparent.png");}</style>');
+                        TWDB.Util.addCss('#queuedTasks .buyPremiumTask {background: none!important}');
                         Premium.checkForAutomationPremium = function (callback, failCallback) {
                             if (typeof failCallback !== 'undefined') return failCallback();
                         }
@@ -7283,16 +7304,33 @@
 
                     try {
                         // ========================== backup & wrap Dialog.show function
-                        if (!isDefined(west.gui.Dialog.prototype.TWDB_show)) {
-                            west.gui.Dialog.prototype.TWDB_show = west.gui.Dialog.prototype.show;
+                        if (!isDefined(west.gui.Dialog.prototype.__twdb__show)) {
+                            west.gui.Dialog.prototype.__twdb__show = west.gui.Dialog.prototype.show;
                         }
-                        west.gui.Dialog.prototype.show = function() {
-                            if (this.divMain.attr('id') === 'market_createoffer_window')  {
-                                var dlg = this.TWDB_show();
-                                w.setTimeout(function(){MarketWindow.TWDB_touchUpSellDialog(dlg)},25);
-                                return dlg;
-                            };
-                            return this.TWDB_show();
+                        
+                        if (TWDB.script.isDev()) {
+                            west.gui.Dialog.prototype.show = function() {
+                                if (this.divMain.attr('id') === 'market_createoffer_window') {
+                                    var dlg = this.__twdb__show();
+                                    w.setTimeout(function(){MarketWindow.TWDB_touchUpSellDialog(dlg)},25);
+                                    return dlg;
+                                }
+                                // testing...
+                                var selectors = ["div#equip_manager_list","span.twdb_banking"].join(", ");
+                                if ($(this.divMain).find(selectors).addBack().is(selectors)) {
+                                    return this.setModal(false).setBlockGame(false).setDraggable(true).__twdb__show();
+                                }
+                                return this.__twdb__show();
+                            }
+                        } else {
+                            west.gui.Dialog.prototype.show = function() {
+                                if (this.divMain.attr('id') === 'market_createoffer_window') {
+                                    var dlg = this.__twdb__show();
+                                    w.setTimeout(function(){MarketWindow.TWDB_touchUpSellDialog(dlg)},25);
+                                    return dlg;
+                                }
+                                return this.__twdb__show();
+                            }
                         }
                         // ========================== backup & wrap MarketWindow.createMarketOffer function
                         if (!isDefined(MarketWindow.TWDB_createMarketOffer)) {
@@ -8233,7 +8271,7 @@
                                 .click(function () {
                                     var active = $(this).toggleClass('active').hasClass('active');
                                     $(this).closest('.telegram-head').next('.telegram-post').html(active
-                                        ? p.text.replace(/<(b|i|u|del)>/g, "[$1]").replace(/<\/(b|i|u|del)>/g, "[/$1]")
+                                        ? p.text.replace(/<(\/?(b|i|u|del))>/g, "[$1]")
                                                 .replace(/<a href="[^"]+PlayerProfileWindow[^"]+">([^<]+)<\/a>/g, "[player]$1[/player]")
                                                 .replace(/<a href="[^"]+TownWindow[^"]+">([^<]+)<\/a>/g, "[town]$1[/town]")
                                                 .replace(/<a href="[^"]+FortWindow[^"]+">([^<]+)<\/a>/g, "[fort]$1[/fort]")
@@ -8252,8 +8290,8 @@
                                 + 'background: url(//westzzs.innogamescdn.com/images/window/messages/icons.png) 72px -3px; '
                                 + 'left: 52px; }\n'
                             + '.telegram-source div { display: inline-block; width: 14px; height: 11px; color: white; '
-                                + 'background: black; font-size: 10px; margin: 4px; padding: 0px 0 5px 2px; line-height: 16px; '
-                                + 'font-family: Impact, sans-serif; font-weight: normal; }\n'
+                                + 'background: #523F30; font-size: 10px; margin: 4px; padding: 0px 0 5px 2px; line-height: 16px; '
+                                + 'font-family: Impact, sans-serif; font-weight: 300; }\n'
                             + '.telegram-source.active div { background: blue; }\n');
                     } catch (t) {
                         Error.report(t, "manipulate TelegramWindow.appendTelegram (display telegram source)")
@@ -9399,16 +9437,8 @@
                 };
                 var o = function () {
                     (new west.gui.Dialog("#DEPOSIT#",
-                        e("<span>#MONEY#: " + w.Character.money + "</span>"))).setIcon(
-                        west.gui.Dialog.SYS_QUESTION).setIcon(
-                        west.gui.Dialog.SYS_QUESTION).setModal(
-                        true,
-                        false, {
-                            bg: w.Game.cdnURL + "/images/curtain_bg.png",
-                            opacity: .4
-                        }).addButton("yes", function () {
-                        a(1)
-                    }).addButton("no", function () {}).show()
+                        e("<span class='twdb_banking'>#MONEY#: " + w.Character.money + "</span>"))).setIcon(west.gui.Dialog.SYS_QUESTION).setModal(true, false)
+                        .addButton("yes", function(){ a(1); }).addButton("no").show();
                 };
                 var u = function () {
                     try {
@@ -9420,26 +9450,9 @@
                         if (w.Character.position.x == w.Character.homeTown.x && w.Character.position.y == w.Character.homeTown.y) {
                             if (n) {
                                 n = false;
-                                (new west.gui.Dialog(
-                                    "#DEPOSIT#",
-                                    e("<span>#DEPOSITDESC# <br />#MONEY#: " + w.Character.money + "</span>")))
-                                .setIcon(
-                                        west.gui.Dialog.SYS_QUESTION)
-                                    .setIcon(
-                                        west.gui.Dialog.SYS_QUESTION)
-                                    .setModal(
-                                        true,
-                                        false, {
-                                            bg: w.Game.cdnURL + "/images/curtain_bg.png",
-                                            opacity: .4
-                                        })
-                                    .addButton(
-                                        "yes",
-                                        function () {
-                                            n = true;
-                                            a(w.Character.homeTown.town_id)
-                                        }).addButton("no",
-                                        function () {}).show()
+                                (new west.gui.Dialog("#DEPOSIT#",
+                                    e("<span class='twdb_banking'>#DEPOSITDESC# <br />#MONEY#: " + w.Character.money + "</span>"))).setIcon(west.gui.Dialog.SYS_QUESTION).setModal(true, false)
+                                    .addButton("yes", function(){ n = true; a(w.Character.homeTown.town_id); }).addButton("no").show();
                             }
                         } else {
                             n = true
