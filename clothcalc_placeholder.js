@@ -44,6 +44,10 @@
 
         // START OF SCRIPT CODE THAT CAN BE EDITED IN A RELEASE
         TheWestApi.version = Game.version = (parseInt(Game.version, 10) ? Game.version : TWDB.script.gameversion);
+        
+        // never-expiring script compatibility; remove if a beta version seems script-breaking!
+        TWDB.script.gameversion = Game.version;
+        
         TWDB.script.isDev = function() {
             return (this.check.search('dev_version') !== -1);
         };
