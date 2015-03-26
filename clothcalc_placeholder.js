@@ -181,6 +181,12 @@
                 localStorage.setItem(uid + 'embackup', 'TRUE');
             };
             _public.backupData = function() { return _backupData(); };
+            
+            _public.idMigrationDone = function() {
+                var migInf = TWDB.Cache.load('migration') || {};
+                migInf.itemid = migInf.itemid || {}; 
+                return (migInf.itemid.migcomplete === true);
+            }
 
             var _idMigrator = function() {
                 //  security checks.. we don't want to migrate twice or too early
@@ -338,7 +344,7 @@
             _public.simpleRestore = function(r) { return _simpleRestore(r); };
             
             /** TODO: Remove when Inno cleaned up their shit **/
-            // simple wrapper to catch that uncaught exception on current beta versions
+            // simple wrapper to catch that uncaught exception
             _public.wrapBetaGetItem = function() {
                  ItemManager.__twdb__get = ItemManager.__twdb__get || ItemManager.get;
                  ItemManager.get = function(id) {
@@ -347,7 +353,7 @@
                      } catch (e) {
                          console.log(e);
                          TWDB.script.isDev() && console.trace && console.trace();
-                         return null;
+                         return undefined;
                      }
                  }
             };
@@ -2671,13 +2677,11 @@
                             return destroy();
                         } */
                         
-                        // check for kID & wrap awful beta getItem
-                        if (TWDB.Util.isNewIDsystem() && window.location.href.indexOf(".beta.the-west.net") !== -1) {
-                            TWDB.Util.wrapBetaGetItem();
-                        }
+                        // check for kID & wrap awful getItem --- not only beta :(
+                        if (TWDB.Util.isNewIDsystem() { TWDB.Util.wrapBetaGetItem(); }
                         
                         // check for kID & try migration if it's not the already messed up public beta
-                        if (TWDB.Util.isNewIDsystem() && window.location.href.indexOf(".beta.the-west.net") === -1) {
+                        if (TWDB.Util.isNewIDsystem() && window.location.href.indexOf(".beta.the-west.net") === -1 && !TWDB.Util.idMigrationDone()) {
                             try { TWDB.Util.backupData(); } catch (e) {};       // no time for handling a failed backup :(
                             try {
                                 TWDB.Util.idMigrator();
@@ -2689,7 +2693,7 @@
                                 TWDB.Util.simpleRestore();  // restore backup 
                             };
                         }
-                        return next();
+                        return next();          // end of first run
                     }
                     if (isDefined(failed[current.key])) {
                         return next();
