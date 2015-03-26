@@ -2681,8 +2681,8 @@
                             return destroy();
                         } */
                         
-                        // check for kID & wrap awful getItem --- not only beta :(
-                        if (TWDB.Util.isNewIDsystem() { TWDB.Util.wrapBetaGetItem(); }
+                        // check for kID & wrap awful getItem --- not only beta
+                        if (TWDB.Util.isNewIDsystem()) { TWDB.Util.wrapBetaGetItem(); }
                         
                         // check for kID & try migration if it's not the already messed up public beta
                         if (TWDB.Util.isNewIDsystem() && window.location.href.indexOf(".beta.the-west.net") === -1 && !TWDB.Util.idMigrationDone()) {
