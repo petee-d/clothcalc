@@ -8171,6 +8171,8 @@
                 // =============================================================
                 _self.injectInventoryAddItemsPinItems = function (e) {
                     try {
+                        TWDB.Util.addCss('body.april2015-sick {-webkit-animation: speedsick 15s infinite; animation: speedsick 15s infinite;} @keyframes speedsick { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(359deg); } } @-webkit-keyframes speedsick { 0% { -webkit-filter: hue-rotate(0deg); } 100% { -webkit-filter: hue-rotate(359deg); } }');
+                                            
                         Inventory.__CCPI__addItems = Inventory.__CCPI__addItems || Inventory.addItems;
                         Inventory.addItems = function (category, page) {
                             Inventory.__CCPI__addItems.apply(this, arguments);
@@ -8203,11 +8205,43 @@
                                 Inventory.addItems(category, page);
                             });
                             // if in new, add pinned items
-                            if ((category || Inventory.defaultCategory) == 'new')
+                            if ((category || Inventory.defaultCategory) == 'new') {
                                 $.each((TWDB.Settings.get('pinnedItems') || []).slice().reverse(), function (i, item_id) {
                                     var item = Bag.getItemByItemId(item_id);
                                     if (item) Inventory.addItemDivToInv(item, true);
                                 });
+                                
+                                // april fools 2015 - add a fake rocket turtle
+                                var d = new Date();
+                                if (!(d.getDate() == 1 && d.getMonth() + 1 == 4 && d.getYear() + 1900 == 2015) 
+                                        && !window['april2015Override']) return;
+                                
+                                var item = new tw2widget.InventoryItem(ItemManager.get(699000)).setCount(1).setInvId(699).setCharacter(Character);
+                                var $item = $('<div>').append(item.getMainDiv().data('itemId', item.getId()));
+                                $item.find('img').off('click').click(function (e) {
+                                    var $img = $(this).css('opacity', 0.5);
+                                    setTimeout(function () {
+                                        $img.css('opacity', 1);
+                                        $('body').addClass('april2015-sick');
+                                        var msg = (new UserMessage("All this speed makes you feel a bit dizzy...", UserMessage.TYPE_HINT));
+                                        msg.hide = function () {};
+                                        msg.show();
+                                        msg.divMain.click(function () {
+                                            $('body').removeClass('april2015-sick');
+                                            $(this).remove();
+                                            var apology = (new UserMessage("TW-DB.info and ClothCalc authors apologize"
+                                                +" for yet another cheap April Fools joke. :)", UserMessage.TYPE_SUCCESS)).show();
+                                            setTimeout(function () {
+                                                apology.divMain.mouseover();
+                                            }, 1000);
+                                        });
+                                    }, 2000);
+                                });
+                                $item.find('img').setDraggable(Inventory.announceDragStart, Inventory.announceDragStop)
+                                $item.appendTo($('#bag', Inventory.DOM));
+                                if ($('#bag > div').length > Inventory.latestSize)
+                                    $('#bag > div:not(.pinned):first', Inventory.DOM).detach();
+                            }
                         }
                     } catch (t) {
                         Error.report(t, "manipulate Inventory.addItems (pin items)")
@@ -8226,7 +8260,7 @@
                             else {
                                 var pinnedItems = TWDB.Settings.get('pinnedItems') || [], id = item.getId();
 
-                                $item = $('<div>').append(item.getMainDiv().data('itemId', item.getId()));
+                                var $item = $('<div>').append(item.getMainDiv().data('itemId', item.getId()));
                                 $item.find('img').off('click').click(
                                     TWDB.Settings.itemPinningMode ?
                                     function (e) {
