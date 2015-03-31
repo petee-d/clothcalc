@@ -8171,7 +8171,13 @@
                 // =============================================================
                 _self.injectInventoryAddItemsPinItems = function (e) {
                     try {
-                        TWDB.Util.addCss('body.april2015-sick {-webkit-animation: speedsick 15s infinite; animation: speedsick 15s infinite;} @keyframes speedsick { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(359deg); } } @-webkit-keyframes speedsick { 0% { -webkit-filter: hue-rotate(0deg); } 100% { -webkit-filter: hue-rotate(359deg); } }');
+                        var d = new Date();
+                        var aprilFools2015 = (d.getDate() == 1 && d.getMonth() + 1 == 4 && d.getYear() + 1900 == 2015) || window['april2015Override'];
+                        if (aprilFools2015) {
+                            TWDB.Util.addCss('body.april2015-sick {-webkit-animation: speedsick 15s infinite; animation: speedsick 15s infinite;} @keyframes speedsick { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(359deg); } } @-webkit-keyframes speedsick { 0% { -webkit-filter: hue-rotate(0deg); } 100% { -webkit-filter: hue-rotate(359deg); } }');
+                        
+                            setTimeout(function () { WestUi.showInventoryChanged('add',699000,1); }, 45000);
+                        }
                                             
                         Inventory.__CCPI__addItems = Inventory.__CCPI__addItems || Inventory.addItems;
                         Inventory.addItems = function (category, page) {
@@ -8212,9 +8218,7 @@
                                 });
                                 
                                 // april fools 2015 - add a fake rocket turtle
-                                var d = new Date();
-                                if (!(d.getDate() == 1 && d.getMonth() + 1 == 4 && d.getYear() + 1900 == 2015) 
-                                        && !window['april2015Override']) return;
+                                if (!aprilFools2015) return;
                                 
                                 var item = new tw2widget.InventoryItem(ItemManager.get(699000)).setCount(1).setInvId(699).setCharacter(Character);
                                 var $item = $('<div>').append(item.getMainDiv().data('itemId', item.getId()));
@@ -8229,11 +8233,9 @@
                                         msg.divMain.click(function () {
                                             $('body').removeClass('april2015-sick');
                                             $(this).remove();
-                                            var apology = (new UserMessage("TW-DB.info and ClothCalc authors apologize"
-                                                +" for yet another cheap April Fools joke. :)", UserMessage.TYPE_SUCCESS)).show();
-                                            setTimeout(function () {
-                                                apology.divMain.mouseover();
-                                            }, 1000);
+                                            (new west.gui.Dialog("Sorry! ^^","TW-DB.info and ClothCalc authors apologize"
+                                                + " for yet another cheap April Fools joke. :)"))
+                                                .addButton('OK').show()
                                         });
                                     }, 2000);
                                 });
