@@ -1,5 +1,5 @@
 // be aware that the script release system ignores everything before // START OF ...
-
+var isDefined, TWDB, debLog;    // calm down the syntax highlighter
 /**
  * News on this update :
  * -
@@ -11,14 +11,14 @@
  * -
  * */
 
-(function(f) {
+(function (f) {
     var d = document,
         s = d.createElement('script');
     s.setAttribute('type', 'application/javascript');
     s.textContent = '(' + f.toString() + ')()';
     (d.body || d.head || d.documentElement).appendChild(s);
-    s.parentNode.removeChild(s)
-})(function() {
+    s.parentNode.removeChild(s);
+})(function () {
 
     // Dun : Just test if there is already a TWDB object in the DOM ,
     // if it exists, there is another cc/lang installed, so do not
@@ -40,34 +40,34 @@
             lang: "eng"
         });
         try { TWDB.script.notes = jQuery.parseJSON('[{\"version\":\"99\",\"notes\":\"DEV version\"}]');
-        } catch (e) {};
+            } catch (e) {}
 
         // START OF SCRIPT CODE THAT CAN BE EDITED IN A RELEASE
         TheWestApi.version = Game.version = (parseInt(Game.version, 10) ? Game.version : TWDB.script.gameversion);
-        
+
         // never-expiring script compatibility; remove if a beta version seems script-breaking!
         TWDB.script.gameversion = Game.version;
-        
-        TWDB.script.isDev = function() {
+
+        TWDB.script.isDev = function () {
             return (this.check.search('dev_version') !== -1);
         };
 
-        Number.prototype.round = function(e) {
+        Number.prototype.round = function (e) {
             var t = Math.pow(10, e);
-            return Math.round(this * t) / t
+            return Math.round(this * t) / t;
         };
 
         /**TODO: get rid of this **/
         String.prototype.twdb_twiceHTMLUnescape = function () {
-                return $($.parseHTML($($.parseHTML(this+"")).text())).text();
+            return $($.parseHTML($($.parseHTML(this + "")).text())).text();
         }
 
         if (!window.console) { window.console={}; }
-        if (!window.console.log) { window.console.log = function(e){}; }
-        window.debLog = (function() {
+        if (!window.console.log) { window.console.log = function (e) {}; }
+        window.debLog = (function () {
                 if (TWDB.script.isDev() && window.console.info) {
-                    return function(e) { console.info.apply(console,["CC:"].concat(Array.prototype.slice.call(arguments))); }
-                } else { return function(e){}; }
+                return function(e) { console.info.apply(console, ["CC:"].concat(Array.prototype.slice.call(arguments))); };
+                } else { return function (e){}; }
         })();
 
         TWDB.images = {
@@ -141,9 +141,9 @@
              * @param {String} optionalId Optional ID to create multiple <style> elements.
              *				  Standard ID is twdb_css, if param is present it's twdb_css_optionalId.
              */
-            var _addCss = function(cssString, optionalId) {
+            var _addCss = function (cssString, optionalId) {
                 var id = "twdb_css";
-                if (typeof optionalId != "undefined" && typeof optionalId == "string") { id += "_" + optionalId.replace(/\W+/g, "")};
+                if (typeof optionalId !== "undefined" && typeof optionalId === "string") { id += "_" + optionalId.replace(/\W+/g, ""); }
                 if ($("head style#" + id).append('\n'+cssString).length == 1) { return; }
                 else { $("head").append($('<style type="text/css" id="' + id +'">').text(cssString)) };
             };
@@ -185,47 +185,47 @@
                 localStorage.setItem(uid + 'embackup', 'TRUE');
             };
             _public.backupData = function() { return _backupData(); };
-            
+
             _public.idMigrationDone = function() {
                 var migInf = TWDB.Cache.load('migration') || {};
-                migInf.itemid = migInf.itemid || {}; 
+                migInf.itemid = migInf.itemid || {};
                 return (migInf.itemid.migcomplete === true);
             }
 
             var _idMigrator = function() {
                 //  security checks.. we don't want to migrate twice or too early
                 if (!TWDB.Util.isNewIDsystem()) { return; }
-                
+
                 // to tidy up, we only keep keys which are used in the script and should be kept or converted
                 var KEEPKEYS = ["barracks", "bonusdisplay", "bonusjobs", "chathistory", "embackup", "marketreminder", "migration", "msdsettings", "notes", "settings", "statistic"];
                 var usedkeys  = {'keys':true};
-                
+
                 var twdbKeys = [];
                 var key;
                 var content;
                 var temp;
                 var tmpId;
-                
+
                 var uid = 'twdb_' + Character.playerId + '_';
                 var migInf = TWDB.Cache.load('migration') || {};
-                migInf.itemid = migInf.itemid || {}; 
+                migInf.itemid = migInf.itemid || {};
                 if (migInf.itemid.migcomplete === true) { return; }
-                
+
                 var tdc = function(object) {
                     // tricky deep copy
                     // tricky, because it works only on data types which are specified in JSON;
                     // since we have only previously JSONed data, we can use it safely.
                     return JSON.parse(JSON.stringify(object));
                 };
-                
+
                 var cv = function(value) { return parseInt(value, 10)*1000; };
-                
+
                 // find all twdb_ keys for the current user first...
                 for (var i=0; i<localStorage.length; i++) {
                     key = localStorage.key(i);
                     if (key.search(uid) === 0) { twdbKeys.push(key.substr(uid.length)); }
-                }                
-                
+                }
+
                 for (var i=0; i<twdbKeys.length; i++) {
                     key = twdbKeys[i];
                     if (KEEPKEYS.indexOf(key) === -1) {     // those to delete
@@ -235,7 +235,7 @@
                             usedkeys[key] = true;
                             continue;
                         }
-                        switch (key) {                    
+                        switch (key) {
                         case "marketreminder":
                             content = TWDB.Cache.load(key) || {};
                             for (var mid in content) {
@@ -245,7 +245,7 @@
                             migInf.itemid[key] = true;
                             TWDB.Cache.save('migration', migInf);
                             break;
-                            
+
                         case "notes":
                             content = TWDB.Cache.load(key) || '';
                             temp = content.replace(/\[item=(\d+)\]/gi, function(m,dig){ return '[item=' + cv(dig)+']';} );
@@ -255,17 +255,17 @@
                             migInf.itemid[key] = true;
                             TWDB.Cache.save('migration', migInf);
                             break;
-                            
+
                         case "settings":
                             content = TWDB.Cache.load(key);
                             if (isDefined(content.pinnedItems) && isDefined(content.pinnedItems.length)) {      // only change (and save) if this is an existing array
                                 for (var mid=0; mid < content.pinnedItems.length; mid++) { content.pinnedItems[mid] = cv(content.pinnedItems[mid]); }
                                 TWDB.Cache.save(key, content);
-                            }                    
+                            }
                             migInf.itemid[key] = true;
                             TWDB.Cache.save('migration', migInf);
                             break;
-                            
+
                         case "statistic":
                             content = TWDB.Cache.load(key);
                             temp = {};
@@ -278,9 +278,9 @@
                                 }
                             }
                             content.chest = tdc(temp);          // chest stats end ####
-                            
+
                             for (var j in content.job) {        // job id (mostly)
-                                if (!JobList.getJobById(j)){ continue; }   // leave 'last' and that unused 'items' alone                            
+                                if (!JobList.getJobById(j)){ continue; }   // leave 'last' and that unused 'items' alone
                                 temp = {};
                                 for (var m in content.job[j]) { // motivation, products (&more)
                                     temp[m] = {};
@@ -292,7 +292,7 @@
                                                 temp[m][s] = {};
                                                 for (var item in content.job[j][m][s]) {
                                                     temp[m][s][cv(item)] = content.job[j][m][s][item];
-                                                }                                        
+                                                }
                                             } else {
                                                 temp[m][s] = tdc(content.job[j][m][s]);
                                             }
@@ -304,12 +304,12 @@
                                 }
                                 content.job[j] = tdc(temp);
                             }
-                            
+
                             TWDB.Cache.save(key, content);
                             migInf.itemid[key] = true;
                             TWDB.Cache.save('migration', migInf);
                             break;
-                            
+
                         default:
                             break;
                         };
@@ -319,9 +319,9 @@
                 TWDB.Cache.save('keys', usedkeys);
                 migInf.itemid.migcomplete = true;
                 TWDB.Cache.save('migration', migInf);
-            };            
+            };
             _public.idMigrator = function() { return _idMigrator(); };
-            
+
             var _simpleRestore = function(remove) {
                 if (localStorage.getItem('twdb_' + Character.playerId + '_embackup') != 'TRUE') { return; }
                 var twdbKeys = [];
@@ -346,7 +346,7 @@
                 }
             };
             _public.simpleRestore = function(r) { return _simpleRestore(r); };
-            
+
             /** TODO: Remove when Inno cleaned up their shit **/
             // simple wrapper to catch that uncaught exception
             _public.wrapBetaGetItem = function() {
@@ -361,7 +361,7 @@
                      }
                  }
             };
-            
+
             return _public;
         })(jQuery);
 
@@ -487,9 +487,10 @@
                 this.gui.cache = jQuery('<div style="position:absolute;top:10px;right:8px;width:20px;height:20px;cursor:pointer;" />');
                 this.gui.bag = jQuery('<div style="position:absolute;top:95px;left:1px;width:252px;height:186px;" />');
                 this.BagInt = window.setInterval(function(){ _self.finishInit(); }, 100);
-		//get custom jobs or define default value
-                this.data.custom = TWDB.Settings.get("custom", {1:{id:1,type:"speed",para:{},name:"Speed"},2:{id:2,type:"custom",para:{9:1},name:"max Health"},3:{id:3,type:"regen",para:{},name:"Health Regeneration"},4:{id:4,type:"fort",para:{att:200,def:20,health:100,type:0},name:"Fortbattle Attacker (Att)"},5:{id:5,type:"fort",para:{att:20,def:200,health:100,type:0},name:"Fortbattle Attacker (Def)"},6:{id:6,type:"fort",para:{att:200,def:20,health:100,type:1},name:"Fortbattle Defender (Att)"},7:{id:7,type:"fort",para:{att:20,def:200,health:100,type:1},name:"Fortbattle Defender (Def)"},8:{id:8,type:"duel",para:{12:1,15:1,16:1,24:1},name:"Range Dueler (Att)"},9:{id:9,type:"duel",para:{12:1,15:1,16:1,21:1},name:"Range Dueler (Def)"},10:{id:10,type:"duel",para:{6:1,7:1,11:1,15:1},name:"Melee Dueler"}});
-		// load cache if version didn't not changed
+                //get custom jobs or define default value
+                this.data.custom = TWDB.Settings.get("custom",
+                                                     {1:{id:1,type:"speed",para:{},name:"Speed"},2:{id:2,type:"custom",para:{9:1},name:"max Health"},3:{id:3,type:"regen",para:{},name:"Health Regeneration"},4:{id:4,type:"fort",para:{att:200,def:20,health:100,type:0},name:"Fortbattle Attacker (Att)"},5:{id:5,type:"fort",para:{att:20,def:200,health:100,type:0},name:"Fortbattle Attacker (Def)"},6:{id:6,type:"fort",para:{att:200,def:20,health:100,type:1},name:"Fortbattle Defender (Att)"},7:{id:7,type:"fort",para:{att:20,def:200,health:100,type:1},name:"Fortbattle Defender (Def)"},8:{id:8,type:"duel",para:{12:1,15:1,16:1,24:1},name:"Range Dueler (Att)"},9:{id:9,type:"duel",para:{12:1,15:1,16:1,21:1},name:"Range Dueler (Def)"},10:{id:10,type:"duel",para:{6:1,7:1,11:1,15:1},name:"Melee Dueler"}});
+        // load cache if version didn't not changed
                 if (!TWDB.Updater.wasUpdated()) {
                     var data = TWDB.Cache.load("calcdata");
                     if (typeof data == "object" && data !== null && isDefined(data.loaded)) { this.calcdata = data; }
@@ -515,14 +516,14 @@
 
             addButton: function() {
                 if (this.ready === false) { return; }
-                var e = this;
-                var t = jQuery('<div title="tw-db.info ClothCalc " class="menulink" />')
+                var _this = this;
+                var $button = jQuery('<div title="tw-db.info ClothCalc " class="menulink" />')
                         .css("background-image", "url(" + TWDB.images.button + ")")
                         .css("background-position", "0px -25px")
                         .mouseenter( function() { jQuery(this).css("background-position", "-25px -25px"); })
                         .mouseleave( function() { jQuery(this).css("background-position", "0px -25px"); })
-                        .click(function(){ e.open(); });
-                jQuery("#TWDB_ClothCalc_menubuttons .menucontainer_bottom").before(t);
+                        .click(function(){ _this.open(); });
+                jQuery("#TWDB_ClothCalc_menubuttons .menucontainer_bottom").before($button);
             },
 
             isBetterItem: function (itemId) {
@@ -558,11 +559,11 @@
             },
 
             checkSkill: function () {
-                for (var e in this.data.skills) {
-                    if (typeof this.calcdata.skills[e] == "undefined") {
+                for (var skill in this.data.skills) {
+                    if (typeof this.calcdata.skills[skill] == "undefined") {
                         return true
                     }
-                    if (this.data.skills[e].val != this.calcdata.skills[e].val) {
+                    if (this.data.skills[skill].val != this.calcdata.skills[skill].val) {
                         return true
                     }
                 }
@@ -643,7 +644,7 @@
                     TWDB.DataManager.loadData(true)
                 })
             },
-            
+
             openWear: function () {
                 var oldInv = wman.getById(Inventory.uid);       // Inventory already existing?
                 if (TWDB.Settings.get("wear_openmin", false)) {
@@ -661,7 +662,7 @@
 
             // ClothCalc.open()
             open: function (e, t) {
-                var n = this;
+                var _this = this;
                 if (this.ready === false) {
                     if (isDefined(e) && isDefined(t)) { this.open_param = [e, t]; }     // save parameters & open when CC is ready
                     return;
@@ -682,7 +683,7 @@
                             var r = null;
                             break;
                         }
-                        if (isDefined(r)) { n.showTab(e, 'Jobs'); n.joblist.open(r); }
+                        if (isDefined(r)) { _this.showTab(e, 'Jobs'); _this.joblist.open(r); }
                     };
                     return;
                 };
@@ -694,11 +695,11 @@
                     this.up2date = false;
                     this.getGameData();
                 } else {
-                    this.eventOpen = TWDB.Eventer.set( "getGameData", function() { n.finishOpening(); }, 1);
+                    this.eventOpen = TWDB.Eventer.set( "getGameData", function() { _this.finishOpening(); }, 1);
                     this.getGameData();
                 };
                 this.openWear();
-                
+
                 this.jobs.selected = 0;
                 // Dun - adding the danger sorting
                 this.gui.job.sort = jQuery('<div style="position:absolute;top:10px;left:0px;height:20px;" />')
@@ -715,11 +716,11 @@
                 this.gui.job.checkbox = new west.gui.Checkbox("", this.joblist.all ? "" : "tw2gui_checkbox_checked",
                     function() {
                         if (this.isSelected()) {
-                            n.joblist.all = false;
-                            n.joblist.update();
+                            _this.joblist.all = false;
+                            _this.joblist.update();
                         } else {
-                            n.joblist.all = true;
-                            n.joblist.update();
+                            _this.joblist.all = true;
+                            _this.joblist.update();
                         }
                     });
                 this.gui.job.checkbox.setTooltip("#HIDEJOBS#");
@@ -741,19 +742,19 @@
                 this.gui.job.mainDiv.append(this.gui.job.calc);
 
                 this.gui.job.button.click(function() {
-                    if (n.joblist.getMainDiv().is(":visible")) {
-                        n.joblist.close();
+                    if (_this.joblist.getMainDiv().is(":visible")) {
+                        _this.joblist.close();
                     } else {
-                        n.joblist.open();
+                        _this.joblist.open();
                     };
                 }.bind(this));
-                this.gui.job.search.click(function() { n.jobSearch(); }.bind(this));
+                this.gui.job.search.click(function() { _this.jobSearch(); }.bind(this));
                 this.gui.job.searchDiv = jQuery("<div />");
-                if (n.joblist.getMainDiv().is(":visible")) {
-                    n.joblist.close();
+                if (_this.joblist.getMainDiv().is(":visible")) {
+                    _this.joblist.close();
                 };
 
-                n.joblist.name = null;
+                _this.joblist.name = null;
                 if (isDefined(e) && isDefined(t)) {
                     switch (t) {
                     case "job":
@@ -767,16 +768,16 @@
                         var r = null;
                         break;
                     };
-                    if (isDefined(r)) { n.joblist.name = r; };
+                    if (isDefined(r)) { _this.joblist.name = r; };
                 };
                 this.customs.selected = 0;
                 this.gui.custom.title = jQuery('<div style="position:absolute;top:36px;left:0px;width:210px;height:19px;font-weight:bold;text-align:center;">#SELECTJOB# >></div>');
                 this.gui.custom.settings = jQuery('<div title="#SETTINGS#" style="position:absolute;top:35px;right:30px;width:20px;height:20px;background:url(' + TWDB.images.iconSetting + ');cursor:pointer;" />');
-                this.gui.custom.settings.click(function() { n.customs.showConfig(); });
+                this.gui.custom.settings.click(function() { _this.customs.showConfig(); });
                 this.gui.custom.button = jQuery('<div style="position:absolute;top:35px;right:4px;width:26px;height:20px;background:url(\'/images/window/character/title_editbtn.jpg\') no-repeat scroll 0 0 transparent;cursor:pointer;" title=" #SELECTJOB# " />');
                 this.gui.custom.selectbox = new west.gui.Selectbox;
                 this.gui.custom.selectbox.elContent.css("max-height", "660px");
-                this.gui.custom.selectbox.setWidth(300).addListener(function (e) { n.customs.switchCustomJob(e); });
+                this.gui.custom.selectbox.setWidth(300).addListener(function (e) { _this.customs.switchCustomJob(e); });
                 this.gui.custom.skills = jQuery('<div style="position:absolute;top:60px;left:1px;width:252px;height:30px;display:block;" />');
                 this.gui.custom.mainDiv = jQuery('<div style="position:absolute;top:0px;left:0px;height:100%;width:100%;" />').hide();
                 this.gui.custom.mainDiv.append(this.gui.custom.title);
@@ -784,9 +785,9 @@
                 this.gui.custom.mainDiv.append(this.gui.custom.button);
                 this.gui.custom.mainDiv.append(this.gui.custom.skills);
                 this.gui.custom.mainDiv.append(this.gui.custom.calc);
-                this.gui.custom.button.click(function (e) { n.gui.custom.selectbox.show(e); });
+                this.gui.custom.button.click(function (e) { _this.gui.custom.selectbox.show(e); });
                 this.gui.bag.children().remove();
-                var a = function(e, t) { n.showTab(e, t); };
+                var a = function(e, t) { _this.showTab(e, t); };
                 this.gui.window = wman.open(this.uid, null, "noreload").setMiniTitle("TWDB Cloth Calc").setTitle("tw-db.info Cloth Calc")
                     .addTab("#JOB#", "Jobs", a).addTab("#CUSTOM#", "Custom", a)
                     .appendToContentPane(this.gui.job.mainDiv).appendToContentPane(this.gui.custom.mainDiv)
@@ -797,7 +798,7 @@
                            function() { $(this).css("background-position","0px -20px"); })
                     .click(function() {
                             TWDB.Settings.set("clothPos", "custom");
-                            var e = n.gui.window.saveAppearance();
+                            var e = _this.gui.window.saveAppearance();
                             TWDB.Settings.set("clothPosition", {x: e.x, y: e.y });
                             (new UserMessage("#SAVE_SUCCESSFUL#", UserMessage.TYPE_SUCCESS)).show(); });
                 $(this.gui.window.divMain).find(".tw2gui_window_buttons").append(f);
@@ -904,21 +905,10 @@
                         if (!this.isItemUsable(r.item_id)) { continue; }
                         this.data.items[r.item_id] = { id: r.item_id };
                     }
-                    /** TODO: remove branching when all worlds use the new system **/
-                    if (TWDB.Util.isNewIDsystem()) {
-                        for (var id in Bag.items_by_id) {
-                            var item = Bag.items_by_id[id].obj;
-                            if (!this.isItemUsable(item.item_id)) { continue; }
-                            this.data.items[item.item_id] = { id: item.item_id };
-                        }
-                    } else {    // old system, old code
-                        for (var i in Bag.items) {
-                            for (var n in Bag.items[i]) {
-                                var r = ItemManager.get(Number(n));
-                                if (!this.isItemUsable(r.item_id)) { continue; }
-                                this.data.items[r.item_id] = { id: r.item_id };
-                            }
-                        }
+                    for (var id in Bag.items_by_id) {
+                        var item = Bag.items_by_id[id].obj;
+                        if (!this.isItemUsable(item.item_id)) { continue; }
+                        this.data.items[item.item_id] = { id: item.item_id };
                     }
                     TWDB.Eventer.trigger("getItems")
                 }
@@ -1422,14 +1412,14 @@
                         i.dom = r;
                         i.id = t;
                         // i.str = n.name.toUpperCase() + " ";
-                        i.str = "ง" + n.name.toUpperCase() + "ง";       // separator that doesn't occur in jobs/products
+                        i.str = "ยง" + n.name.toUpperCase() + "ยง";       // separator that doesn't occur in jobs/products
                         if (n.gameid != 0) {
                             var s = JobList.getJobById(n.gameid);
                             for (var o in s.yields) {
                                 if (isNaN(o)){ continue; }
                                 var u = ItemManager.get(o);
                                 // i.str += u.name.toUpperCase() + " ";
-                                i.str += u.name.toUpperCase() + "ง";
+                                i.str += u.name.toUpperCase() + "ยง";
                             }
                         }
                         this.elements.push(i)
@@ -1476,7 +1466,7 @@
                     }
                 },
                 search: function(string, absolute){
-                    var regexp = new RegExp(isDefined(absolute) ? "ง" + string.toUpperCase() + "ง" : string.toUpperCase(), 'i');
+                    var regexp = new RegExp(isDefined(absolute) ? "ยง" + string.toUpperCase() + "ยง" : string.toUpperCase(), 'i');
                     var state = true;
                     var _self = this;
                     var $found = [];
@@ -1979,20 +1969,12 @@
                     }
                 },
                 htmlUnEscape: function (str) {
-                    return String(str).replace(
-                        /&amp;/g, '&').replace(
-                        /&quot/g, '"').replace(
-                        /&#39;/g, "'").replace(
-                        /&lt;/g, '<').replace(
-                        /&gt;/g, '>');
+                    return String(str).replace(/&amp;/g, '&').replace(/&quot/g, '"')
+                        .replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>');
                 },
                 htmlEscape: function (str) {
-                    return String(str).replace(/&/g,
-                        '&amp;').replace(/"/g,
-                        '&quot;').replace(/'/g,
-                        '&#39;').replace(/</g,
-                        '&lt;').replace(/>/g,
-                        '&gt;');
+                    return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;')
+                        .replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
                 },
                 editConfig: function (e, t) {
                     if (typeof t == "undefined") {
@@ -2680,21 +2662,21 @@
                             (new UserMessage("TWDB-ClothCalc Script is deactivated until the Gameversion on your world is updated to 2.04. Sorry!", UserMessage.TYPE_FATAL)).show();
                             return destroy();
                         } */
-                        
+
                         // check for kID & wrap awful getItem --- not only beta
                         if (TWDB.Util.isNewIDsystem()) { TWDB.Util.wrapBetaGetItem(); }
-                        
+
                         // check for kID & try migration if it's not the already messed up public beta
                         if (TWDB.Util.isNewIDsystem() && window.location.href.indexOf(".beta.the-west.net") === -1 && !TWDB.Util.idMigrationDone()) {
                             try { TWDB.Util.backupData(); } catch (e) {};       // no time for handling a failed backup :(
                             try {
                                 TWDB.Util.idMigrator();
                                 (new UserMessage('Converting TW-DB data to new item ID system successful.', UserMessage.TYPE_SUCCESS)).show();
-                                TWDB.Util.simpleRestore(true);  // delete backup 
+                                TWDB.Util.simpleRestore(true);  // delete backup
                             } catch (e) {
                                 Error.report(e, 'Item ID conversion failed.');
                                 (new UserMessage('Item ID conversion failed. Do not use the ANALYSERS if you want to save your data!', UserMessage.TYPE_FATAL)).show();
-                                TWDB.Util.simpleRestore();  // restore backup 
+                                TWDB.Util.simpleRestore();  // restore backup
                             };
                         }
                         return next();          // end of first run
@@ -3013,9 +2995,8 @@
                 var AllJobs = [];
                 var Name2Id = {};
                 var Shortname2Id = {};
-                /** TODO: Remove ternary operator when all worlds are migrated **/
                 // uncut_ruby , uncut_emerald , uncut_diamond , habanero_chilis , cobra_fangs , cossack_saddle_blanket , gilded_cogs
-                var Products = TWDB.Util.isNewIDsystem() ? [1828000, 1829000, 1830000, 2000000, 2003000, 2006000, 2009000] : [1828, 1829, 1830, 2000, 2003, 2006, 2009];
+                var Products = [1828000, 1829000, 1830000, 2000000, 2003000, 2006000, 2009000];
                 var construction;
                 /** TODO: Find reason of existence of  var jobdata **/
                 var jobdata = {};
@@ -3261,8 +3242,8 @@
                 return t
             }($);
             Debugger.Window = Window;
-            
-            
+
+
             var Support = function (e) {
                 var t = {};
                 var n = "twdb_support";
@@ -3293,8 +3274,8 @@
                 return t
             }($);
             Debugger.Support = Support;
-            
-            
+
+
             var Timer = function (e) {
                 var t = {};
                 var n = 0;
@@ -3325,8 +3306,8 @@
                 return t
             }($);
             Debugger.Timer = Timer;
-            
-            
+
+
             var Eventer = function (e) {
                 var t = {};
                 var n = {};
@@ -3382,8 +3363,8 @@
             }($);
             _base.Eventer = Eventer;
             Debugger.Eventer = Eventer;
-            
-            
+
+
             var Calc = function (e) {
                 var _self = {};
                 var bReady = false;
@@ -3747,19 +3728,19 @@
                             [0, "sellTip4", "#HELP_SELLTIP4#", "#SELLTIP_SETTINGS#"],
                             [0, "sellTip5", "#HELP_SELLTIP5#", "#SELLTIP_SETTINGS#"],
                         [0, "pinitems", "#HELP_PIN_ITEMS#", false],
-                        
+
                         [9, "", "#MENULEFT3#", false],                          // Quests
                         [0, "questwiki", "#HELP_QUESTWIKI#", false],
                         [0, "questcancle", "#HELP_QUESTCANCEL#", false],
                         [0, "qbswitch", "#HELP_QBSWITCH#", false],
                         [0, "qfulltext", "#HELP_QFULLTEXT#", false],
                         // [0, "questgroup", "#HELP_QUESTGROUP#", false],
-                        
+
                         [9, "", "#BUILDING_MARKET#", false],                    // Market
                         [0, "marketmap", "#HELP_MARKETMAP#", false],
                         [0, "marketreminder", "#HELP_MARKETREMINDER#", false],
                         [0, "marketselldialog", "#MSD_SETTING#", false],
-                        
+
                         [9, "", "#MENULEFT6#", false],                          // Jobs
                         [0, "jobwin_ccbutton", "#HELP_JOBWINCC#", false],
                         [0, "jobwin_showlp", "#HELP_JOBWINLP#", false],
@@ -3775,7 +3756,7 @@
                         [9, "", "#MINIMAP_CAP#", false],                        // Mini map
                         [0, "showbonusjobs", "#HELP_SHOWBONUSJOBS#", false],
                         [0, "showscrollto", "#HELP_SCROLLTO#", false],
-                        
+
                         [9, "", "#FORT#", false],                               // Fort
                         [0, "fortrecruitment", "#HELP_FORTRECRUITMENT#", false],
                         [0, "enhancedfortrecruitment", "#HELP_ENHANCEDFORTRECRUITMENT#", false],
@@ -3807,12 +3788,12 @@
                       if (values[i][0] === 9) {
                           row.append($('<td colspan="2" />').append($('<span class="twdb_sett_capt" />').text((values[i][2]+"").twdb_twiceHTMLUnescape()))); /**TODO: get rid of unescape **/
                           table.append(row);
-                          continue;                          
+                          continue;
                       }
                       if (values[i][0] === 8) {         // placeholder
                           row.addClass('placeholder_' + values[i][1]);
                           table.append(row);
-                          continue;                          
+                          continue;
                       }
                       switch (values[i][0]) {
                         case 0:
@@ -3846,7 +3827,7 @@
                     combobox.addItem('left','#LEFT#').addItem('right','#RIGHT#').addItem('custom','#CUSTOM_POSITION#');
                     combobox.select(String(settings['clothPos']));
                     $('tr.placeholder_clothPos', table).removeClass('placeholder_clothPos').append($('<td colspan="2" />').append(combobox.getMainDiv(), '<span>&nbsp;#HELP_POSITION#</span>'));
-                    
+
                     table.append($('<tr><td>&nbsp;</td></tr>'));        // empty row at the end of the table
 
                     var btn = new west.gui.Button('#SAVE#', function(){
@@ -3891,8 +3872,8 @@
             }($);
             _base.Settings = Settings;
             Debugger.Settings = Settings;
-            
-            
+
+
             /**
              * Enhances job windows with additional controls and info.
              *
@@ -4868,7 +4849,7 @@
                       var tmp = data[moti];
                       row.motivation += (moti * tmp.count);
                       row.bond += tmp.bond;
-                      row.duration += (tmp.duration || 0);      // old stats didn't have a duration during the fixed job time era 
+                      row.duration += (tmp.duration || 0);      // old stats didn't have a duration during the fixed job time era
                       row.experience += tmp.experience;
                       for ( var injury in tmp.injury ) {
                         row.injury += injury*tmp.injury[injury];
@@ -4964,7 +4945,7 @@
                     tmp.data('avg-t','&Oslash; ' + String(((row.products/row.count)*100).round(2)) + '% [' + (targetQuote*100) + '%]');
                     dom.append(tmp);
                     sum.products += row.products;
-                    
+
                     var tmp = $('<div class="cell_9 view-items" style="width:63px; text-align:center;cursor:pointer;" ></div>');
                     /* time intensive!! */
                     var items = $.map(row.all_products, function(count, itemid) {
@@ -5266,8 +5247,8 @@
                 return t
             }($);
             Debugger.Notes = Notes;
-            
-            
+
+
             var Map = function (e) {
                 var t = {};
                 var n = false;
@@ -5430,7 +5411,7 @@
                         var s = "";
                         n.setWidth(45);
                         r.setWidth(45).setMaxLength(5);
-                        
+
                         var o = function () {
                             var e = Number(n.getValue());
                             var t = Number(r.getValue());
@@ -5438,7 +5419,7 @@
                             n.setValue("");
                             r.setValue("")
                         };
-                        
+
                         e(n.getMainDiv()).find("input").keyup(function(t) {
                             window.setTimeout(function() {
                                 var u;
@@ -5473,7 +5454,7 @@
                                 n.setValue(i);
                             }, 100)
                         });
-                        
+
                         e(r.getMainDiv())
                             .find("input")
                             .keyup(
@@ -5542,7 +5523,7 @@
                                                     .setValue(s)
                                             }, 100)
                                 });
-                            
+
                         var u = (new west.gui.Button("Ok", function() { o(); }, null, null, "#SCROLL_TO#")).setWidth("48");
                         var a = e('<img title="#SHOW_COORDS#" src="' + Images.iconCount + '" />')
                                 .click(function() {
@@ -5563,8 +5544,8 @@
             }($);
             _base.Map = Map;
             Debugger.Map = Map;
-            
-            
+
+
             var BonusJobs = function (e) {
                 var t = {};
                 var n = {};
@@ -5668,7 +5649,7 @@
                         e(t)
                     })
                 };
-                
+
                 var u = function () {   // minimap - bonus job bar
                     var css = 'div#mmap_twdb_bonusjobs {position:absolute; top:40px; right:10px;}\n'
                             + 'div#mmap_twdb_bonusjobs > input[type="checkbox"] {margin-left:6px; cursor:pointer;}\n'
@@ -5694,7 +5675,7 @@
                     };
                     GameInject.injectMinimap(function() { t(); });
                 };
-                
+
                 var a = function () {
                     Cache.save("bonusdisplay", i);
                     e("#minimap_worldmap > div.TWDBbonusjob", MinimapWindow.window.divMain).remove();
@@ -5750,7 +5731,7 @@
                         if (u > 0) { t(l, c, o, u, a); }
                     }
                 };
-                
+
                 var f = function () {
                     var t = [];
                     for (var r in n) {
@@ -5934,8 +5915,8 @@
                 return t
             }($);
             Debugger.BonusJobs = BonusJobs;
-            
-            
+
+
             var Chat = function (e) {
                 var t = {};
                 var n = false;
@@ -6635,8 +6616,8 @@
                 return t
             }($);
             Debugger.Collector = Collector;
-            
-            
+
+
             var BuyTip = function (e) {
                 var t = {};
                 var n = false;
@@ -6929,7 +6910,7 @@
                     var t = '<table border="0" cellspacing="0" cellpadding="0"><tr>';
                     if (!ClothCalc.isItemUsable(e)) {
                         var n = ItemManager.get(e);
-                        t += '<td colspan="2" style="text-align:center; font-weight:bold;">' + n.level + " #LEVEL#</td></tr><tr>"
+                        t += '<td colspan="2" style="text-align:center; font-weight:bold;">#LEVEL# ' + n.level + "</td></tr><tr>"
                     }
                     for (var i = 0; i < r[e].length; i++) {
                         var o = r[e][i];
@@ -6964,8 +6945,8 @@
                 return t
             }($);
             Debugger.BuyTip = BuyTip;
-            
-            
+
+
             var LpInfo = function (e) {
                 var t = {};
                 var n = false;
@@ -7026,7 +7007,7 @@
                 var interval = null;
                 var loader = {};
                 var init = function() {
-                    if (loader.ready) { return; }                    
+                    if (loader.ready) { return; }
                     trustTWDB();
                     if (Settings.get("instanthotel", true)) { InstantHotel(); }
                     if (Settings.get("qbswitch", true)) { QuestbookSwitch(); }
@@ -7049,7 +7030,7 @@
                     loader.ready = true;
                 };
                 loader = Loader.add("Snippets", "tw-db code Snippets", init, { Settings: true });
-                
+
                 var trustTWDB = function() {
                     try {
                         var str = showlink.toString();
@@ -7058,17 +7039,17 @@
                         eval("showlink = " + str);
                     } catch (e) {}
                 };
-                
+
                 var allowChatGuiMinimize = function() {
                     TWDB.Util.addCss('div#ui_bottomleft { width: auto; overflow: hidden; }'
                         + 'div#ui_chat.minchat div#servertime { display: none; }'
                         + 'div#ui_chat.minchat > div.tabs div { display: none; }'
                         + 'div#ui_chat.minchat div.container div.vertical_divider { display: none; }'
                         + 'div#ui_chat.minchat img.leave_channel { display: none!important; }'
-                        + 'div#ui_chat div.tabs.minchat_tabr { display: none; }'
+                        + 'div#ui_chat div.tabs.minchat_tabr { display: none; cursor: pointer; }'
                         + 'div#ui_chat.minchat div.tabs.minchat_tabr { display: block; position: absolute; left: 32px; top: 0px; width: 8px; background-position: top right; }'
                         + 'div#ui_chat.minchat { position: relative; left: -10px; top: 4px; width: 39px; }'
-                        + 'div#ui_chat.minchat > div.tabs { width: 32px; }'
+                        + 'div#ui_chat.minchat > div.tabs { width: 32px; cursor: pointer; }'
                         + 'div#ui_chat.minchat div.chat_channel { width: 24px; }'
                         + 'div#ui_chat.minchat div.chat_channel .new_message { left: 2px; top: 0px; }'
                         + 'div#ui_chat.minchat div.chat_channel div.online_count { background: none; position: absolute; right: 0px; top: -1px; width: auto; height: auto; line-height: normal; padding: 0px; font-size: 8pt; font-weight: bold; text-align: right; text-shadow: -1px 1px 1px #FFF, 0px 0px 2px #FFF; cursor: default; }'
@@ -7077,9 +7058,9 @@
                         + 'div#ui_chat.minchat div.tw2gui_scrollpane { width: 50px; }', 'minchat');
                     $('div#ui_chat').append('<div class="tabs minchat_tabr" />')
                         .on('click', 'div.tabs', function(){ Settings.set("mini_chatgui_min", $(this).parent().toggleClass('minchat').hasClass('minchat')); })
-                        .toggleClass('minchat', Settings.get("mini_chatgui_min", false));
+                        .toggleClass('minchat', Settings.get("mini_chatgui_min", true));
                 };
-                
+
                 var expBarValues = function() {
                     if (isDefined(w.SlySuite)) {
                         TWDB.Settings.set('expbarvalues', false);
@@ -7113,7 +7094,7 @@
 
                 var supressOnGoingEntries = function() {
                     var dontLikes = ['shop_sale'];      // extendable
-                    
+
                     var killEntries = function(classes) {
                         if ($.isArray(classes)) {
                             for (var i = 0; i < classes.length; i++) {
@@ -7126,7 +7107,7 @@
                             }
                         }
                     };
-                    
+
                     /** TODO: move me to GameInject! **/
                     var injectWestUiNotiBarAdd = function(filters) {
                         try {
@@ -7142,24 +7123,24 @@
                             Error.report(t, "manipulate WestUi.NotiBar.add");
                         }
                     };
-                    
+
                     injectWestUiNotiBarAdd(dontLikes);
                     killEntries(dontLikes);
                 };
-                
+
                 var InstantHotel = function() {
                     /** TODO: move me to GameInject! **/
                     try {
                         w.Map.Component.Town.prototype.__twdb__getContent = w.Map.Component.Town.prototype.__twdb__getContent || w.Map.Component.Town.prototype.getContent;
-			w.Map.Component.Town.prototype.getContent = function() {
-			    var origCont = this.__twdb__getContent();
-			    if (origCont === '') { return origCont; }
-			    else {
-			        return origCont.replace(/\<\/div\>$/, "<div class='instanthotel needslistener' title='#HOTEL#' tid='" + this.data[1].town_id + "'></div></div>");
-			    }
-			};
-			w.Map.Draw.__twdb__checkDouble = w.Map.Draw.__twdb__checkDouble || w.Map.Draw.checkDouble;
-			w.Map.Draw.checkDouble = function() {
+            w.Map.Component.Town.prototype.getContent = function() {
+                var origCont = this.__twdb__getContent();
+                if (origCont === '') { return origCont; }
+                else {
+                    return origCont.replace(/\<\/div\>$/, "<div class='instanthotel needslistener' title='#HOTEL#' tid='" + this.data[1].town_id + "'></div></div>");
+                }
+            };
+            w.Map.Draw.__twdb__checkDouble = w.Map.Draw.__twdb__checkDouble || w.Map.Draw.checkDouble;
+            w.Map.Draw.checkDouble = function() {
                             $('#map div.instanthotel.needslistener').each(function(i, el) {
                                 var $el = $(el);
                                 var town_id = parseInt($el.attr('tid'),10);
@@ -7167,18 +7148,18 @@
                                     ev.stopPropagation();
                                     HotelWindow.open(town_id);
                                     return false;
-			        }).removeClass('needslistener').removeAttr('tid');
+                    }).removeClass('needslistener').removeAttr('tid');
                             });
-			    return w.Map.Draw.__twdb__checkDouble();
-			};
+                return w.Map.Draw.__twdb__checkDouble();
+            };
                         var css = "div.instanthotel { background-image: url('" + TWDB.images.instanthotel + "'); width: 20px; height: 20px; "
-			+ "position: absolute; right: 10px; top: -8px; cursor: pointer; display: none; }\n"
-			+ "div.townname:hover .instanthotel { z-index: 2; display: block; }";
-			TWDB.Util.addCss(css);
-			w.Map.refresh(true);
-		    } catch (err) {
-		        Error.report(err, "manipulate town signs");
-		    }
+            + "position: absolute; right: 10px; top: -8px; cursor: pointer; display: none; }\n"
+            + "div.townname:hover .instanthotel { z-index: 2; display: block; }";
+            TWDB.Util.addCss(css);
+            w.Map.refresh(true);
+            } catch (err) {
+                Error.report(err, "manipulate town signs");
+            }
                 };
 
                 var fastSkillChange = function () {
@@ -7248,7 +7229,7 @@
                         Error.report(e, "manipulate showSolvedQuest")
                     }
                 };
-                
+
                 var QuestFullText = function() {
                     try {
                         QuestWindowView.cc_showQuest = QuestWindowView.showQuest;
@@ -7338,7 +7319,7 @@
                         if (!isDefined(west.gui.Dialog.prototype.__twdb__show)) {
                             west.gui.Dialog.prototype.__twdb__show = west.gui.Dialog.prototype.show;
                         }
-                        
+
                         if (TWDB.script.isDev()) {
                             west.gui.Dialog.prototype.show = function() {
                                 if (this.divMain.attr('id') === 'market_createoffer_window') {
@@ -7561,8 +7542,7 @@
                                 if (json.error) { return new UserMessage(json.msg).show(); }
                                 if (json.hasOwnProperty('recipes_content') && json.recipes_content.length > 0) {
                                     var i;
-                                    /** TODO: Remove '?' expression when all worlds are migrated **/
-                                    var timed_recipes = TWDB.Util.isNewIDsystem() ? [20099000, 20104000, 20109000, 20114000] : [20099, 20104, 20109, 20114];
+                                    var timed_recipes = [20099000, 20104000, 20109000, 20114000];
                                     for (i = 0; i < json.recipes_content.length; i++) {
                                         if (timed_recipes.indexOf(json.recipes_content[i].item_id) !== -1) {
                                             if (json.recipes_content[i].last_craft) {
@@ -8198,10 +8178,10 @@
                         var aprilFools2015 = (d.getDate() == 1 && d.getMonth() + 1 == 4 && d.getYear() + 1900 == 2015) || window['april2015Override'];
                         if (aprilFools2015) {
                             TWDB.Util.addCss('body.april2015-sick {-webkit-animation: speedsick 15s infinite; animation: speedsick 15s infinite;} @keyframes speedsick { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(359deg); } } @-webkit-keyframes speedsick { 0% { -webkit-filter: hue-rotate(0deg); } 100% { -webkit-filter: hue-rotate(359deg); } }');
-                        
+
                             setTimeout(function () { WestUi.showInventoryChanged('add',699000,1); }, 45000);
                         }
-                                            
+
                         Inventory.__CCPI__addItems = Inventory.__CCPI__addItems || Inventory.addItems;
                         Inventory.addItems = function (category, page) {
                             Inventory.__CCPI__addItems.apply(this, arguments);
@@ -8239,10 +8219,10 @@
                                     var item = Bag.getItemByItemId(item_id);
                                     if (item) Inventory.addItemDivToInv(item, true);
                                 });
-                                
+
                                 // april fools 2015 - add a fake rocket turtle
                                 if (!aprilFools2015) return;
-                                
+
                                 var item = new tw2widget.InventoryItem(ItemManager.get(699000)).setCount(1).setInvId(699).setCharacter(Character);
                                 var $item = $('<div>').append(item.getMainDiv().data('itemId', item.getId()));
                                 $item.find('img').off('click').click(function (e) {
@@ -8328,9 +8308,9 @@
                         TelegramWindow.__CCDTS__appendTelegram = TelegramWindow.__CCDTS__appendTelegram || TelegramWindow.appendTelegram;
                         TelegramWindow.appendTelegram = function (p, e) {
                             TelegramWindow.__CCDTS__appendTelegram.apply(this, arguments);
-                            
+
                             e.contentPane.find('.telegram-head:last .author')
-                            .css({ left: '81px', width: '140px', 
+                            .css({ left: '81px', width: '140px',
                                 background: 'url(//westzzs.innogamescdn.com/images/window/messages/post-head.jpg) -16px 0' })
                             .before(
                                 $('<div class="telegram-source"><div>BB</div></div>')
@@ -8471,7 +8451,7 @@
                 t.getUp2Date = function () {
                     return f
                 };
-                
+
                 var p = function () {
                     try {
                         var t = e.extend(true, {}, a.skills);
@@ -8502,29 +8482,15 @@
                         i = {};
                         o = [];
 
-                        /** TODO: remove branching when all worlds use the new system **/
-                        if (TWDB.Util.isNewIDsystem()) {
-                            for (var id in Bag.items_by_id) {
-                                var item = Bag.items_by_id[id].obj;
-                                if (ClothCalc.isItemUsable(item.item_id)) {
-                                    i[item.item_id] = true;
-                                    if (item.type === "animal") { o.push({ id: item.item_id, speed: item.speed }); }
-                                    if (isDefined(t[item.item_id])) { delete t[item.item_id]; } else { f.items = false; }
-                                }
-                            }
-                        } else {    // old system, old code
-                            for (var n in Bag.items) {
-                                for (var r in Bag.items[n]) {
-                                    var s = Number(r);
-                                    if (ClothCalc.isItemUsable(s)) {
-                                        i[s] = true;
-                                        if (n == "animal") { o.push({ id: s, speed: Bag.items[n][s].obj.speed }); }
-                                        if (isDefined(t[s])) { delete t[s]; } else { f.items = false; }
-                                    }
-                                }
+                        for (var id in Bag.items_by_id) {
+                            var item = Bag.items_by_id[id].obj;
+                            if (ClothCalc.isItemUsable(item.item_id)) {
+                                i[item.item_id] = true;
+                                if (item.type === "animal") { o.push({ id: item.item_id, speed: item.speed }); }
+                                if (isDefined(t[item.item_id])) { delete t[item.item_id]; } else { f.items = false; }
                             }
                         }
-                        
+
                         for (var n in Wear.wear) {
                             var s = Number(Wear.wear[n].getId());
                             if (isDefined(i[s])) { continue; }
@@ -8643,8 +8609,8 @@
             }($);
             _base.DataManager = DataManager;
             Debugger.DataManager = DataManager;
-            
-            
+
+
             var Quests = function(e) {
                 var t = {};
                 var n = {};
@@ -8787,8 +8753,8 @@
                 return t
             }($);
             Debugger.Quests = Quests;
-            
-            
+
+
             var Customs = function(e) {
                 var t = {};
                 var n = {};
@@ -9250,8 +9216,8 @@
                 return t
             }($);
             Debugger.Customs = Customs;
-            
-            
+
+
             var Forum = function (e) {
                 var t = {};
                 var n = {};
@@ -9470,7 +9436,7 @@
             })($);
             Debugger.DuelMotivation = DuelMotivation;
 
-            
+
             var Bank = function (e) {
                 var t = {};
                 var n = true;
@@ -9543,8 +9509,8 @@
                 return t
             }($);
             Debugger.Bank = Bank;
-            
-            
+
+
             var Market = function (e) {
                 var t = {};
                 var n = false;
@@ -9986,8 +9952,8 @@
                 return t
             }($);
             Debugger.Market = Market;
-            
-            
+
+
             var Fort = function($) {
                 var _self = {};
                 var loader = {};
@@ -10103,8 +10069,8 @@
                 return _self
             }($);
             Debugger.Fort = Fort;
-            
-            
+
+
             var CCstarter = function (e) {
                 var t = {};
                 var n = {};

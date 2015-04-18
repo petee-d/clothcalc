@@ -1,1 +1,26 @@
+#HELP_MIN_EQUIP#                open Equipment window minimized when opening ClothCalc          Öffne das Ausrüstungsfenster minimiert beim Öffnen des ClothCalc  
+
+#CAP_TASKLIST#                  Task list                               Auftragsliste
+#HELP_TL_CANCELALL#             cancel all tasks                        Alle Aufträge abbrechen
+#HELP_TL_SHOWLP#                show labor points in task list popups   Zeige Arbeitspunkte in Auftrags-Popups
+
+#HELP_MINIMIZE_CHATGUI#         allow Chat room GUI to be minimized     Ermögliche das Chaträume-GUI zu minimieren
+
+Changelog:
+[main] support for the upcoming new item IDs<br />
+[main] automatic conversion of CC data (most of all statistics) for the ID update<br />
+[main] job search automatically selects the job when search is narrowed down to only one<br />
+[main bugfix] using cursor keys in job search works again<br />
+[settings] rearranged the options and added captions for more clarity<br />
+[jobs *new*] ClothCalc button in job windows<br />
+[jobs *new*] display of labor points in job window title<br />
+[misc *new*] instant hotel button on town signs<br />
+[misc *new*] show BBCodes in received telegrams<br />
+[misc *new*] show values on experience bar - thanks to <a href='https://greasyfork.org/scripts/3935-the-west-script-suite'>Leones/Slygoxx</a><br />
+[misc *new*] option to disable the Shop SALE sign below the saloon<br />
+[misc *new*] you can assign a hotkey to ClothCalc in the <u>game</u> settings -&gt; Keyboard shortcuts<br />
+
+
+
+[main] option to open the Wear window minimized<br />
 
