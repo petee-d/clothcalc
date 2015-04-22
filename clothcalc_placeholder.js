@@ -8212,10 +8212,12 @@
                                 Inventory.DOM.children('.actions').append(
                                     $('<div id="CC_pin_items" class="tw2gui_iconbutton" />')
                                     .attr({ title: "#TOGGLE_ITEM_PINNING_MODE#".twdb_twiceHTMLUnescape() /**TODO: get rid of unescape */ })
+                                    .toggleClass('pinact', (TWDB.Settings.itemPinningMode === 1))
                                 );
                             }
                             $('#CC_pin_items').off('click').click(function () {
                                 TWDB.Settings.itemPinningMode ^= true;
+                                $(this).toggleClass('pinact', (TWDB.Settings.itemPinningMode === 1));
                                 Inventory.addItems(category, page);
                             });
                             // if in new, add pinned items
@@ -8227,6 +8229,7 @@
                             }
                         };
                         var css = 'div#CC_pin_items {' +
+                          'background-image: url("' + Images.pinItems + '");' +
                           'background-position: top;' +
                           'width: 34px;' +
                           'height: 36px;' +
@@ -8281,6 +8284,7 @@
                             }
                         };
                         var css = '#bag > .pinned > .item {' +
+                              'background: rgba(134, 93, 39, 0.4) url("' + Images.pinMini + '") -1px -1px no-repeat;' +
                               'border-radius: 4px;' +
                               '-webkit-box-shadow: inset 0px 0px 2px 1px #852;' +
                               '-moz-box-shadow: inset 0px 0px 2px 1px #852;' +
