@@ -1,5 +1,9 @@
+/*jshint strict: false, globalstrict: true, browser: true, jquery: true*/
+/*global isDefined, TWDB, west, Character, Game, TheWestApi, jQuery, $, window */
+// var isDefined, TWDB, console, Game;    // calm down the syntax highlighter & linter
+
 // be aware that the script release system ignores everything before // START OF ...
-var isDefined, TWDB, debLog;    // calm down the syntax highlighter
+
 /**
  * News on this update :
  * -
@@ -28,7 +32,7 @@ var isDefined, TWDB, debLog;    // calm down the syntax highlighter
         (new west.gui.Dialog(TWDB.script.name, '<div class="txcenter"><b><br>#CC_INSTALLED_TWICE#</br></b></div>', west.gui.Dialog.SYS_WARNING)).addButton("OK").show();
     } else {
         TWDB = {};
-        TWDB.script = new Object({
+        TWDB.script = {
             version: 39,
             revision: 4,
             name: "The West - tw-db.info Cloth Calc",
@@ -38,7 +42,7 @@ var isDefined, TWDB, debLog;    // calm down the syntax highlighter
             protocol: location.protocol.match(/^(.+):$/)[1],
             gameversion: 2.19,
             lang: "eng"
-        });
+        };
         try { TWDB.script.notes = jQuery.parseJSON('[{\"version\":\"99\",\"notes\":\"DEV version\"}]');
             } catch (e) {}
 
@@ -59,15 +63,13 @@ var isDefined, TWDB, debLog;    // calm down the syntax highlighter
 
         /**TODO: get rid of this **/
         String.prototype.twdb_twiceHTMLUnescape = function () {
-            return $($.parseHTML($($.parseHTML(this + "")).text())).text();
-        }
+            return $($.parseHTML($($.parseHTML(String(this))).text())).text();
+        };
 
-        if (!window.console) { window.console={}; }
-        if (!window.console.log) { window.console.log = function (e) {}; }
-        window.debLog = (function () {
-                if (TWDB.script.isDev() && window.console.info) {
-                return function(e) { console.info.apply(console, ["CC:"].concat(Array.prototype.slice.call(arguments))); };
-                } else { return function (e){}; }
+        debLog = (function () {
+            if (TWDB.script.isDev() && console.info) {
+                return function (e) { console.info.apply(console, ["CC:"].concat(Array.prototype.slice.call(arguments))); };
+            } else { return function (e) {}; }
         })();
 
         TWDB.images = {
@@ -131,7 +133,7 @@ var isDefined, TWDB, debLog;    // calm down the syntax highlighter
             instanthotel: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAABOFJREFUeNp0VFlsVGUU/u46c2eflm4UmBFL2UVRo7IlQiwKGJYAUYghKgkYE014wfBoYgxPPmN4MBKiJMYABqSWBMHQiFLsQktpgDLTzkzbWe5sd+bu1zNjSwwJZ/LnnvmX7z//Od93mLDPh5o5joNQ0IuPtm2GyXHMgkjL0thEZp08nV3DcFxDVpanhx/G/5HLSq9uGuOFkoJVnVH0338Ey7LBEEZt8DUwuVyug+YVBT6fe9XCaNvRZStW7+uIlptHRu7CqDroaI+gY/4iVHQj/tfg4A93tfi3fSMPHmHWnNnBNPj8yJVL9cn3uza99/GBnV/7w1L06s0+3Bl8gMeJBDRVg9fjgdvtQWu4AVF/EEW1OnI7Pn7s74HRbvzPGJfAQzNM7O/asOPA9q6zkzMzgSu37uAhXc5aVahVFZLLDZfIwbQB1WGxoK0db6zshCcgpE+d6z4YS2V75gA5y7bRFPK3fHpo1+lSRY2eudiD9FQCIZeNaFsjli6JYM/uHehYvAjlQhYC40AuFpDMK1jYGPJ2RtpX990f76E8ynXApnAQ619eerhzcduHZ365hmQiBS/ngGNZ5EoaXl2/EZ8cPYy1L63E6INJumwKtuUgNZ0FFQuLmuc1T8ul4kyu8EctjVzHgpbA1o2vfRlL5qLXe/tQqVRg0ttqaTj4wQEc++wIHEuHrml48YUVmEwXceNmPwzTRLqgICgFGEO3QvFM5joxJc01+Hyrd+/YduLPgWExEY+hrSmAoM+N418cw6GD++GYKhzbBE/RcByLtQQabghgaPgeVE2nQkmY5w/445n0kKYb/bzIccuGB+96JyYnYVommhsbcOTIYWztevMJ2JyJglD/7t35NgTRhZPfnEJGzqHZL3lZhnmeljwsz/B8diaHdFYmHjnYt283ujavqxfAcSzk8kVMzWTpMqtO3YnENBJTM+jsiGLvrndo3oCLtcA5Vk0hEp8pFeOlSkUTed4luUScOv0d4hNJnP/1Gnp7zmFweAw9N25hOQHsefctJKcz+PzESWzfsg6Xu69B4AXkq6pumHalFj1frCgj5Wp1tKUxvGba1uiZOs5fuISyboHhXYhTRD/+dAkc6WrLm5tQJZIrpKyfL1yheB24gy7cjyUyZdV4TFsM1nacqdjU1NVadEQWeiYHygfFztefqBsGadWCJApgqTAMrTmzOhM4AX6JQVlThwhnjAArbKGi4l48dVZRtKRX8qJU1RHwCIi0eGHrCmwivkDV5YmbjqFCpQgZ+gmknNamEAKik86UtF4Ce0xCMpi5CkaaGo4vibR9lZJlTlVKCHtEcAKLbFknztkIed0wDAsFRUWtt8wn6oT8onJ7LHWxoOjfs8DvNWXS3f91iWKlOkLq8Efmt77CsQJTVDQCMCl3DAIE5pdEiC6OtMUj4Bbh9wjl0Qn5t2yxeokwegksX5ceMwtIpuaKykC+pBQDkvRcU6gxIEoexmZYioentuXANIhoAq+XytXxsWTuslzWugnsOp1NOHPdphahPfuHfIb8MLmvNwZ821rDwQ0eydPOMJyYzcuGrlcmi6o+VFC0IdozQPv76TtjP4npKcAnk0Qn2tFM7jKOZZazLNtI3cSiSqZo7iGtx2ik6JyGp8+yeLYRKEvDS66bACib0MmvtXfzWWf+FWAAEgZP3u0LJukAAAAASUVORK5CYII=",
             bestwear: 'data:image/png;base64,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'
         };
-        TWDB.Util = (function($) {
+        TWDB.Util = (function ($) {
             var _public = {};
 
             /**
@@ -144,10 +146,10 @@ var isDefined, TWDB, debLog;    // calm down the syntax highlighter
             var _addCss = function (cssString, optionalId) {
                 var id = "twdb_css";
                 if (typeof optionalId !== "undefined" && typeof optionalId === "string") { id += "_" + optionalId.replace(/\W+/g, ""); }
-                if ($("head style#" + id).append('\n'+cssString).length == 1) { return; }
-                else { $("head").append($('<style type="text/css" id="' + id +'">').text(cssString)) };
+                if ($("head style#" + id).append('\n' + cssString).length === 1) { return; }
+                else { $("head").append($('<style type="text/css" id="' + id + '">').text(cssString)); }
             };
-            _public.addCss = function(cssString, optionalId) { return _addCss(cssString, optionalId); };
+            _public.addCss = function (cssString, optionalId) { return _addCss(cssString, optionalId); };
 
             /**
              * Checks if the new ID system is already implemented.
@@ -155,19 +157,19 @@ var isDefined, TWDB, debLog;    // calm down the syntax highlighter
              *
              * @return {Boolean} TRUE if new system
              */
-            var _isNewIDsystemCache = null;
-            var _isNewIDsystem = function() {
-                if (_isNewIDsystemCache === null) { _isNewIDsystemCache = isDefined(ItemManager.getByBaseId); }
-                return _isNewIDsystemCache;
-            };
-            _public.isNewIDsystem = function() { return _isNewIDsystem(); };
+            var _isNewIDsystemCache = null,
+                _isNewIDsystem = function () {
+                    if (_isNewIDsystemCache === null) { _isNewIDsystemCache = isDefined(ItemManager.getByBaseId); }
+                    return _isNewIDsystemCache;
+                };
+            _public.isNewIDsystem = function () { return _isNewIDsystem(); };
 
-            var _backupData = function() {
-                var twdbKeys = [];
-                var key;
-                var newkey;
-                var uid = 'twdb_' + Character.playerId + '_';
-                if (localStorage.getItem(uid + 'embackup') == 'TRUE') { return; }
+            var _backupData = function () {
+                var twdbKeys = [],
+                    key,
+                    newkey,
+                    uid = 'twdb_' + Character.playerId + '_';
+                if (localStorage.getItem(uid + 'embackup') === true) { return; }
                 for (var i=0; i<localStorage.length; i++) {
                     key = localStorage.key(i);
                     if (key.search(uid) === 0 && key.search(/(marketreminder|notes|settings|statistic)$/i) !== -1) {
@@ -182,7 +184,7 @@ var isDefined, TWDB, debLog;    // calm down the syntax highlighter
                     localStorage.setItem(twdbKeys[i].newkey, twdbKeys[i].val);
                     console.log('key ' + twdbKeys[i].key.substr(uid.length) + ' saved.');
                 }
-                localStorage.setItem(uid + 'embackup', 'TRUE');
+                localStorage.setItem(uid + 'embackup', true);
             };
             _public.backupData = function() { return _backupData(); };
 
@@ -284,11 +286,11 @@ var isDefined, TWDB, debLog;    // calm down the syntax highlighter
                                 temp = {};
                                 for (var m in content.job[j]) { // motivation, products (&more)
                                     temp[m] = {};
-                                    if (m == 'products') {
+                                    if (m === 'products') {
                                         for (var p in content.job[j][m]) { temp[m][cv(p)] = tdc(content.job[j][m][p]); }
                                     } else if ($.isNumeric(m)) {        // motivations
                                         for (var s in content.job[j][m]) {      // various stats, including items & extraitems
-                                            if (s == 'items' || s == 'extraitems') {
+                                            if (s === 'items' || s === 'extraitems') {
                                                 temp[m][s] = {};
                                                 for (var item in content.job[j][m][s]) {
                                                     temp[m][s][cv(item)] = content.job[j][m][s][item];
@@ -488,12 +490,10 @@ var isDefined, TWDB, debLog;    // calm down the syntax highlighter
                 this.gui.bag = jQuery('<div style="position:absolute;top:95px;left:1px;width:252px;height:186px;" />');
                 this.BagInt = window.setInterval(function(){ _self.finishInit(); }, 100);
                 //get custom jobs or define default value
-                this.data.custom = TWDB.Settings.get("custom",
-                                                     {1:{id:1,type:"speed",para:{},name:"Speed"},2:{id:2,type:"custom",para:{9:1},name:"max Health"},3:{id:3,type:"regen",para:{},name:"Health Regeneration"},4:{id:4,type:"fort",para:{att:200,def:20,health:100,type:0},name:"Fortbattle Attacker (Att)"},5:{id:5,type:"fort",para:{att:20,def:200,health:100,type:0},name:"Fortbattle Attacker (Def)"},6:{id:6,type:"fort",para:{att:200,def:20,health:100,type:1},name:"Fortbattle Defender (Att)"},7:{id:7,type:"fort",para:{att:20,def:200,health:100,type:1},name:"Fortbattle Defender (Def)"},8:{id:8,type:"duel",para:{12:1,15:1,16:1,24:1},name:"Range Dueler (Att)"},9:{id:9,type:"duel",para:{12:1,15:1,16:1,21:1},name:"Range Dueler (Def)"},10:{id:10,type:"duel",para:{6:1,7:1,11:1,15:1},name:"Melee Dueler"}});
-        // load cache if version didn't not changed
+                this.data.custom = TWDB.Settings.get("custom",{1: {id: 1,type: "speed",para: {},name: "Speed"},2: {id: 2,type: "custom",para: {9: 1},name: "max Health"},3: {id: 3,type: "regen",para: {},name: "Health Regeneration"},4: {id: 4,type: "fort",para: {att: 200,def: 20,health: 100,type: 0},name: "Fortbattle Attacker (Att)"},5: {id: 5,type: "fort",para: {att: 20,def: 200,health: 100,type: 0},name: "Fortbattle Attacker (Def)"},6: {id: 6,type: "fort",para: {att: 200,def: 20,health: 100,type: 1},name: "Fortbattle Defender (Att)"},7: {id: 7,type: "fort",para: {att: 20,def: 200,health: 100,type: 1},name: "Fortbattle Defender (Def)"},8: {id: 8,type: "duel",para: {12: 1,15: 1,16: 1,24: 1},name: "Range Dueler (Att)"},9: {id: 9,type: "duel",para: {12: 1,15: 1,16: 1,21: 1},name: "Range Dueler (Def)"},10: {id: 10,type: "duel",para: {6: 1,7: 1,11: 1,15: 1},name: "Melee Dueler"}});        // load cache if version didn't not changed
                 if (!TWDB.Updater.wasUpdated()) {
                     var data = TWDB.Cache.load("calcdata");
-                    if (typeof data == "object" && data !== null && isDefined(data.loaded)) { this.calcdata = data; }
+                    if (typeof data === "object" && data !== null && isDefined(data.loaded)) { this.calcdata = data; }
                 }
             },
 
@@ -7009,6 +7009,8 @@ var isDefined, TWDB, debLog;    // calm down the syntax highlighter
                 var init = function() {
                     if (loader.ready) { return; }
                     trustTWDB();
+                    injectTaskJobs();
+                    TWDB.Util.addCss("@media (min-width: 1320px) { .custom_unit_counter {top: -1px!important; margin-left: 310px!important;} #hiro_friends_container {top: -1px!important; margin-right: 304px!important;} }"); // reposition counters for wide screens
                     if (Settings.get("instanthotel", true)) { InstantHotel(); }
                     if (Settings.get("qbswitch", true)) { QuestbookSwitch(); }
                     if (Settings.get("qfulltext", false)) { QuestFullText(); }
@@ -7059,6 +7061,33 @@ var isDefined, TWDB, debLog;    // calm down the syntax highlighter
                     $('div#ui_chat').append('<div class="tabs minchat_tabr" />')
                         .on('click', 'div.tabs', function(){ Settings.set("mini_chatgui_min", $(this).parent().toggleClass('minchat').hasClass('minchat')); })
                         .toggleClass('minchat', Settings.get("mini_chatgui_min", true));
+                };
+
+                var injectTaskJobs = function() {
+                    try {
+                        var __twdb__TaskJob = TaskJob;
+                        TaskJob = function () {
+                            var job = __twdb__TaskJob.apply(this, arguments);
+                            job.__twdb__getTitle = job.getTitle;
+                            job.getTitle = function () {
+                                return job.__twdb__getTitle() + '#LP#: ' + (this.data.job_points < 0 ? "<b class='text_red'>" : '<b>') + this.data.job_points + '</b><br />';
+                            };
+                            return job;
+                        };
+                    } catch (e) {
+                        Error.report(e, "manipulate TaskJob template");
+                    }
+                    try {
+                        if (TaskQueue.queue.length) {
+                            var data = $("script:contains('TaskQueue.init')").text().match(/TaskQueue\.init\(\s*(\[[^\]]*\])/);
+                            if (data.length === 2) {
+                                data = $.parseJSON(data[1]);
+                                TaskQueue.init(data, TaskQueue.limit);
+                            }
+                        }
+                    } catch (e) {
+                        Error.report(e, "manipulate existing Job tasks");
+                    }
                 };
 
                 var expBarValues = function() {
@@ -7120,7 +7149,7 @@ var isDefined, TWDB, debLog;    // calm down the syntax highlighter
                                 WestUi.NotiBar.__twdb__add.apply(this, arguments);
                             }
                         } catch (e) {
-                            Error.report(t, "manipulate WestUi.NotiBar.add");
+                            Error.report(e, "manipulate WestUi.NotiBar.add");
                         }
                     };
 
@@ -9511,150 +9540,118 @@ var isDefined, TWDB, debLog;    // calm down the syntax highlighter
             Debugger.Bank = Bank;
 
 
-            var Market = function (e) {
-                var t = {};
-                var n = false;
-                var r = false;
-                var i = {};
-                var s = {};
-                var o = function () {
-                    if (s.ready) {
-                        return
+            var Market = function ($) {
+                var _self = {};
+                var dom = false;
+                var map = false;
+                var towns = {};
+                var loader = {};
 
-                    }
+                var init = function () {
+                    if (loader.ready) return;
                     if (Settings.get("marketmap", true)) {
-                        GameInject.addTabOnMarketWindow("#MARKETMAP#",
-                            "marketmap", function () {
-                                l()
-                            })
+                        GameInject.addTabOnMarketWindow("#MARKETMAP#", "marketmap", function () { open(); })
                     }
                     if (Settings.get("marketreminder", true)) {
-                        GameInject.MarketOfferTable(function (e) {
-                            u(e)
-                        });
-                        GameInject.MarketWatchlistTable(function (e) {
-                            a(e)
-                        });
-                        f.init()
+                        GameInject.MarketOfferTable(function (data) { OfferTable(data); });
+                        GameInject.MarketWatchlistTable(function (data) { WatchlistTable(data); });
+                        Reminder.init();
                     }
-                    s.ready = true
+                    loader.ready = true
                 };
-                s = Loader.add("Market", "tw-db Market", o, {
-                    Settings: true
-                });
-                var u = function (t) {
-                    for (var n = 0; n < t.length; n++) {
-                        var r = t[n];
-                        var i = e('<div class="mpo_alert" />');
-                        e(MarketWindow.offerTable.getMainDiv())
-                            .children().find(
-                                ".marketBidsData_" + r.market_offer_id)
-                            .append(i);
-                        if (!r.isFinished) {
-                            i.append(getReminderImg(r))
-                        }
-                    }
-                };
-                var a = function (t) {
-                    for (var n = 0; n < t.length; n++) {
-                        var r = t[n];
-                        var i = e('<div class="mpo_alert" />');
-                        e(MarketWindow.watchlistTable.getMainDiv())
-                            .children().find(
-                                ".marketWatchData_" + r.market_offer_id)
-                            .append(i);
-                        if (!r.isFinished) {
-                            i.append(getReminderImg(r))
-                        }
-                    }
-                };
-                getReminderImg = function (t) {
-                    var n = e('<img src="' + Images.iconAlarm + '" />')
-                        .css({
-                            cursor: "pointer"
-                        });
-                    n.click(function (e, t) {
-                        return function () {
-                            f.create(e, t)
-                        }
-                    }(t, n));
-                    if (f.exists(t.market_offer_id) === false) {
-                        n.css("opacity", .5)
-                    } else {}
-                    return n
-                };
-                var f = function (e) {
-                    var t = {};
-                    var n = {};
-                    var r = {};
-                    t.init = function () {
-                        var e = Cache.load("marketreminder");
-                        if (isDefined(e)) {
-                            n = e
-                        }
-                        for (var t in n) {
-                            i(t)
-                        }
-                    };
-                    t.exists = function (e) {
-                        if (isDefined(n[e])) {
-                            return true
-                        } else {
-                            return false
-                        }
-                    };
-                    var i = function (e) {
-                        var t = n[e];
-                        var r = t.ends * 1e3 - (new Date).getTime() - t.reminder * 60 * 1e3;
-                        if (r < 0) {
-                            r = 100
-                        }
-                        t.timer = setTimeout(function (e) {
-                            return function () {
-                                u(e)
-                            }
-                        }(e), r)
-                    };
-                    var s = function (e, r, s) {
-                        var o = parseInt(r.getValue(), 10);
-                        if (isNaN(o) || o < 1) {
-                            t.create(e, s);
-                            return
+                loader = Loader.add("Market", "tw-db Market", init, { Settings: true });
 
-                        }
-                        if ((new Date).getTime() / 1e3 + o * 60 >= e.auction_end_date) {
-                            (new UserMessage("#REMINDERTOOLATE#"))
-                            .show();
-                            t.create(e, s);
-                            return
+                var OfferTable = function (data) {
+                    for (var n = 0; n < data.length; n++) {
+                        var offer = data[n];
+                        var $el = $('<div class="mpo_alert" />');
+                        $(MarketWindow.offerTable.getMainDiv())
+                            .children().find(".marketBidsData_" + offer.market_offer_id)
+                            .append($el);
+                        if (!offer.isFinished) { $el.append(getReminderImg(offer)); }
+                    }
+                };
+                var WatchlistTable = function (data) {
+                    for (var n = 0; n < data.length; n++) {
+                        var offer = data[n];
+                        var $el = $('<div class="mpo_alert" />');
+                        $(MarketWindow.watchlistTable.getMainDiv())
+                            .children().find(".marketWatchData_" + offer.market_offer_id)
+                            .append($el);
+                        if (!offer.isFinished) { $el.append(getReminderImg(offer)); }
+                    }
+                };
 
+                var getReminderImg = function (offerData) {
+                    var $img = $('<img src="' + Images.iconAlarm + '" />').css({cursor: "pointer"});
+                    $img.click(function (data, imgEl) { return function () {
+                        Reminder.create(data, imgEl)
+                    }; }(offerData, $img));
+                    if (Reminder.exists(offerData.market_offer_id) === false) { $img.css("opacity", .5) }
+                    return $img;
+                };
+
+                var Reminder = function ($) {
+                    var _that = {},
+                        entries = {},
+                        active = {};
+
+                    _that.init = function () {
+                        var tmp = Cache.load("marketreminder");
+                        if (isDefined(tmp)) { entries = tmp; }
+                        for (var id in entries) { activateTimer(id); }
+                    };
+
+                    _that.exists = function (id) {
+                        return (isDefined(entries[id]));
+                    };
+
+                    var activateTimer = function (id) {
+                        var offer = entries[id],
+                            time = Math.max(offer.ends * 1e3 - (new Date).getTime() - offer.reminder * 60 * 1e3, 100);
+                        offer.timer = setTimeout(function (id) {
+                            return function () { popup(id); };
+                        }(id), time)
+                    };
+
+                    var add = function (data, timeInput, $imgEl) {
+                        var minutes = parseInt(timeInput.getValue(), 10);
+                        if (isNaN(minutes) || minutes < 1) {
+                            _that.create(data, $imgEl);
+                            return;
                         }
-                        if (t.exists(e.market_offer_id)) {
-                            clearTimeout(n[e.market_offer_id].timer);
-                            delete n[e.market_offer_id].timer
+                        if ((new Date).getTime() / 1e3 + minutes * 60 >= data.auction_end_date) {
+                            (new UserMessage("#REMINDERTOOLATE#")).show();
+                            _that.create(data, $imgEl);
+                            return;
                         }
-                        n[e.market_offer_id] = {
-                            ends: e.auction_end_date,
-                            reminder: o,
-                            id: e.market_offer_id,
-                            item: e.item_id
+                        if (_that.exists(data.market_offer_id)) {
+                            clearTimeout(entries[data.market_offer_id].timer);
+                            delete entries[data.market_offer_id].timer;
+                        }
+                        entries[data.market_offer_id] = {
+                            ends: data.auction_end_date,
+                            reminder: minutes,
+                            id: data.market_offer_id,
+                            item: data.item_id
                         };
-                        Cache.save("marketreminder", n);
-                        i(e.market_offer_id)
+                        Cache.save("marketreminder", entries);
+                        activateTimer(data.market_offer_id)
                     };
+
                     var o = function (e) {
-                        delete n[e];
-                        Cache.save("marketreminder", n)
+                        delete entries[e];
+                        Cache.save("marketreminder", entries)
                     };
-                    var u = function (t) {
-                        var r = n[t];
+                    var popup = function (t) {
+                        var r = entries[t];
                         var i = ItemManager.get(r.item);
                         var s = new OnGoingEntry;
                         s.init();
                         s.setTooltip("#AUCTION#: " + i.name + ", #END#: " + Number(
                                 r.ends - (new Date).getTime() / 1e3)
                             .getTimeString4Timestamp());
-                        s.setImage(e('<img src="' + Images.notiBell + '" />'));
+                        s.setImage($('<img src="' + Images.notiBell + '" />'));
                         WestUi.NotiBar.add(s);
                         TitleTicker.setNotifyMessage("#AUCTION#: " + i.name + ", #END#: " + Number(
                                 r.ends - (new Date).getTime() / 1e3)
@@ -9663,8 +9660,8 @@ var isDefined, TWDB, debLog;    // calm down the syntax highlighter
                             .play(AudioController.SOUND_NEWMSG);
                         o(t)
                     };
-                    t.create = function (r, i) {
-                        var u = e("<div />");
+                    _that.create = function (r, i) {
+                        var u = $("<div />");
                         u
                             .append('<span style="position:relative; width:100%;display:block;">#AUCTIONEND#: ' + r.auction_ends_in
                                 .getTimeString4Timestamp() + "</span>");
@@ -9674,8 +9671,8 @@ var isDefined, TWDB, debLog;    // calm down the syntax highlighter
                                 "#REMINDBEFORE#: ")
                             .setPlaceholder("#MINUTES#");
                         u.append(a.getMainDiv());
-                        if (t.exists(r.market_offer_id)) {
-                            a.setValue(n[r.market_offer_id].reminder);
+                        if (_that.exists(r.market_offer_id)) {
+                            a.setValue(entries[r.market_offer_id].reminder);
                             i.css("opacity", 1)
                         } else {
                             i.css("opacity", .5)
@@ -9694,9 +9691,9 @@ var isDefined, TWDB, debLog;    // calm down the syntax highlighter
                                     opacity: .4
                                 }).addButton("ok", function () {
                                 i.css("opacity", 1);
-                                s(r, a, i)
+                                add(r, a, i)
                             });
-                        if (t.exists(r.market_offer_id)) {
+                        if (_that.exists(r.market_offer_id)) {
                             f.addButton("#DELETE#", function () {
                                 o(r.market_offer_id);
                                 i.css("opacity", .5)
@@ -9704,9 +9701,9 @@ var isDefined, TWDB, debLog;    // calm down the syntax highlighter
                         }
                         f.addButton("cancel", function () {}).show()
                     };
-                    return t
-                }(e);
-                var l = function () {
+                    return _that
+                }($);
+                var open = function () {
                     try {
                         window.MarketWindow.window.showLoader();
                         window.MarketWindow.window.setTitle(
@@ -9714,14 +9711,14 @@ var isDefined, TWDB, debLog;    // calm down the syntax highlighter
                             .addClass("premium-buy");
                         var t = -111;
                         var s = -1;
-                        r = e('<div style="position:relative;display:block;margin:10px 9px 10px 9px;width:770px;height:338px;" />');
+                        map = $('<div style="position:relative;display:block;margin:10px 9px 10px 9px;width:770px;height:338px;" />');
                         for (var o = 1; o < 16; o++) {
                             if (o == 8) {
                                 s += 169;
                                 t = -111
                             }
                             t += 110;
-                            var u = e('<img style="position:absolute;border:1px solid #000;width:110px;height:169px;left:' + t + "px;top:" + s + 'px;" src="' + Game.cdnURL + "/images/map/minimap/county_" + o + '.jpg" />');
+                            var u = $('<img style="position:absolute;border:1px solid #000;width:110px;height:169px;left:' + t + "px;top:" + s + 'px;" src="' + Game.cdnURL + "/images/map/minimap/county_" + o + '.jpg" />');
                             if (o == 4) {
                                 u.css({
                                     height: "114px"
@@ -9743,15 +9740,15 @@ var isDefined, TWDB, debLog;    // calm down the syntax highlighter
                                     }
                                 }
                             }
-                            r.append(u)
+                            map.append(u)
                         }
-                        n = e("<div />").append(r);
-                        e(MarketWindow.window.getContentPane()).find(
+                        dom = $("<div />").append(map);
+                        $(MarketWindow.window.getContentPane()).find(
                                 ".marketplace-marketmap").children()
                             .remove();
-                        e(MarketWindow.window.getContentPane()).find(
-                            ".marketplace-marketmap").append(n);
-                        i = {};
+                        $(MarketWindow.window.getContentPane()).find(
+                            ".marketplace-marketmap").append(dom);
+                        towns = {};
                         h();
                         p();
                         d();
@@ -9762,23 +9759,23 @@ var isDefined, TWDB, debLog;    // calm down the syntax highlighter
                     }
                 };
                 var c = function (e, t, n, r, s, o, u) {
-                    if (!isDefined(i[e])) {
-                        i[e] = {};
-                        i[e]["name"] = t;
-                        i[e]["town_id"] = e;
-                        i[e]["x"] = n;
-                        i[e]["y"] = r;
-                        i[e]["count"] = 0;
-                        i[e]["offers_end"] = {};
-                        i[e]["offers_unend"] = {};
-                        i[e]["money"] = 0;
-                        i[e]["distance"] = window.Map.calcWayTime(
+                    if (!isDefined(towns[e])) {
+                        towns[e] = {};
+                        towns[e]["name"] = t;
+                        towns[e]["town_id"] = e;
+                        towns[e]["x"] = n;
+                        towns[e]["y"] = r;
+                        towns[e]["count"] = 0;
+                        towns[e]["offers_end"] = {};
+                        towns[e]["offers_unend"] = {};
+                        towns[e]["money"] = 0;
+                        towns[e]["distance"] = window.Map.calcWayTime(
                             window.Character.position, {
                                 x: n,
                                 y: r
                             }).formatDuration()
                     }
-                    var a = i[e];
+                    var a = towns[e];
                     if (s != "") {
                         if (!isDefined(a["offers_end"][s["item_id"]])) {
                             a["count"]++;
@@ -9800,7 +9797,7 @@ var isDefined, TWDB, debLog;    // calm down the syntax highlighter
                     }
                 };
                 var h = function () {
-                    e
+                    $
                         .ajax({
                             url: "game.php?window=building_market&action=fetch_bids&h=" + Player.h,
                             type: "POST",
@@ -9831,7 +9828,7 @@ var isDefined, TWDB, debLog;    // calm down the syntax highlighter
                         })
                 };
                 var p = function () {
-                    e
+                    $
                         .ajax({
                             url: "game.php?window=building_market&action=fetch_offers&h=" + Player.h,
                             type: "POST",
@@ -9851,8 +9848,8 @@ var isDefined, TWDB, debLog;    // calm down the syntax highlighter
                         })
                 };
                 var d = function () {
-                    for (town_id in i) {
-                        var t = i[town_id];
+                    for (town_id in towns) {
+                        var t = towns[town_id];
                         var n = '<div style="max-width: 305px;"><b>' + t.name + "</b>" + (t["money"] == 0 ? "" : " " + t["money"] + "$") + "<br/>";
                         var s = 0;
                         for (item_id in t["offers_end"]) {
@@ -9878,7 +9875,7 @@ var isDefined, TWDB, debLog;    // calm down the syntax highlighter
                             }
                         }
                         n += "</div>";
-                        e("<img src='" + Images.point.red + "' />")
+                        $("<img src='" + Images.point.red + "' />")
                             .css({
                                 left: t.x / (181 * window.Map.tileSize) * 770 - 8 + "px",
                                 top: t.y / (79 * window.Map.tileSize) * 338 - 8 + "px"
@@ -9890,24 +9887,24 @@ var isDefined, TWDB, debLog;    // calm down the syntax highlighter
                                 return function () {
                                     TownWindow.open(e.x, e.y)
                                 }
-                            }(t)).appendTo(r)
+                            }(t)).appendTo(map)
                     }
-                    e("<img src='" + Images.point.blue + "' />").css({
+                    $("<img src='" + Images.point.blue + "' />").css({
                         left: Character.position.x / (181 * window.Map.tileSize) * 770 - 8 + "px",
                         top: Character.position.y / (79 * window.Map.tileSize) * 338 - 8 + "px"
                     }).attr({
                         "class": "mmap_mappoint",
                         id: "mmap_icon_pos",
                         title: "#YOURPOSITION#"
-                    }).appendTo(r)
+                    }).appendTo(map)
                 };
                 var v = function () {
                     try {
                         var t = [];
-                        for (var r in i) {
+                        for (var r in towns) {
                             t.push({
                                 id: r,
-                                distance: i[r].distance
+                                distance: towns[r].distance
                             })
                         }
                         t.sort(function (e, t) {
@@ -9915,7 +9912,7 @@ var isDefined, TWDB, debLog;    // calm down the syntax highlighter
                         });
                         var s = "";
                         for (var o = 0; o < t.length; o++) {
-                            var u = i[t[o].id];
+                            var u = towns[t[o].id];
                             s += '<div><a onclick="TownWindow.open(' + u.x + ", " + u.y + ');">' + u.name + "</a>" + ' <a title="#SHOWTOWN#" onclick="Map.center(' + u["x"] + ", " + u["y"] + ')"><img src="' + Game.cdnURL + '/images/icons/center.png" /></a>' + " #DISTANCE#: " + u["distance"] + ' <a title="#TOWNWALK#" onclick="TaskQueue.add(new TaskWalk(' + u.town_id + ",'town'))\"><img src=\"" + Game.cdnURL + '/images/map/icons/instantwork.png"></a>' + (u["money"] == 0 ? "" : " " + u["money"] + "$") + "<br />";
                             for (item_id in u["offers_end"]) {
                                 var a = u["offers_end"][item_id];
@@ -9939,17 +9936,17 @@ var isDefined, TWDB, debLog;    // calm down the syntax highlighter
                             }
                         }
                         var c = new west.gui.Scrollpane;
-                        e(c.getMainDiv()).css({
+                        $(c.getMainDiv()).css({
                             height: "200px",
                             "margin-left": "8px"
                         });
                         c.appendContent(s);
-                        n.append(c.getMainDiv())
+                        dom.append(c.getMainDiv())
                     } catch (h) {
                         Error.report(h, "Market createTownList")
                     }
                 };
-                return t
+                return _self
             }($);
             Debugger.Market = Market;
 
