@@ -3902,10 +3902,10 @@
                             }));
                         };
 
-                        var css_ccBest = "div.job_bestwearbutton {left: 15px!important;}\n"
-                        + "div.twdb_bestwear {background: url('" + TWDB.images.bestwear + "') no-repeat top left; "
-                        + "height: 55px; position: relative; left: 195px; top: -15px;}\n"
-                        + "div.job_bestwearbutton:hover .twdb_bestwear {background-position: bottom left;}";
+                        var css_ccBest = "div.job_bestwearbutton {left: 15px!important; width: 210px;}\n"
+                        + "div.twdb_bestwear {background: url('" + TWDB.images.bestwear + "') no-repeat top; "
+                        + "height: 55px; width: 55px; position: relative; left: 195px; top: -15px;}\n"
+                        + "div.job_bestwearbutton:hover .twdb_bestwear {background-position: bottom;}";
                         TWDB.Util.addCss(css_ccBest,'bestwear');
                     } catch (err) {
                         Error.report(err, "manipulate JobWindow.prototype.getBestWearButton");
@@ -7045,23 +7045,31 @@
 
                 var allowChatGuiMinimize = function() {
                     TWDB.Util.addCss('div#ui_bottomleft { width: auto; overflow: hidden; }'
+                        + 'div#ui_chat { margin-top: 12px; }'
+                        + 'div#ui_chat div#toggleMinChat { position: absolute; top: -14px; left: 5px; width: 27px; display: block; background-size: 108px 42px; }'
+                        + 'div#ui_chat.minchat div#toggleMinChat { background-position: 0px 0px; }'
                         + 'div#ui_chat.minchat div#servertime { display: none; }'
                         + 'div#ui_chat.minchat > div.tabs div { display: none; }'
+                        + 'div#ui_chat.minchat div.container div.friend { display: none!important; }'
+                        + 'div#ui_chat.minchat div.container div.general { display: block!important; }'
                         + 'div#ui_chat.minchat div.container div.vertical_divider { display: none; }'
                         + 'div#ui_chat.minchat img.leave_channel { display: none!important; }'
-                        + 'div#ui_chat div.tabs.minchat_tabr { display: none; cursor: pointer; }'
-                        + 'div#ui_chat.minchat div.tabs.minchat_tabr { display: block; position: absolute; left: 32px; top: 0px; width: 8px; background-position: top right; }'
+                        + 'div#ui_chat div.minchat_tabr { display: none; }'
+                        + 'div#ui_chat.minchat div.minchat_tabr { display: block; position: absolute; left: 32px; top: 0px; width: 8px; height: 34px; background: url("' + to_cdn('images/interface/chat/chat-top.png?1') + '") top right; }'
                         + 'div#ui_chat.minchat { position: relative; left: -10px; top: 4px; width: 39px; }'
-                        + 'div#ui_chat.minchat > div.tabs { width: 32px; cursor: pointer; }'
+                        + 'div#ui_chat.minchat > div.tabs { width: 32px; background: url("' + to_cdn('images/interface/chat/chat-top.png?1') + '"); }'
                         + 'div#ui_chat.minchat div.chat_channel { width: 24px; }'
                         + 'div#ui_chat.minchat div.chat_channel .new_message { left: 2px; top: 0px; }'
                         + 'div#ui_chat.minchat div.chat_channel div.online_count { background: none; position: absolute; right: 0px; top: -1px; width: auto; height: auto; line-height: normal; padding: 0px; font-size: 8pt; font-weight: bold; text-align: right; text-shadow: -1px 1px 1px #FFF, 0px 0px 2px #FFF; cursor: default; }'
                         + 'div#ui_chat.minchat div.container { width: 40px; background-position-x: right; }'
                         + 'div#ui_chat.minchat div.row_title { left: 5px; width: 32px; opacity: 0; }'
                         + 'div#ui_chat.minchat div.tw2gui_scrollpane { width: 50px; }', 'minchat');
-                    $('div#ui_chat').append('<div class="tabs minchat_tabr" />')
-                        .on('click', 'div.tabs', function(){ Settings.set("mini_chatgui_min", $(this).parent().toggleClass('minchat').hasClass('minchat')); })
-                        .toggleClass('minchat', Settings.get("mini_chatgui_min", true));
+                    $('div#ui_chat').append('<div class="minchat_tabr" />').toggleClass('minchat', Settings.get("mini_chatgui_min", true))
+                        .children('.tabs').first().append($('<div id="toggleMinChat" class="tw2gui_arrow_up_top" />')
+                        .on('click', function (ev) { ev.stopPropagation();
+                            Settings.set("mini_chatgui_min", $('div#ui_chat').toggleClass('minchat').hasClass('minchat'));
+                            return false}
+                           ));
                 };
 
                 var injectTaskJobs = function() {
