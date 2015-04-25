@@ -7201,45 +7201,42 @@
                 };
 
                 var fastSkillChange = function () {
-                    $("div.char_links.skills").click(function() {
-                        var e = 80,
-                            t = function () {
-                                if ($(".skills_content,.skills_content4Shaman").length != 2) {
-                                    if (e-- <= 0 && n != -1) {
-                                        clearInterval(n);
-                                        n = -1;
-                                    }
-                                } else {
-                                    $(".skills_content,.skills_content4Shaman").find(".butMinus,.butPlus").each(function() {
-                                        function r() {
-                                            e = Math.max(Math.round(e * (e / 200 + 1) / (e / 133 + 1)), 15);
-                                            n.click();
-                                            t = setTimeout(r, e)
+                    try {
+                        west.gui.Plusminusfield.prototype.__twdb__init = west.gui.Plusminusfield.prototype.init;
+                        west.gui.Plusminusfield.prototype.init = function (id, start_value, min_value, max_value, extra_points, callbackPlus, callbackMinus) {
+                            this.__twdb__init.apply(this, arguments);
+                            var _this = this;
+                            var buttons = {
+                                minus: $('span.butMinus', _this.divMain),
+                                plus: $('span.butPlus', _this.divMain)
+                            };
+                            $(this.divMain).mousewheel(function(ev, delta) {
+                                buttons[delta < 0 ? 'minus' : 'plus'].click();
+                                ev.stopPropagation();
+                                return false;
+                            });
+                            $.each(buttons, function (key, $elem) {
+                                var i = 400,
+                                    timeout = -1,
+                                    timeh = function () {
+                                        i = Math.max(Math.round(i * (i / 200 + 1) / (i / 133 + 1)), 15);
+                                        $elem.click();
+                                        timeout = setTimeout(timeh, i);
+                                    },
+                                    down = function () { timeout = setTimeout(timeh, i); },
+                                    up = function (ev) {
+                                        if (timeout != -1) {
+                                            clearTimeout(timeout);
+                                            timeout = -1;
                                         }
-
-                                        function i() {
-                                            t = setTimeout(r,e)
-                                        }
-
-                                        function s() {
-                                            if (t != -1) {
-                                                clearTimeout(t);
-                                                t = -1
-                                            }
-                                            e = 400
-                                        }
-                                        if ($(this).get(0).twdb_skills)
-                                            return;
-                                        $(this).get(0).twdb_skills = true;
-                                        var e = 400,
-                                            t = -1,
-                                            n = $(this).css("cursor","pointer");
-                                        n.mousedown(i).mouseup(s).mouseout(s)
-                                    })
-                                }
-                            },
-                            n = setInterval(t, 50)
-                    })
+                                        i = 400;
+                                    };
+                                $elem.mousedown(down).mouseup(up).mouseout(up);
+                            });
+                        };
+                    } catch (e) {
+                        Error.report(e, "manipulate Plusminusfield");
+                    }
                 };
 
                 var QuestbookSwitch = function() {
