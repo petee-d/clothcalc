@@ -7203,7 +7203,7 @@
                 var fastSkillChange = function () {
                     try {
                         west.gui.Plusminusfield.prototype.__twdb__init = west.gui.Plusminusfield.prototype.init;
-                        west.gui.Plusminusfield.prototype.init = function (id, start_value, min_value, max_value, extra_points, callbackPlus, callbackMinus) {
+                        west.gui.Plusminusfield.prototype.init = function () {
                             this.__twdb__init.apply(this, arguments);
                             var _this = this;
                             var buttons = {
@@ -7231,7 +7231,7 @@
                                         }
                                         i = 400;
                                     };
-                                $elem.mousedown(down).mouseup(up).mouseout(up);
+                                $elem.css('cursor', 'pointer').mousedown(down).mouseup(up).mouseout(up);
                             });
                         };
                     } catch (e) {
