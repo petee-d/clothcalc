@@ -23,4 +23,4 @@ Changelog:
 
 
 [main] option to open the Wear window minimized<br />
-
+[misc] changing the amount in Crafting works the same way now as in Skills window, plus mouse wheel support in both

@@ -9518,14 +9518,20 @@
             var Market = function ($) {
                 var _self = {};
                 var dom = false;
-                var map = false;
+                var $map = false;
                 var towns = {};
                 var loader = {};
 
                 var init = function () {
                     if (loader.ready) return;
                     if (Settings.get("marketmap", true)) {
-                        GameInject.addTabOnMarketWindow("#MARKETMAP#", "marketmap", function () { open(); })
+                        GameInject.addTabOnMarketWindow("#MARKETMAP#", "marketmap", function () { open(); });
+                        TWDB.Util.addCss('.twdb_mmap_point { width: 7px;' +
+                          'height: 7px;' +
+                          'background-color: #F00;' +
+                          'position: absolute;' +
+                          'border: 1px solid #000;' +
+                          'border-radius: 5px; }');
                     }
                     if (Settings.get("marketreminder", true)) {
                         GameInject.MarketOfferTable(function (data) { OfferTable(data); });
@@ -9567,17 +9573,17 @@
                 };
 
                 var Reminder = function ($) {
-                    var _that = {},
+                    var _self = {},
                         entries = {},
                         active = {};
 
-                    _that.init = function () {
+                    _self.init = function () {
                         var tmp = Cache.load("marketreminder");
                         if (isDefined(tmp)) { entries = tmp; }
                         for (var id in entries) { activateTimer(id); }
                     };
 
-                    _that.exists = function (id) {
+                    _self.exists = function (id) {
                         return (isDefined(entries[id]));
                     };
 
@@ -9592,15 +9598,15 @@
                     var add = function (data, timeInput, $imgEl) {
                         var minutes = parseInt(timeInput.getValue(), 10);
                         if (isNaN(minutes) || minutes < 1) {
-                            _that.create(data, $imgEl);
+                            _self.create(data, $imgEl);
                             return;
                         }
                         if ((new Date).getTime() / 1e3 + minutes * 60 >= data.auction_end_date) {
                             (new UserMessage("#REMINDERTOOLATE#")).show();
-                            _that.create(data, $imgEl);
+                            _self.create(data, $imgEl);
                             return;
                         }
-                        if (_that.exists(data.market_offer_id)) {
+                        if (_self.exists(data.market_offer_id)) {
                             clearTimeout(entries[data.market_offer_id].timer);
                             delete entries[data.market_offer_id].timer;
                         }
@@ -9611,169 +9617,130 @@
                             item: data.item_id
                         };
                         Cache.save("marketreminder", entries);
-                        activateTimer(data.market_offer_id)
+                        activateTimer(data.market_offer_id);
                     };
 
-                    var o = function (e) {
-                        delete entries[e];
-                        Cache.save("marketreminder", entries)
+                    var del = function (id) {
+                        delete entries[id];
+                        Cache.save("marketreminder", entries);
                     };
-                    var popup = function (t) {
-                        var r = entries[t];
-                        var i = ItemManager.get(r.item);
-                        var s = new OnGoingEntry;
-                        s.init();
-                        s.setTooltip("#AUCTION#: " + i.name + ", #END#: " + Number(
-                                r.ends - (new Date).getTime() / 1e3)
-                            .getTimeString4Timestamp());
-                        s.setImage($('<img src="' + Images.notiBell + '" />'));
-                        WestUi.NotiBar.add(s);
-                        TitleTicker.setNotifyMessage("#AUCTION#: " + i.name + ", #END#: " + Number(
-                                r.ends - (new Date).getTime() / 1e3)
-                            .getTimeString4Timestamp());
-                        AudioController
-                            .play(AudioController.SOUND_NEWMSG);
-                        o(t)
+
+                    var popup = function (id) {
+                        var auction = entries[id],
+                            item = ItemManager.get(auction.item),
+                            ongEntry = new OnGoingEntry;
+                        ongEntry.init();
+                        ongEntry.setTooltip("#AUCTION#: " + item.name + ", #END#: " +
+                            Number(auction.ends - (new Date).getTime() / 1e3).getTimeString4Timestamp());
+                        ongEntry.setImage($('<img src="' + Images.notiBell + '" />'));
+                        WestUi.NotiBar.add(ongEntry);
+                        TitleTicker.setNotifyMessage("#AUCTION#: " + item.name + ", #END#: " +
+                            Number(auction.ends - (new Date).getTime() / 1e3).getTimeString4Timestamp());
+                        AudioController.play(AudioController.SOUND_NEWMSG);
+                        del(id);
                     };
-                    _that.create = function (r, i) {
-                        var u = $("<div />");
-                        u
-                            .append('<span style="position:relative; width:100%;display:block;">#AUCTIONEND#: ' + r.auction_ends_in
-                                .getTimeString4Timestamp() + "</span>");
-                        var a = (new west.gui.Textfield(
-                                "twdb_analyser_last")).maxlength(4)
-                            .onlyNumeric().setLabel(
-                                "#REMINDBEFORE#: ")
-                            .setPlaceholder("#MINUTES#");
-                        u.append(a.getMainDiv());
-                        if (_that.exists(r.market_offer_id)) {
-                            a.setValue(entries[r.market_offer_id].reminder);
-                            i.css("opacity", 1)
+
+                    _self.create = function (data, $imgEl) {
+                        var $msg = $("<div />").append('<span style="position:relative; width:100%;display:block;">#AUCTIONEND#: ' +
+                                    data.auction_ends_in.getTimeString4Timestamp() + "</span>"),
+                            input = (new west.gui.Textfield("twdb_analyser_last")).maxlength(4)
+                                .onlyNumeric().setLabel("#REMINDBEFORE#: ").setPlaceholder("#MINUTES#");
+                        $msg.append(input.getMainDiv());
+                        if (_self.exists(data.market_offer_id)) {
+                            input.setValue(entries[data.market_offer_id].reminder);
+                            $imgEl.css("opacity", 1);
                         } else {
-                            i.css("opacity", .5)
+                            $imgEl.css("opacity", .5);
                         }
-                        var i = i;
-                        var f = (new west.gui.Dialog(
-                                "#MARKETREMINDER#", u))
-                            .setIcon(
-                                west.gui.Dialog.SYS_QUESTION)
-                            .setIcon(
-                                west.gui.Dialog.SYS_QUESTION)
-                            .setModal(
-                                true,
-                                false, {
-                                    bg: w.Game.cdnURL + "/images/curtain_bg.png",
-                                    opacity: .4
-                                }).addButton("ok", function () {
-                                i.css("opacity", 1);
-                                add(r, a, i)
-                            });
-                        if (_that.exists(r.market_offer_id)) {
-                            f.addButton("#DELETE#", function () {
-                                o(r.market_offer_id);
-                                i.css("opacity", .5)
-                            })
+                        // var $imgEl = $imgEl;
+                        var dialog = (new west.gui.Dialog("#MARKETREMINDER#", $msg))
+                            .setIcon(west.gui.Dialog.SYS_QUESTION)
+                            .setModal(true, false, {bg: w.Game.cdnURL + "/images/curtain_bg.png", opacity: .4})
+                            .addButton("ok", function () { $imgEl.css("opacity", 1); add(data, input, $imgEl) });
+                        if (_self.exists(data.market_offer_id)) {
+                            dialog.addButton("#DELETE#", function () { del(data.market_offer_id); $imgEl.css("opacity", .5) });
                         }
-                        f.addButton("cancel", function () {}).show()
+                        dialog.addButton("cancel", function () {}).show();
                     };
-                    return _that
+                    return _self;
                 }($);
+
                 var open = function () {
                     try {
                         window.MarketWindow.window.showLoader();
-                        window.MarketWindow.window.setTitle(
-                                "#MARKETMAP#").setSize(840, 655)
-                            .addClass("premium-buy");
-                        var t = -111;
-                        var s = -1;
-                        map = $('<div style="position:relative;display:block;margin:10px 9px 10px 9px;width:770px;height:338px;" />');
-                        for (var o = 1; o < 16; o++) {
-                            if (o == 8) {
-                                s += 169;
-                                t = -111
-                            }
-                            t += 110;
-                            var u = $('<img style="position:absolute;border:1px solid #000;width:110px;height:169px;left:' + t + "px;top:" + s + 'px;" src="' + Game.cdnURL + "/images/map/minimap/county_" + o + '.jpg" />');
-                            if (o == 4) {
-                                u.css({
-                                    height: "114px"
-                                })
+                        window.MarketWindow.window.setTitle("#MARKETMAP#").setSize(840, 655).addClass("premium-buy");
+                        var coordX = -111,
+                            coordY = -1;
+                        $map = $('<div style="position:relative;display:block;margin:10px 9px 10px 9px;width:770px;height:338px;" />');
+                        for (var sector = 1; sector < 16; sector++) {
+                            if (sector == 8) { coordY += 169; coordX = -111; }
+                            coordX += 110;
+                            var $img = $('<img style="position:absolute;border:1px solid #000;width:110px;height:169px;left:' + coordX + "px;top:" + coordY + 'px;" src="' + Game.cdnURL + "/images/map/minimap/county_" + sector + '.jpg" />');
+                            if (sector == 4) {
+                                $img.css({ height: "114px" });
                             } else {
-                                if (o == 11) {
-                                    u.css({
-                                        height: "114px",
-                                        top: s + 55 + "px"
-                                    })
+                                if (sector == 11) {
+                                    $img.css({ height: "114px", top: coordY + 55 + "px" });
                                 } else {
-                                    if (o == 15) {
-                                        u.css({
-                                            height: "108px",
-                                            width: "109px",
-                                            left: "329px",
-                                            top: "114px"
-                                        })
+                                    if (sector == 15) {
+                                        $img.css({ height: "108px", width: "109px", left: "329px", top: "114px" });
                                     }
                                 }
                             }
-                            map.append(u)
+                            $map.append($img);
                         }
-                        dom = $("<div />").append(map);
-                        $(MarketWindow.window.getContentPane()).find(
-                                ".marketplace-marketmap").children()
-                            .remove();
-                        $(MarketWindow.window.getContentPane()).find(
-                            ".marketplace-marketmap").append(dom);
+                        dom = $("<div />").append($map);
+                        $(MarketWindow.window.getContentPane()).find(".marketplace-marketmap").children().remove();
+                        $(MarketWindow.window.getContentPane()).find(".marketplace-marketmap").append(dom);
                         towns = {};
-                        h();
-                        p();
-                        d();
-                        v();
-                        window.MarketWindow.window.hideLoader()
-                    } catch (a) {
-                        Error.report(a, "Market")
+                        getItems();
+                        getMoney();
+                        drawPoints();
+                        createTownList();
+                        window.MarketWindow.window.hideLoader();
+                    } catch (err) {
+                        Error.report(err, "Market map");
                     }
                 };
-                var c = function (e, t, n, r, s, o, u) {
-                    if (!isDefined(towns[e])) {
-                        towns[e] = {};
-                        towns[e]["name"] = t;
-                        towns[e]["town_id"] = e;
-                        towns[e]["x"] = n;
-                        towns[e]["y"] = r;
-                        towns[e]["count"] = 0;
-                        towns[e]["offers_end"] = {};
-                        towns[e]["offers_unend"] = {};
-                        towns[e]["money"] = 0;
-                        towns[e]["distance"] = window.Map.calcWayTime(
-                            window.Character.position, {
-                                x: n,
-                                y: r
-                            }).formatDuration()
+
+                var addObject = function (town_id, name, coordX, coordY, auctEnded, auctRunning, money) {
+                    if (!isDefined(towns[town_id])) {
+                        towns[town_id] = {
+                            name: name,
+                            town_id: town_id,
+                            x: coordX,
+                            y: coordY,
+                            count: 0,
+                            offers_end: {},         /** TODO: remove horrible names **/
+                            offers_unend: {},
+                            money: 0,
+                            distance: window.Map.calcWayTime(window.Character.position, {x: coordX,y: coordY}).formatDuration()
+                        };
                     }
-                    var a = towns[e];
-                    if (s != "") {
-                        if (!isDefined(a["offers_end"][s["item_id"]])) {
-                            a["count"]++;
-                            a["offers_end"][s["item_id"]] = s
+                    var town = towns[town_id];
+                    if (auctEnded != "") {
+                        if (!isDefined(town["offers_end"][auctEnded["item_id"]])) {
+                            town["count"]++;
+                            town["offers_end"][auctEnded["item_id"]] = auctEnded;
                         } else {
-                            a["offers_end"][s["item_id"]]["count"] += s["count"]
+                            town["offers_end"][auctEnded["item_id"]]["count"] += auctEnded["count"];
                         }
                     }
-                    if (o != "") {
-                        if (!isDefined(a["offers_unend"][o["item_id"]])) {
-                            a["count"]++;
-                            a["offers_unend"][o["item_id"]] = o
+                    if (auctRunning != "") {
+                        if (!isDefined(town["offers_unend"][auctRunning["item_id"]])) {
+                            town["count"]++;
+                            town["offers_unend"][auctRunning["item_id"]] = auctRunning;
                         } else {
-                            a["offers_unend"][o["item_id"]]["count"] += o["count"]
+                            town["offers_unend"][auctRunning["item_id"]]["count"] += auctRunning["count"];
                         }
                     }
-                    if (u != 0) {
-                        a["money"] += u
+                    if (money != 0) {
+                        town["money"] += money;
                     }
                 };
-                var h = function () {
-                    $
-                        .ajax({
+
+                var getItems = function () {         /** TODO: refactor, use Game API methods **/
+                    $.ajax({
                             url: "game.php?window=building_market&action=fetch_bids&h=" + Player.h,
                             type: "POST",
                             data: {},
@@ -9793,7 +9760,7 @@
                                         i["count"] = t[n].item_count;
                                         var r = ""
                                     }
-                                    c(t[n].market_town_id,
+                                    addObject(t[n].market_town_id,
                                         t[n].market_town_name,
                                         t[n].market_town_x,
                                         t[n].market_town_y, r,
@@ -9802,9 +9769,9 @@
                             }
                         })
                 };
-                var p = function () {
-                    $
-                        .ajax({
+
+                var getMoney = function () {         /** TODO: refactor, use Game API methods **/
+                    $.ajax({
                             url: "game.php?window=building_market&action=fetch_offers&h=" + Player.h,
                             type: "POST",
                             data: {},
@@ -9813,7 +9780,7 @@
                             success: function (e) {
                                 var t = e.msg.search_result;
                                 for (var n = 0; n < t.length; n++) {
-                                    c(t[n].market_town_id,
+                                    addObject(t[n].market_town_id,
                                         t[n].market_town_name,
                                         t[n].market_town_x,
                                         t[n].market_town_y, "",
@@ -9822,58 +9789,62 @@
                             }
                         })
                 };
-                var d = function () {
-                    for (town_id in towns) {
-                        var t = towns[town_id];
-                        var n = '<div style="max-width: 305px;"><b>' + t.name + "</b>" + (t["money"] == 0 ? "" : " " + t["money"] + "$") + "<br/>";
-                        var s = 0;
-                        for (item_id in t["offers_end"]) {
-                            s++;
-                            if (s > 19) {
-                                n += " ... ";
-                                break
+
+                var drawPoints = function () {
+                    for (var town_id in towns) {
+                        var town = towns[town_id];
+                        var popup = '<div style="max-width: 305px;"><b>' + town.name + "</b>" + (town["money"] == 0 ? "" : " " + town["money"] + "$") + "<br/>";
+                        var itemCount = 0,
+                            item;         /** TODO: refactor, use Game API methods (item) **/
+                        for (var item_id in town["offers_end"]) {
+                            itemCount++;
+                            if (itemCount > 19) {
+                                popup += " ... ";
+                                break;
                             }
-                            var o = t["offers_end"][item_id];
-                            if (t["offers_end"][item_id] != 0) {
-                                n += '<div class="item item_inventory"><img width="53" height="53" src="' + ItemManager.get(item_id).image + '" class="tw_item item_inventory_img dnd_draggable dnd_dragElem" style="margin-left:3px;margin-top:4px;"><span class="count" style="display: block;"><p>' + o.count + "</p></span></div>"
-                            }
-                        }
-                        for (item_id in t["offers_unend"]) {
-                            s++;
-                            if (s > 19) {
-                                n += " ... ";
-                                break
-                            }
-                            var o = t["offers_unend"][item_id];
-                            if (t["offers_unend"][item_id] != 0) {
-                                n += '<div style="opacity:0.35" class="item item_inventory"><img width="53" height="53" src="' + ItemManager.get(item_id).image + '" class="tw_item item_inventory_img dnd_draggable dnd_dragElem" style="margin-left:3px;margin-top:4px;"><span class="count" style="display: block;"><p>' + o.count + "</p></span></div>"
+                            item = town["offers_end"][item_id];
+                            if (town["offers_end"][item_id] != 0) {
+                                popup += '<div class="item item_inventory"><img width="53" height="53" src="' + ItemManager.get(item_id).image + '" class="tw_item item_inventory_img dnd_draggable dnd_dragElem" style="margin-left:3px;margin-top:4px;"><span class="count" style="display: block;"><p>' + item.count + "</p></span></div>";
                             }
                         }
-                        n += "</div>";
-                        $("<img src='" + Images.point.red + "' />")
+                        for (item_id in town["offers_unend"]) {
+                            itemCount++;
+                            if (itemCount > 19) {
+                                popup += " ... ";
+                                break;
+                            }
+                            item = town["offers_unend"][item_id];
+                            if (town["offers_unend"][item_id] != 0) {
+                                popup += '<div style="opacity:0.35" class="item item_inventory"><img width="53" height="53" src="' + ItemManager.get(item_id).image + '" class="tw_item item_inventory_img dnd_draggable dnd_dragElem" style="margin-left:3px;margin-top:4px;"><span class="count" style="display: block;"><p>' + item.count + "</p></span></div>";
+                            }
+                        }
+                        popup += "</div>";
+                        $("<div />")
                             .css({
-                                left: t.x / (181 * window.Map.tileSize) * 770 - 8 + "px",
-                                top: t.y / (79 * window.Map.tileSize) * 338 - 8 + "px"
+                                left: town.x / (181 * window.Map.tileSize) * 770 - 5 + "px",
+                                top: town.y / (79 * window.Map.tileSize) * 338 - 5 + "px"
                             }).attr({
-                                "class": "mmap_mappoint",
+                                "class": "twdb_mmap_point",
                                 id: town_id,
-                                title: n
+                                title: popup
                             }).click(function (e) {
                                 return function () {
-                                    TownWindow.open(e.x, e.y)
+                                    TownWindow.open(e.x, e.y);
                                 }
-                            }(t)).appendTo(map)
+                            }(town)).appendTo($map);
                     }
-                    $("<img src='" + Images.point.blue + "' />").css({
+                    $("<img src='" + to_cdn('images/map/minimap/icons/miniicon_pos.png') + "' />").css({
                         left: Character.position.x / (181 * window.Map.tileSize) * 770 - 8 + "px",
-                        top: Character.position.y / (79 * window.Map.tileSize) * 338 - 8 + "px"
+                        top: Character.position.y / (79 * window.Map.tileSize) * 338 - 8 + "px",
+                        width: '16px', height: '16px'
                     }).attr({
                         "class": "mmap_mappoint",
                         id: "mmap_icon_pos",
                         title: "#YOURPOSITION#"
-                    }).appendTo(map)
+                    }).appendTo($map)
                 };
-                var v = function () {
+
+                var createTownList = function () {
                     try {
                         var t = [];
                         for (var r in towns) {
