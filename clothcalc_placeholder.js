@@ -847,14 +847,14 @@
                 return;
             },
 
-            finishOpening: function() {
+            finishOpening: function () {
                 this.jobs.mode(2);
                 this.joblist.init(this);
                 this.customs.createSelectbox();
                 if (typeof this.gui.window !== "undefined") {
                     this.checkCache();
                     delete this.eventOpen;
-                    var carryEventHandler = function(e) { TWDB.ClothCalc.jobs.update(); };
+                    var carryEventHandler = function (e) { TWDB.ClothCalc.jobs.update(); };
                     /** TODO: do we really need this on every opening? **/
                     EventHandler.unlisten('wear_changed', carryEventHandler);
                     EventHandler.listen('wear_changed', carryEventHandler);
@@ -862,32 +862,32 @@
                 }
             },
 
-            showTab: function(e, t) {
+            showTab: function (e, t) {
                 this.gui.window.activateTab(t);
                 this.gui.window.showLoader();
                 this.gui.bag.children().remove();
                 switch (t) {
                 case "Jobs":
                     this.gui.custom.mainDiv.hide();
-                    if (this.jobs.selected !== 0) { this.jobs.switchJob(this.jobs.selected); };
+                    if (this.jobs.selected !== 0) { this.jobs.switchJob(this.jobs.selected); }
                     this.gui.job.mainDiv.show();
                     break;
                 case "Custom":
                     this.gui.job.mainDiv.hide();
-                    if (this.customs.selected !== 0) { this.customs.switchCustomJob(this.customs.selected); };
+                    if (this.customs.selected !== 0) { this.customs.switchCustomJob(this.customs.selected); }
                     this.gui.custom.mainDiv.show();
                     break;
-                };
+                }
                 this.gui.window.hideLoader();
             },
 
-            getGameData: function(e) {
+            getGameData: function (e) {
                 var t = this;
-                if (typeof e == "undefined") {
+                if (typeof e === "undefined") {
                     this.getState = {skill: false, items: false, jobs: false};
-                    TWDB.Eventer.set("getSkill", function() { t.getGameData("skill"); }, 1);
-                    TWDB.Eventer.set("getItems", function() { t.getGameData("items"); }, 1);
-                    TWDB.Eventer.set("getJobs",  function() { t.getGameData("jobs");  }, 1);
+                    TWDB.Eventer.set("getSkill", function () { t.getGameData("skill"); }, 1);
+                    TWDB.Eventer.set("getItems", function () { t.getGameData("items"); }, 1);
+                    TWDB.Eventer.set("getJobs",  function () { t.getGameData("jobs");  }, 1);
                     TWDB.DataManager.loadData();
                     this.getSkill();
                     this.getJobs();
@@ -897,19 +897,19 @@
                     var n = true,
                         r;
                     for (r in this.getState) {
-                        if (!this.getState[r]) { n = false; break; };
-                    };
+                        if (!this.getState[r]) { n = false; break; }
+                    }
                     if (n) {
                         delete this.getState;
                         TWDB.Eventer.trigger("getGameData");
-                    };
-                };
+                    }
+                }
             },
 
-            getSkill: function(e) {
-                if (typeof e == "undefined") {
+            getSkill: function (e) {
+                if (typeof e === "undefined") {
                     var t = this;
-                    setTimeout(function() { t.getSkill(CharacterSkills.skills); }, 10);
+                    setTimeout(function () { t.getSkill(CharacterSkills.skills); }, 10);
                     return;
                 } else {
                     this.data.skills = {};
@@ -917,15 +917,15 @@
                     for (n in e) {
                         r = TWDB.ClothCalc._skill2id[n];
                         this.data.skills[r] = {id: r, val: e[n].points};
-                    };
+                    }
                     TWDB.Eventer.trigger("getSkill");
-                };
+                }
             },
 
-            getItems: function(e) {
-                if (typeof e == "undefined") {
+            getItems: function (e) {
+                if (typeof e === "undefined") {
                     var t = this;
-                    jQuery.post("game.php?window=inventory", {}, function(e) { t.getItems(e) }, "json");
+                    jQuery.post("game.php?window=inventory", {}, function (e) { t.getItems(e); }, "json");
                     return;
                 } else {
                     this.data.items = {};
@@ -940,81 +940,79 @@
                         if (!this.isItemUsable(item.item_id)) { continue; }
                         this.data.items[item.item_id] = { id: item.item_id };
                     }
-                    TWDB.Eventer.trigger("getItems")
+                    TWDB.Eventer.trigger("getItems");
                 }
             },
 
             getJobs: function (e) {
-                if (typeof e == "undefined") {
+                if (typeof e === "undefined") {
                     var t = this;
                     jQuery.post(
                         "game.php?window=work&mode=index", {}, function (e) {
-                            t.getJobs(e)
+                            t.getJobs(e);
                         }, "json");
-                    return
+                    return;
 
                 } else {
                     this.data.jobs = e;
-                    TWDB.Eventer.trigger("getJobs")
+                    TWDB.Eventer.trigger("getJobs");
                 }
             },
 
             isItemUsable: function (e, t) {
                 var n = ItemManager.get(e);
-                if (typeof n == "undefined") {
-                    return false
+                if (typeof n === "undefined") {
+                    return false;
                 }
                 var r = false;
                 if (!this.itemHasBonus(n)) {
-                    return false
+                    return false;
                 }
                 if (n.characterClass !== null && n.characterClass !== Character.charClass) {
-                    return false
+                    return false;
                 }
                 if (n.characterSex !== null && n.characterSex !== Character.charSex) {
-                    return false
+                    return false;
                 }
                 if (n.level !== null &&
-                    n.level > Character.level + Character.itemLevelRequirementDecrease["all"] + (typeof Character.itemLevelRequirementDecrease[n.type] !== "undefined" ? Character.itemLevelRequirementDecrease[n.type] : 0)) {
+                        n.level > Character.level + Character.itemLevelRequirementDecrease.all + (typeof Character.itemLevelRequirementDecrease[n.type] !== "undefined" ? Character.itemLevelRequirementDecrease[n.type] : 0)) {
                     return (isDefined(t) && t);
                 }
                 return true;
             },
 
             itemHasBonus: function (item) {
-                if (item.type == "left_arm" || item.type == "right_arm") {
-                    return true
+                if (item.type === "left_arm" || item.type === "right_arm") {
+                    return true;
                 }
                 if (typeof item.set !== "undefined" && item.set !== null) {
-                    return true
+                    return true;
                 }
                 if (typeof item.speed !== "undefined" && item.speed !== null) {
-                    return true
+                    return true;
                 }
-                if (typeof item.bonus == "undefined") {
-                    return false
+                if (typeof item.bonus === "undefined") {
+                    return false;
                 }
                 var index;
                 if (typeof item.bonus.skills !== "undefined") {
                     for (index in item.bonus.skills) {
-                        if (!jQuery
-                            .isFunction(item.bonus.skills[index])) {
-                            return true
+                        if (!jQuery.isFunction(item.bonus.skills[index])) {
+                            return true;
                         }
                     }
                 }
                 if (typeof item.bonus.attributes !== "undefined") {
                     for (index in item.bonus.attributes) {
-                        if (!jQuery
-                            .isFunction(item.bonus.attributes[index])) {
-                            return true
+                        if (!jQuery.isFunction(item.bonus.attributes[index])) {
+                            return true;
                         }
                     }
                 }
                 if (typeof item.bonus.item !== "undefined") {
                     for (index in item.bonus.item) {
                         if (!jQuery.isFunction(item.bonus.item[index])) {
-                            return true
+                            return true;
                         }
                     }
                 }
@@ -1039,39 +1037,17 @@
             handleTWDBData: function () {
                 var e = TWDB.DataManager.getData("twdb");
                 var t = this;
-                this.calcdata.items = jQuery.extend(true, {},
-                    t.data.items);
-                this.calcdata.skills = jQuery.extend(true, {},
-                    t.data.skills);
+                this.calcdata.items = jQuery.extend(true, {}, t.data.items);
+                this.calcdata.skills = jQuery.extend(true, {}, t.data.skills);
                 this.calcdata.time = e.time;
                 this.calcdata.jobs = e.jobs;
                 this.calcdata.custom = e.custom;
                 this.calcdata.loaded = true;
                 this.calcdata.used = {};
-                try {
-                    this.jobs.init();
-                } catch (n) {
-                    TWDB.Error.report(n,
-                        "GENERICERROR#; handle Jobs");
-                }
-                try {
-                    this.joblist.reset();
-                } catch (n) {
-                    TWDB.Error.report(n,
-                        "GENERICERROR#; handle Jobslist");
-                }
-                try {
-                    this.customs.init();
-                } catch (n) {
-                    TWDB.Error.report(n,
-                        "GENERICERROR#; handle Customs");
-                }
-                try {
-                    this.setUsedItems();
-                } catch (n) {
-                    TWDB.Error.report(n,
-                        "GENERICERROR#; setUsedItems");
-                }
+                try { this.jobs.init(); } catch (n) { TWDB.Error.report(n, "GENERICERROR#; handle Jobs"); }
+                try { this.joblist.reset(); } catch (n) { TWDB.Error.report(n, "GENERICERROR#; handle Jobslist"); }
+                try { this.customs.init(); } catch (n) { TWDB.Error.report(n, "GENERICERROR#; handle Customs"); }
+                try { this.setUsedItems(); } catch (n) { TWDB.Error.report(n, "GENERICERROR#; setUsedItems"); }
                 TWDB.Cache.save("calcdata", this.calcdata);
                 this.finishOpening();
             },
@@ -1233,38 +1209,41 @@
                     this.showCur();
 
                 },
-                mode: function (e) {
-                    var _this = this;
-                    // check the minimal allowed duration
-                    var minDur = 2, J = _this.parent.data.jobs.jobs;
-                    for (var i in _this.parent.data.jobs.jobs) { minDur = Math.min(J[i].durations.length - 1,minDur); };
-                    if (minDur < e) { return _this.mode(0); }; // Dun - correcting for level < 20
+
+                mode: function (jobDurationid) {
+                    var _this = this,
+                        minDur = 2,
+                        j = _this.parent.data.jobs.jobs,
+                        i;
+                    for (i in _this.parent.data.jobs.jobs) { minDur = Math.min(j[i].durations.length - 1, minDur); }
+                    if (minDur < jobDurationid) { return _this.mode(0); } // Dun - correcting for level < 20
 
                     /** TODO: fix this error! **/
                     try { _this.parent.gui.job.mode.unbind("click"); }          // -> Uncaught TypeError: Cannot read property 'unbind' of undefined
                     catch (err) {}
-                    switch (e) {
-                    case 0:
-                        _this.base = 0;
-                        _this.basetime = 15;
-                        _this.parent.gui.job.mode.css("background-position", "0px 0px")
-                            .click(function() { _this.mode(1); _this.parent.joblist.update(); });
-                        break;
+                    switch (jobDurationid) {
                     case 1:
                         _this.base = 1;
                         _this.basetime = 600;
                         _this.parent.gui.job.mode.css("background-position", "-20px 0px")
-                            .click(function() { _this.mode(2); _this.parent.joblist.update(); });
+                            .click(function () { _this.mode(2); _this.parent.joblist.update(); });
                         break;
                     case 2:
                         _this.base = 2;
                         _this.basetime = 3600;
                         _this.parent.gui.job.mode.css("background-position", "-40px 0px")
-                            .click(function() { _this.mode(0); _this.parent.joblist.update(); });
+                            .click(function () { _this.mode(0); _this.parent.joblist.update(); });
+                        break;
+                    default:
+                        _this.base = 0;
+                        _this.basetime = 15;
+                        _this.parent.gui.job.mode.css("background-position", "0px 0px")
+                            .click(function () { _this.mode(1); _this.parent.joblist.update(); });
                         break;
                     };
                 },
-                _calcStepFormula: function(r1, r2, formula, points, malus, magic, mot, factor, freezeBronze) {
+
+                _calcStepFormula: function (r1, r2, formula, points, malus, magic, mot, factor, freezeBronze) {
                     /*
                      * by steps until silver, then formula
                      * r1, r2 - what type of rounding is used on the calculated value
@@ -1279,33 +1258,33 @@
                         stars = Math.min(Math.floor(points / step), 15),
                         dmot = Math.ceil(mot / 25) * 0.25;
                     return points < 5 * step || points <= malus ?
-                        Math[r1](({0: 1, 1: 2, 2: 3, 3: 4, 4: 5, 5: 6.25})[freezeBronze ? 0 : stars] * magic * dmot * factor) :
-                        Math[r2](formula(points - malus, stars) * magic * dmot * factor);
+                            Math[r1](({0: 1, 1: 2, 2: 3, 3: 4, 4: 5, 5: 6.25})[freezeBronze ? 0 : stars] * magic * dmot * factor) :
+                            Math[r2](formula(points - malus, stars) * magic * dmot * factor);
                 },
-                calcWage: function(pts, mal, magic, mot, fac) {
-                    return this._calcStepFormula('ceil', 'round', function(lp) { return 6.25 * Math.pow(lp, 0.05) }, pts, mal, magic, mot, fac);
+                calcWage: function (pts, mal, magic, mot, fac) {
+                    return this._calcStepFormula('ceil', 'round', function (lp) { return 6.25 * Math.pow(lp, 0.05); }, pts, mal, magic, mot, fac);
                 },
                 calcExp: function (pts, mal, magic, mot, fac) {
-                    return this._calcStepFormula('ceil', 'ceil', function (lp) { return 6.25 }, pts, mal, magic, mot, fac);
+                    return this._calcStepFormula('ceil', 'ceil', function (lp) { return 6.25; }, pts, mal, magic, mot, fac);
                 },
                 calcLuck: function (pts, mal, magic, mot, fac) {
-                    return this._calcStepFormula('floor', 'floor', function (lp) { return 6.25 * Math.pow(lp, 0.2) }, pts, mal, (0.9 * magic + 5) / 1.25, 100, fac);
+                    return this._calcStepFormula('floor', 'floor', function (lp) { return 6.25 * Math.pow(lp, 0.2); }, pts, mal, (0.9 * magic + 5) / 1.25, 100, fac);
                 },
                 calcProductRate: function (pts, mal, magic, mot, fac) {
-                    return this._calcStepFormula('round', 'round', function (lp, stars) { return stars < 15 ? 6.25 : 9.375 }, pts, mal, magic, 100, fac);
+                    return this._calcStepFormula('round', 'round', function (lp, stars) { return stars < 15 ? 6.25 : 9.375; }, pts, mal, magic, 100, fac);
                 },
                 calcDanger: function (pts, mal, magic, mot, fac) {	// Dun change ceil by floor
-                    return this._calcStepFormula('floor', 'floor', function (lp) { return Math.pow(lp, -0.2) }, pts, mal, magic, 100, fac, true);
+                    return this._calcStepFormula('floor', 'floor', function (lp) { return Math.pow(lp, -0.2); }, pts, mal, magic, 100, fac, true);
                 },
                 addPremium: function (job) {	// Dun - adding premium bonus
-                    var premiumChar = Number(Premium.hasBonus("character"));
-                    var premium = Number(Premium.hasBonus("money"));
-                    var premWages = 1;
-                    if (premium) { premWages *= 1.5; };	// Add premium $ increase bonus
-                    var premWorker = 1;
-                    if (Character.charClass === 'worker') { premWorker = (premiumChar) ? 1.1 : 1.05; };	// Add worker increase bonus
-                    var premAv = 1;
-                    if (Character.charClass === 'adventurer') { premAv = (premiumChar) ? 0.8 : 0.9; };	// Add adventurer decrease bonus
+                    var premiumChar = Number(Premium.hasBonus("character")),
+                        premium = Number(Premium.hasBonus("money")),
+                        premWages = 1,
+                        premWorker = 1,
+                        premAv = 1;
+                    if (premium) { premWages *= 1.5; }	// Add premium $ increase bonus
+                    if (Character.charClass === 'worker') { premWorker = (premiumChar) ? 1.1 : 1.05; }	// Add worker increase bonus
+                    if (Character.charClass === 'adventurer') { premAv = (premiumChar) ? 0.8 : 0.9; }	// Add adventurer decrease bonus
 
                     job.values.cur_wages = Math.round(job.values.cur_wages * premWages);
                     job.values.cur_experience = Math.round(job.values.cur_experience * premWorker);
@@ -1316,17 +1295,18 @@
                     job.values.luck2 = Math.floor(job.values.luck2 * premWages);
                     job.values.danger = Math.round(job.values.danger * premAv);
                     return job;
-
                 },
-                calcJob: function(e) {
-                    var job = this.parent.calcdata.jobs[e];
+
+                calcJob: function (e) {
+                    var job = this.parent.calcdata.jobs[e],
+                        difficulty = job.difficulty,
+                        realjob = JobList.getJobById(job.gameid),
+                        r;
                     job.values = {};
                     job.sp = 0;
                     job.max_sp = 0;
                     job.laborpoints.skills = 0;
-                    var difficulty = job.difficulty;
-                    var realjob = JobList.getJobById(job.gameid);
-                    for (var r in job.skills) {
+                    for (r in job.skills) {
                         job.laborpoints.skills += Number(job.skills[r]) * Number(CharacterSkills.skills[r].points);
                     };
                     job.laborpoints.sum = job.laborpoints.cloth;
@@ -1360,6 +1340,7 @@
                         break;
                     case 1:
                         ponderation = 0.47;
+                        break;
                     default:
                         break;
                     };
@@ -1411,50 +1392,52 @@
                     delete this.elements;
                     this.elements = [];
                     this.getMainDiv().children().remove();
-                    this
-                        .getMainDiv()
-                        .append(
-                            '<style type="text/css">.TWDB_hide{display:none;}.TWDB_filter{display:none;}</style>');
-                    this.init(this.parent)
+                    this.getMainDiv().
+                        append('<style type="text/css">.TWDB_hide{display:none;}.TWDB_filter{display:none;}</style>');
+                    this.init(this.parent);
                 },
-                init: function (e) {
+                init: function (parent) {
                     if (this.ready){ return; }
                     this.ready = true;
-                    this.parent = e;
-                    if (!this.gui.main) {
-                        this.gui.main = this.getMainDiv()
-                    }
+                    this.parent = parent;
+                    if (!this.gui.main) { this.gui.main = this.getMainDiv(); }
                     this.gui.result = jQuery('<div class="tw2gui_jobsearchbar_allresults" style="width:285px;" />');
-                    this.gui.input = (new west.gui.Textfield).maxlength(32).setClass4Input("tw2gui_jobsearch_string").setWidth(265);
+                    this.gui.input = (new west.gui.Textfield()).maxlength(32).setClass4Input("tw2gui_jobsearch_string").setWidth(265);
                     this.gui.button = jQuery('<div class="tw2gui_jobsearch_showall" style="display:block;cursor:pointer;"></div>');
-                    this.gui.scrollpane = new west.gui.Scrollpane;
+                    this.gui.scrollpane = new west.gui.Scrollpane();
                     jQuery(this.gui.scrollpane.getMainDiv()).css({"width": "285px", "height": "250px"});
-                    for (var t in e.calcdata.jobs) {
-                        var n = e.calcdata.jobs[t];
-                        var r = jQuery("<p>" + n.name + "</p>");
-                        var i = {};
-                        i.dom = r;
-                        i.id = t;
-                        // i.str = n.name.toUpperCase() + " ";
-                        i.str = "§" + n.name.toUpperCase() + "§";       // separator that doesn't occur in jobs/products
-                        if (n.gameid !== 0) {
-                            var s = JobList.getJobById(n.gameid);
-                            for (var o in s.yields) {
-                                if (isNaN(o)){ continue; }
-                                var u = ItemManager.get(o);
-                                // i.str += u.name.toUpperCase() + " ";
-                                i.str += u.name.toUpperCase() + "§";
+                    var jobid,
+                        job,
+                        div,
+                        tmp;
+                    for (jobid in parent.calcdata.jobs) {
+                        job = parent.calcdata.jobs[jobid];
+                        div = jQuery("<p>" + job.name + "</p>");
+                        tmp = {};
+                        tmp.dom = div;
+                        tmp.id = jobid;
+                        // tmp.str = n.name.toUpperCase() + " ";
+                        tmp.str = "§" + job.name.toUpperCase() + "§";       // separator that doesn't occur in jobs/products
+                        if (job.gameid !== 0) {
+                            var jobData = JobList.getJobById(job.gameid),
+                                itemid;
+                            for (itemid in jobData.yields) {
+                                if (isNaN(itemid)){ continue; }
+                                // tmp.str += u.name.toUpperCase() + " ";
+                                tmp.str += ItemManager.get(itemid).name.toUpperCase() + "§";
                             }
                         }
-                        this.elements.push(i)
+                        this.elements.push(tmp);
                     }
-                    this.gui.main.append(jQuery('<div style="position:relative;top:0;left:0;width:305px" />')
-                                        .append(this.gui.input.getMainDiv()).append(this.gui.button))
-                                 .append(this.gui.result);
+                    this.gui.main.append(jQuery('<div style="position:relative;top:0;left:0;width:305px" />').
+                                         append(this.gui.input.getMainDiv()).
+                                         append(this.gui.button)).
+                    append(this.gui.result);
                     this.update();
                     if (this.name) { this.open(this.name); }
                 },
-                open: function(name){
+
+                open: function (name){
                     var _self = this;
                     this.gui.result.show();
                     jQuery(this.gui.input.getMainDiv()).unbind().keyup(function(ev){ _self.keyHandler(ev); });
@@ -1512,12 +1495,13 @@
                     });
                     if ($found.length === 1){ $found[0].click(); }   // if only one result shown - chose it
                 },
-                keyHandler: function (e) {
-                    var t = e.keyCode ? e.keyCode : e.which;
-                    if (t == 38 || t == 40) {
-                        if (t == 38) {
+                keyHandler: function (event) {
+                    var keycode = event.keyCode ? event.keyCode : event.which,
+                        i;
+                    if (keycode == 38 || keycode == 40) {
+                        if (keycode == 38) {
                             this.elements[this.focused].dom.removeClass("focused");
-                            for (var n = 0; n < this.elements.length; n++) {
+                            for (i = 0; i < this.elements.length; i++) {
                                 this.focused--;
                                 if (this.focused < 0){ this.focused = this.elements.length - 1; }
                                 if (this.elements[this.focused].dom.is(":visible")) {
@@ -1527,7 +1511,7 @@
                             }
                         } else {
                             this.elements[this.focused].dom.removeClass("focused");
-                            for (var n = 0; n < this.elements.length; n++) {
+                            for (i = 0; i < this.elements.length; i++) {
                                 this.focused++;
                                 if (this.focused >= this.elements.length){ this.focused = 0; }
                                 if (this.elements[this.focused].dom.is(":visible")) {
@@ -1536,13 +1520,14 @@
                                 }
                             }
                         }
-                        var r = this.elements[this.focused].dom.offset().top;
-                        var i = jQuery(this.gui.scrollpane.clipPane).offset().top;
-                        if (r-i > 180 || i-r > 0) {
-                            var s = (r - i - 90) / 16;
-                            this.gui.scrollpane.scrollTo(0, s);
+                        var pos1 = this.elements[this.focused].dom.offset().top,
+                            pos2 = jQuery(this.gui.scrollpane.clipPane).offset().top,
+                            diff;
+                        if (pos1 - pos2 > 180 || pos2 - pos1 > 0) {
+                            diff = (pos1 - pos2 - 90) / 16;
+                            this.gui.scrollpane.scrollTo(0, diff);
                         }
-                    } else if (t == 13) { this.elements[this.focused].dom.click(); }
+                    } else if (keycode == 13) { this.elements[this.focused].dom.click(); }
                       else { this.search(this.gui.input.getValue()); }
                 },
                 order: function (e) {
@@ -1629,55 +1614,46 @@
                         r += n.values.duration + " sec";
                         break;
                     case "motivation":
-                        r += n.values.resmotivation * 100 + " (" + Math
-                            .round(n.values.motivation * 100) + ")%";
+                        r += n.values.resmotivation * 100 + " (" + Math.round(n.values.motivation * 100) + ")%";
                         break
                     }
                     t.dom.html(r);
                     if (n.laborpoints.current < 0) {
                         if (n.laborpoints.sum < 0) {
                             if (JobList.getJobById(t.id).level <= Character.level) {
-                                t.dom.css("color", "blue")
+                                t.dom.css("color", "blue");
                             } else {
                                 t.dom.css("color", "red");
                                 if (!this.all) {
-                                    t.dom.addClass("TWDB_hide")
+                                    t.dom.addClass("TWDB_hide");
                                 }
                             }
                         } else {
-                            t.dom.css("color", "orange")
+                            t.dom.css("color", "orange");
                         }
                     } else {
-                        t.dom.css("color", "#333333")
+                        t.dom.css("color", "#333333");
                     }
-                    return n
+                    return n;
                 },
                 update: function () {
                     var e = this;
-                    jQuery.each(this.elements, function (t, n) {
-                        e.updateJob(t)
-                    });
-                    this.order()
+                    jQuery.each(this.elements, function (t, n) { e.updateJob(t); });
+                    this.order();
                 },
                 getMainDiv: function () {
                     if (!this.gui.main) {
-                        this.gui.main = jQuery(
-                                '<div style="position:absolute;left: 255px; top: 30px; display: none;" />')
-                            .append(
-                                '<style type="text/css">.TWDB_hide{display:none;}.TWDB_filter{display:none;}</style>')
+                        this.gui.main = jQuery('<div style="position:absolute;left: 255px; top: 30px; display: none;" />')
+                            .append('<style type="text/css">.TWDB_hide{display:none;}.TWDB_filter{display:none;}</style>');
                     }
-                    return this.gui.main
+                    return this.gui.main;
                 },
-                close: function () {
-                    this.gui.main.hide()
-                }
+                close: function () { this.gui.main.hide(); }
             },
 
             customs: {
                 selected: 0,
-                setParent: function (e) {
-                    this.parent = e
-                },
+                setParent: function (e) { this.parent = e; },
                 init: function () {
                     for (var e in this.parent.calcdata.custom) {
                         try {
@@ -3768,6 +3744,10 @@
                         [9, "", "#MENULEFT6#", false],                          // Jobs
                         [0, "jobwin_ccbutton", "#HELP_JOBWINCC#", false],
                         [0, "jobwin_showlp", "#HELP_JOBWINLP#", false],
+
+                        [9, "", "#CAP_TASKLIST#", false],                    // Task List
+                        [0, "tasklistpoints", "#HELP_TL_SHOWLP#", false],
+                        // [0, "tasklistcancel", "#HELP_TL_CANCELALL#", false],
 
                         [9, "", "GUI", false],                                  // GUI
                         [0, "duelmotivation", "#HELP_DUELMOTIVATION#", false],
@@ -7033,7 +7013,6 @@
                 var init = function() {
                     if (loader.ready) { return; }
                     trustTWDB();
-                    injectTaskJobs();
                     TWDB.Util.addCss("@media (min-width: 1320px) { .custom_unit_counter {top: -1px!important; margin-left: 310px!important;} #hiro_friends_container {top: -1px!important; margin-right: 304px!important;} }"); // reposition counters for wide screens
                     if (Settings.get("instanthotel", true)) { InstantHotel(); }
                     if (Settings.get("qbswitch", true)) { QuestbookSwitch(); }
@@ -7053,6 +7032,10 @@
                     if (Settings.get("noshopsale", false)) { supressOnGoingEntries(); }
                     if (Settings.get("expbarvalues", true)) { expBarValues(); }
                     if (Settings.get("mini_chatgui", true)) { allowChatGuiMinimize(); }
+                    if (Settings.get("tasklistpoints", true)) {
+                        addTaskJobsHints();
+                        GameInject.injectTaskJobs();
+                    }
                     loader.ready = true;
                 };
                 loader = Loader.add("Snippets", "tw-db code Snippets", init, { Settings: true });
@@ -7095,31 +7078,35 @@
                            ));
                 };
 
-                var injectTaskJobs = function() {
-                    try {
-                        var __twdb__TaskJob = TaskJob;
-                        TaskJob = function () {
-                            var job = __twdb__TaskJob.apply(this, arguments);
-                            job.__twdb__getTitle = job.getTitle;
-                            job.getTitle = function () {
-                                return job.__twdb__getTitle() + '#LP#: ' + (this.data.job_points < 0 ? "<b class='text_red'>" : '<b>') + this.data.job_points + '</b><br />';
-                            };
-                            return job;
-                        };
-                    } catch (e) {
-                        Error.report(e, "manipulate TaskJob template");
-                    }
-                    try {
+                var addTaskJobsHints = function() {
+                    var lpHintCss = "div#ui_workcontainer div.twdb_lp_hint { position: absolute; left: 2px; width: 18px; height: 18px; background-color: #322; border: 2px ridge #976; border-radius: 11px; }" +
+                        "div.twdb_lp_hint > img { position: absolute; left: 1px; top: 1px; }";
+                    TWDB.Util.addCss(lpHintCss);
+                    var checkJobLP = function () {
                         if (TaskQueue.queue.length) {
-                            var data = $("script:contains('TaskQueue.init')").text().match(/TaskQueue\.init\(\s*(\[[^\]]*\])/);
-                            if (data.length === 2) {
-                                data = $.parseJSON(data[1]);
-                                TaskQueue.init(data, TaskQueue.limit);
+                            var i,
+                                $list_ui = $('div#ui_workcontainer'),
+                                $notice;
+                            for (i = 0; i < TaskQueue.queue.length; i++) {
+                                if (TaskQueue.queue[i].type === 'job') {
+                                    $notice = null;
+                                    if (TaskQueue.queue[i].data.job_points < 0) {                                               // negative LP
+                                        $notice = west.gui.Icon.get('exclamation-priority-3', '#TASKLIST_NEG_LP#');
+                                    } else if (TaskQueue.queue[i].data.job_points < (TaskQueue.queue[i].data.job.malus / 5)) {  // low LP (< difficulty/5)
+                                        $notice = west.gui.Icon.get('exclamation-priority-2', '#TASKLIST_LOW_LP#');
+                                    } else if (TWDB.ClothCalc.calcdata.loaded && TaskQueue.queue[i].data.job_points < TWDB.ClothCalc.calcdata.jobs[TaskQueue.queue[i].data.job.id].laborpoints.sum - 5) {  // suboptimal LP
+                                        $notice = west.gui.Icon.get('exclamation-priority-1', '#TASKLIST_SUB_LP#');
+                                    }
+                                    if ($notice !== null) {
+                                        $('.task-queuePos-' + i + ' > div.icon', $list_ui).
+                                            children('.twdb_lp_hint').remove().end().
+                                            append($('<div class="twdb_lp_hint" />').append($notice));
+                                    }
+                                }
                             }
                         }
-                    } catch (e) {
-                        Error.report(e, "manipulate existing Job tasks");
-                    }
+                    };
+                    EventHandler.listen(['taskqueue-updated', 'taskqueue-ready'], checkJobLP);
                 };
 
                 var expBarValues = function() {
@@ -7687,6 +7674,34 @@
                     };
                     return _that;
                 })($);
+
+                /* ============================== labor points in Task List Popups ============================== */
+                _self.injectTaskJobs = function() {
+                    try {
+                        var __twdb__TaskJob = TaskJob;
+                        TaskJob = function () {
+                            var job = __twdb__TaskJob.apply(this, arguments);
+                            job.__twdb__getTitle = job.getTitle;
+                            job.getTitle = function () {
+                                return job.__twdb__getTitle() + '#LP#: ' + (this.data.job_points < 0 ? "<b class='text_red'>" : '<b>') + this.data.job_points + '</b><br />';
+                            };
+                            return job;
+                        };
+                    } catch (e) {
+                        Error.report(e, "manipulate TaskJob template");
+                    }
+                    try {
+                        if (TaskQueue.queue.length) {
+                            var data = $("script:contains('TaskQueue.init')").text().match(/TaskQueue\.init\(\s*(\[[^\]]*\])/);
+                            if (data.length === 2) {
+                                data = $.parseJSON(data[1]);
+                                TaskQueue.init(data, TaskQueue.limit);
+                            }
+                        }
+                    } catch (e) {
+                        Error.report(e, "manipulate existing Job tasks");
+                    }
+                };
 
                 /* ============================== Chat ============================== */
                 _self.ChatLayout = (function($) {
