@@ -1,6 +1,7 @@
+/*jslint browser: true, devel: true, passfail: false, continue: true, forin: true, nomen: true, plusplus: true, regexp: true, sloppy: true, vars: true, indent: 4, maxerr: 999*/
 /*jshint strict: false, globalstrict: true, browser: true, jquery: true*/
-/*global isDefined, TWDB, west, Character, Game, TheWestApi, jQuery, $, window */
-// var isDefined, TWDB, console, Game;    // calm down the syntax highlighter & linter
+/*global isDefined, debLog, TWDB, west, wman, TWE, UserMessage, Inventory, Wear, ItemManager, JobList, Bag, Hotkey, HotkeyManager, Character, Game, TheWestApi, jQuery, $, window*/
+// calm down the syntax highlighter & linter
 
 // be aware that the script release system ignores everything before // START OF ...
 
@@ -31,7 +32,7 @@
     if (isDefined(window.TWDB)) {
         (new west.gui.Dialog(TWDB.script.name, '<div class="txcenter"><b><br>#CC_INSTALLED_TWICE#</br></b></div>', west.gui.Dialog.SYS_WARNING)).addButton("OK").show();
     } else {
-        TWDB = {};
+        window.TWDB = {};
         TWDB.script = {
             version: 39,
             revision: 4,
@@ -66,11 +67,9 @@
             return $($.parseHTML($($.parseHTML(String(this))).text())).text();
         };
 
-        debLog = (function () {
-            if (TWDB.script.isDev() && console.info) {
-                return function (e) { console.info.apply(console, ["CC:"].concat(Array.prototype.slice.call(arguments))); };
-            } else { return function (e) {}; }
-        })();
+        window.debLog = (TWDB.script.isDev() && console.info) ?
+                function (e) { console.info.apply(console, ["CC:"].concat(Array.prototype.slice.call(arguments))); } :
+                function (e) {};
 
         TWDB.images = {
             ClothCalcButton: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAACAVJREFUeNqMV0uPHUcVrkc/b8+9c8cz4/HMeGzLCY4EyFJkBAixiBKxAcGCVbaskVix508gskhYsDNix4oNQgEkhEBIRCxMjD02fkzmed/9riq+U13d93pIovSo5vajus453/nOV6c5+/xDfIUx7/n6ehJFbFgX+q7S6p4x7BrnfMcwVgluTowRL8NY/gX3n/i5Gb+YTlO8W2FoDOPGpx78c+77e3v9QbHQb9bG/Nj3vbei0E/WB2ss8D3he1Joo1ldK50XlZ7OMq6UOq5q/Ts/8N43pjgMw8X02TNWOgf0F3VA7OzsxLqY36k0+1kQyO/tX9uUMMyTJIJxn3lSMiE4q7VmMMrKsmJlVbMsK9lkulAX4zlu1b+K4ugX02kGQKYLh8j/oXHZAbGxsdHXuvqOJ9gHuzub/Z2rG2I4SNjmxjpbW4tZHAaM4y2KXinNqrpxYL7I2WyRsRS/iyxnx6djNZ2lj5hgP6mq/KOzs3SE9cvLTsgV43I4HA60Ln4U+v57d27vJ/u72/zmwQ67cf0qG/QTttaLWRB4zPMkkxYF0Q26F3geiyLfXveiUAhPXknn5ffx9AF8Pa7rurycitYBsbW1lZi6+EEY+D//8hs3gr1rW+y1W3tsuL7G1hJEHgVMSMEMmIa8swqQ16q213YBpETCCQF4JBwASSlVPAz9cJ5mb0dx8Fdka1RV1StOyJZwYSjflJ64f+e16/HeziaM71rDfQxajOAmwxp519owsmspTjzAqLE68mIdITToHYMZguNPijBdlN8Qkn+Ypvl0lQ/kgATpNnVd/fJgf/v2/u4mv31zlyW9HkbEmDWubKQ0GuNuwLDRxjpFv4oG5nKbluY94orneRyIDfKsxAP5UVmWGezW5IA4OGBBWS7eRu6+fnV7yHevXkEeQwu5oRgospYypoHLuIuOTXxJZ7qu6treQOnaikHVsu3NdQkb7/Z74Rt42MfwaJIoy2TAGf/p9b0tOUSN9+LIGqdDK4KbLSMmA92/lWP5oLm0PKktUX3HC2gI8SnEKu8mSbKFaaGljtb+Lry8u95P+BUQLoJx8ppySrklCHULPUFN55T/VcdMwwk7Op+aG1I26eCCMQiqACm/3QvkHqYklH6hquqdAeo8DALWR52T8YZoyhq0KFgkls7YvBu9/HVRN8zUHRjannBLSCpNSi3KeMcP/VthGK5RGoQy7JvDQc+j+rVlRApH0eNBrRvDDRINCpZwRjXGmasGes4cSW3kukOG4OcUPm5LnFOQuH8X7xACvhd48obvy6Z08NfWuWl5ZcutiY6eKd04Yn9bNHSLypIr2qHSpoTUk5yJsasBjT0861kHUDLbBLtHIsOaRTSi55yu+DKjmhbVnTFjmtQox4vOAZpnSWIcV1tyclueUeBjUb5Bokk89Xhz2CkkNsrmnGqZ0HBF51j/ahqM44pLk3mVsC4pXcEQAqSQApZxIY2ROKmFh/vneOmWlVe4RBwgbw2uuUNgWYKmM6xaB8wyBaarFG2RoGvPF0yWpHfKVoQBucGFBV3T4SHilxj3SNtpVyMDPrzssudQMG0anAJqVwG65UR73pVk42xRVBAk3zoLRYQNmmkmsG/3A9CT/3M+z5TdVuGEqlWn+zYl8Lim37o5V04fGoN6aVwtETGm1YsGFSpB6XqIRZpTvg9VszUr0YvkHybooMhgnpfWWCMizBlWlhOtExb+1iFlrFOG3mlR0UskekGDGLTfRk9rFGU5hZ2XnNd2P/Bqxp8j349n8/xLMQkF4GrUS3T7QJuOFl7myrGJcilIjUKarioWiwpkbjbcAFJ8ejoDAsXH8zQ/q9DD0LYh9CQfYf0Pjk9HivKV5QXLi7LRAkLBRdwgYDo0ugpQjoRqWR00Yp0zxYUVIeIAGld2cjausfYfsU+cwDg5UEt0b3yQ9Ee1Vu9gw9ikrdOql2sybLTKlRhbsl2vCI9eQYC56AsjHJISG1zMjo5H7Ojk/B8XF7Pf50XxGDNPMTLbEfWIDIE8XmTld5MklgR/C7t1Bo7YcqsdzCtS2wqUWYGepJy0hRyI4x6bzTP29PnJ7Hw0vT+bp//CvP9i6Qn1iNaBRVWZkHsTFGieFcW30AXxrpQcIRuxalStibqpc9ZpVSvV2vWIHuv1ElYilQ8PX5TnF9Nfj8aTv6PcH7no6dtBtz2hSSECoQyOlKqTRV5+NYkjmwFbZi7nS1XjNj2ETidOjqBknHbWXpLYTvk/j1/Up2eT356Pxn9G2/5vvP4SY9p2yKtdsUqLogglfwjCpPMsvwdBEoEf8FYFu1yrtgS1Swezufb9AJDHtpKOz6bs8OnR4ux8/Juz0fhPaVo8wDLPMMYYebtfyUt9jcqKOhOGPYVEPZynxetZXg2xj1N3i5x6dkNB7K7v86xq+kFo93pIPMO3AHv05Ei/eHn68elocv9iPPmbi5zyfuGMq9VubvUjhQb1Y2trQbAdJeHrYRS/FUb+D3txeICWjeP7gKOp4AGUjZwgFLCHmPFkTpBXINmzNM0+nMzSB+iAD6GcZPiTlcjr1bacf8qnGncNY4wx7PX8q3GcHCDCm0j715DjW2gyNxH5AFMNSDVFaiYo4ydVWR0u5ulxXpVH0PxPHNko6pnLubr8YcI/43uRu28G3zkygJisgwfr0PQBqNFHxxvh2oMDqq5JdVSmOZ9DZKauxCaO6fmlL+Uv9HV8GQ3PdbGrw3dOahcZRVisjHIF7s/8RP+fAAMAtOwxNvgpZk8AAAAASUVORK5CYII=",
@@ -147,8 +146,11 @@
             var _addCss = function (cssString, optionalId) {
                 var id = "twdb_css";
                 if (typeof optionalId !== "undefined" && typeof optionalId === "string") { id += "_" + optionalId.replace(/\W+/g, ""); }
-                if ($("head style#" + id).append('\n' + cssString).length === 1) { return; }
-                else { $("head").append($('<style type="text/css" id="' + id + '">').text(cssString)); }
+                if ($("head style#" + id).append('\n' + cssString).length === 1) {
+                    return;
+                } else {
+                    $("head").append($('<style type="text/css" id="' + id + '">').text(cssString));
+                }
             };
             _public.addCss = function (cssString, optionalId) { return _addCss(cssString, optionalId); };
 
@@ -169,67 +171,68 @@
                 var twdbKeys = [],
                     key,
                     newkey,
-                    uid = 'twdb_' + Character.playerId + '_';
+                    uid = 'twdb_' + Character.playerId + '_',
+                    i;
                 if (localStorage.getItem(uid + 'embackup') === true) { return; }
-                for (var i=0; i<localStorage.length; i++) {
+                for (i = 0; i < localStorage.length; i++) {
                     key = localStorage.key(i);
                     if (key.search(uid) === 0 && key.search(/(marketreminder|notes|settings|statistic)$/i) !== -1) {
                         twdbKeys.push({
-                                key: key,
-                                newkey: 'backup_' + key,
-                                val: localStorage.getItem(key),
+                            key: key,
+                            newkey: 'backup_' + key,
+                            val: localStorage.getItem(key)
                         });
                     }
                 }
-                for (var i=0; i<twdbKeys.length; i++) {
+                for (i = 0; i < twdbKeys.length; i++) {
                     localStorage.setItem(twdbKeys[i].newkey, twdbKeys[i].val);
                     console.log('key ' + twdbKeys[i].key.substr(uid.length) + ' saved.');
                 }
                 localStorage.setItem(uid + 'embackup', true);
             };
-            _public.backupData = function() { return _backupData(); };
+            _public.backupData = function () { return _backupData(); };
 
-            _public.idMigrationDone = function() {
+            _public.idMigrationDone = function () {
                 var migInf = TWDB.Cache.load('migration') || {};
                 migInf.itemid = migInf.itemid || {};
                 return (migInf.itemid.migcomplete === true);
-            }
+            };
 
-            var _idMigrator = function() {
+            var _idMigrator = function () {
                 //  security checks.. we don't want to migrate twice or too early
                 if (!TWDB.Util.isNewIDsystem()) { return; }
 
                 // to tidy up, we only keep keys which are used in the script and should be kept or converted
-                var KEEPKEYS = ["barracks", "bonusdisplay", "bonusjobs", "chathistory", "embackup", "marketreminder", "migration", "msdsettings", "notes", "settings", "statistic"];
-                var usedkeys  = {'keys':true};
-
-                var twdbKeys = [];
-                var key;
-                var content;
-                var temp;
-                var tmpId;
-
-                var uid = 'twdb_' + Character.playerId + '_';
-                var migInf = TWDB.Cache.load('migration') || {};
+                var KEEPKEYS = ["barracks", "bonusdisplay", "bonusjobs", "chathistory", "embackup", "marketreminder", "migration", "msdsettings", "notes", "settings", "statistic"],
+                    usedkeys  = {'keys': true},
+                    twdbKeys = [],
+                    key,
+                    content,
+                    temp,
+                    i,
+                    mid,
+                    tmpId,
+                    uid = 'twdb_' + Character.playerId + '_',
+                    migInf = TWDB.Cache.load('migration') || {};
                 migInf.itemid = migInf.itemid || {};
                 if (migInf.itemid.migcomplete === true) { return; }
 
-                var tdc = function(object) {
+                var tdc = function (object) {
                     // tricky deep copy
                     // tricky, because it works only on data types which are specified in JSON;
                     // since we have only previously JSONed data, we can use it safely.
                     return JSON.parse(JSON.stringify(object));
                 };
 
-                var cv = function(value) { return parseInt(value, 10)*1000; };
+                var cv = function (value) { return parseInt(value, 10) * 1000; };
 
                 // find all twdb_ keys for the current user first...
-                for (var i=0; i<localStorage.length; i++) {
+                for (i = 0; i < localStorage.length; i++) {
                     key = localStorage.key(i);
                     if (key.search(uid) === 0) { twdbKeys.push(key.substr(uid.length)); }
                 }
 
-                for (var i=0; i<twdbKeys.length; i++) {
+                for (i = 0; i < twdbKeys.length; i++) {
                     key = twdbKeys[i];
                     if (KEEPKEYS.indexOf(key) === -1) {     // those to delete
                         localStorage.removeItem(uid + key);
@@ -241,7 +244,7 @@
                         switch (key) {
                         case "marketreminder":
                             content = TWDB.Cache.load(key) || {};
-                            for (var mid in content) {
+                            for (mid in content) {
                                 if (content[mid].item) { content[mid].item = cv(content[mid].item); }
                             }
                             TWDB.Cache.save(key, content);
@@ -251,7 +254,7 @@
 
                         case "notes":
                             content = TWDB.Cache.load(key) || '';
-                            temp = content.replace(/\[item=(\d+)\]/gi, function(m,dig){ return '[item=' + cv(dig)+']';} );
+                            temp = content.replace(/\[item=(\d+)\]/gi, function (m, dig) { return '[item=' + cv(dig) + ']'; });
                             if (temp !== content) {
                                 TWDB.Cache.save(key, temp);
                             }
@@ -262,7 +265,7 @@
                         case "settings":
                             content = TWDB.Cache.load(key);
                             if (isDefined(content.pinnedItems) && isDefined(content.pinnedItems.length)) {      // only change (and save) if this is an existing array
-                                for (var mid=0; mid < content.pinnedItems.length; mid++) { content.pinnedItems[mid] = cv(content.pinnedItems[mid]); }
+                                for (mid = 0; mid < content.pinnedItems.length; mid++) { content.pinnedItems[mid] = cv(content.pinnedItems[mid]); }
                                 TWDB.Cache.save(key, content);
                             }
                             migInf.itemid[key] = true;
@@ -272,28 +275,29 @@
                         case "statistic":
                             content = TWDB.Cache.load(key);
                             temp = {};
-                            for (var box in content.chest) {    // chest stats
+                            var box, item, j, m, p, s;
+                            for (box in content.chest) {    // chest stats
                                 tmpId = cv(box);
                                 temp[tmpId] = tdc(content.chest[box]);
                                 temp[tmpId].items = {};
-                                for (var item in content.chest[box].items) {
+                                for (item in content.chest[box].items) {
                                     temp[tmpId].items[cv(item)] = content.chest[box].items[item];
                                 }
                             }
                             content.chest = tdc(temp);          // chest stats end ####
 
-                            for (var j in content.job) {        // job id (mostly)
-                                if (!JobList.getJobById(j)){ continue; }   // leave 'last' and that unused 'items' alone
+                            for (j in content.job) {        // job id (mostly)
+                                if (!JobList.getJobById(j)) { continue; }   // leave 'last' and that unused 'items' alone
                                 temp = {};
-                                for (var m in content.job[j]) { // motivation, products (&more)
+                                for (m in content.job[j]) { // motivation, products (&more)
                                     temp[m] = {};
                                     if (m === 'products') {
-                                        for (var p in content.job[j][m]) { temp[m][cv(p)] = tdc(content.job[j][m][p]); }
+                                        for (p in content.job[j][m]) { temp[m][cv(p)] = tdc(content.job[j][m][p]); }
                                     } else if ($.isNumeric(m)) {        // motivations
-                                        for (var s in content.job[j][m]) {      // various stats, including items & extraitems
+                                        for (s in content.job[j][m]) {      // various stats, including items & extraitems
                                             if (s === 'items' || s === 'extraitems') {
                                                 temp[m][s] = {};
-                                                for (var item in content.job[j][m][s]) {
+                                                for (item in content.job[j][m][s]) {
                                                     temp[m][s][cv(item)] = content.job[j][m][s][item];
                                                 }
                                             } else {
@@ -315,7 +319,7 @@
 
                         default:
                             break;
-                        };
+                        }
                         usedkeys[key] = true;
                     }
                 }
@@ -323,46 +327,47 @@
                 migInf.itemid.migcomplete = true;
                 TWDB.Cache.save('migration', migInf);
             };
-            _public.idMigrator = function() { return _idMigrator(); };
+            _public.idMigrator = function () { return _idMigrator(); };
 
-            var _simpleRestore = function(remove) {
-                if (localStorage.getItem('twdb_' + Character.playerId + '_embackup') != 'TRUE') { return; }
-                var twdbKeys = [];
-                var key;
-                var newkey;
-                var uid = 'backup_twdb_' + Character.playerId + '_';
-                for (var i=0; i<localStorage.length; i++) {
+            var _simpleRestore = function (remove) {
+                if (localStorage.getItem('twdb_' + Character.playerId + '_embackup') !== 'TRUE') { return; }
+                var twdbKeys = [],
+                    key,
+                    newkey,
+                    uid = 'backup_twdb_' + Character.playerId + '_',
+                    i;
+                for (i = 0; i < localStorage.length; i++) {
                     key = localStorage.key(i);
                     if (key.search(uid) === 0) {
                         twdbKeys.push(key);
                     }
                 }
                 if (remove === true) {
-                    for (var i=0; i<twdbKeys.length; i++) {
+                    for (i = 0; i < twdbKeys.length; i++) {
                         localStorage.removeItem(twdbKeys[i]);
                     }
                     localStorage.removeItem('twdb_' + Character.playerId + '_embackup');
                 } else {
-                    for (var i=0; i<twdbKeys.length; i++) {
+                    for (i = 0; i < twdbKeys.length; i++) {
                         localStorage.setItem(twdbKeys[i].substr(7), localStorage.getItem(twdbKeys[i]));
                     }
                 }
             };
-            _public.simpleRestore = function(r) { return _simpleRestore(r); };
+            _public.simpleRestore = function (r) { return _simpleRestore(r); };
 
             /** TODO: Remove when Inno cleaned up their shit **/
             // simple wrapper to catch that uncaught exception
-            _public.wrapBetaGetItem = function() {
-                 ItemManager.__twdb__get = ItemManager.__twdb__get || ItemManager.get;
-                 ItemManager.get = function(id) {
-                     try {
-                         return ItemManager.__twdb__get(id);
-                     } catch (e) {
-                         console.log(e);
-                         TWDB.script.isDev() && console.trace && console.trace();
-                         return undefined;
-                     }
-                 }
+            _public.wrapBetaGetItem = function () {
+                ItemManager.__twdb__get = ItemManager.__twdb__get || ItemManager.get;
+                ItemManager.get = function (id) {
+                    try {
+                        return ItemManager.__twdb__get(id);
+                    } catch (e) {
+                        console.log(e);
+                        TWDB.script.isDev() && console.trace && console.trace();
+                        return undefined;
+                    }
+                };
             };
 
             return _public;
@@ -477,29 +482,41 @@
             up2date: true,
             gui: { job: {}, custom: {} },
 
-            init: function() {
-                if (this.ready) { return; };
+            init: function () {
+                if (this.ready) { return; }
                 var _self = this;
                 this.jobs.setParent(this);
                 this.joblist.parent = this;
                 this.customs.setParent(this);
                 this.bag.setParent(this);
-                TWDB.Eventer.set("TWDBdataLoaded", function(){ _self.handleTWDBData(); });
+                TWDB.Eventer.set("TWDBdataLoaded", function () { _self.handleTWDBData(); });
                 //define gui general
-                this.gui.copyright = jQuery('<div style="position:absolute;bottom:0px;left:0px;height:15px;display:block;font-size:10px;color:#000000;">.:powered by tw-db team:. | <a href="http://tw-db.info" style="font-weight:normal;color:#000000;" target="_blank">.:tw-db.info:.</a> | ' + (TWDB.script.version / 100 / 1 + " rev. " + TWDB.script.revision) + "</div>");
+                this.gui.copyright = jQuery('<div style="position:absolute;bottom:0px;left:0px;height:15px;display:block;font-size:10px;color:#000000;">.:powered by tw-db team:. | <a href="http://tw-db.info" style="font-weight:normal;color:#000000;" target="_blank">.:tw-db.info:.</a> | ' + (TWDB.script.version / 100) + " rev. " + TWDB.script.revision + "</div>");
                 this.gui.cache = jQuery('<div style="position:absolute;top:10px;right:8px;width:20px;height:20px;cursor:pointer;" />');
                 this.gui.bag = jQuery('<div style="position:absolute;top:95px;left:1px;width:252px;height:186px;" />');
-                this.BagInt = window.setInterval(function(){ _self.finishInit(); }, 100);
+                this.BagInt = window.setInterval(function () { _self.finishInit(); }, 100);
                 //get custom jobs or define default value
-                this.data.custom = TWDB.Settings.get("custom",{1: {id: 1,type: "speed",para: {},name: "Speed"},2: {id: 2,type: "custom",para: {9: 1},name: "max Health"},3: {id: 3,type: "regen",para: {},name: "Health Regeneration"},4: {id: 4,type: "fort",para: {att: 200,def: 20,health: 100,type: 0},name: "Fortbattle Attacker (Att)"},5: {id: 5,type: "fort",para: {att: 20,def: 200,health: 100,type: 0},name: "Fortbattle Attacker (Def)"},6: {id: 6,type: "fort",para: {att: 200,def: 20,health: 100,type: 1},name: "Fortbattle Defender (Att)"},7: {id: 7,type: "fort",para: {att: 20,def: 200,health: 100,type: 1},name: "Fortbattle Defender (Def)"},8: {id: 8,type: "duel",para: {12: 1,15: 1,16: 1,24: 1},name: "Range Dueler (Att)"},9: {id: 9,type: "duel",para: {12: 1,15: 1,16: 1,21: 1},name: "Range Dueler (Def)"},10: {id: 10,type: "duel",para: {6: 1,7: 1,11: 1,15: 1},name: "Melee Dueler"}});        // load cache if version didn't not changed
+                this.data.custom = TWDB.Settings.get("custom", {
+                    1: {id: 1, type: "speed", para: {}, name: "Speed"},
+                    2: {id: 2, type: "custom", para: {9: 1}, name: "max Health"},
+                    3: {id: 3, type: "regen", para: {}, name: "Health Regeneration"},
+                    4: {id: 4, type: "fort", para: {att: 200, def: 20, health: 100, type: 0}, name: "Fortbattle Attacker (Att)"},
+                    5: {id: 5, type: "fort", para: {att: 20, def: 200, health: 100, type: 0}, name: "Fortbattle Attacker (Def)"},
+                    6: {id: 6, type: "fort", para: {att: 200, def: 20, health: 100, type: 1}, name: "Fortbattle Defender (Att)"},
+                    7: {id: 7, type: "fort", para: {att: 20, def: 200, health: 100, type: 1}, name: "Fortbattle Defender (Def)"},
+                    8: {id: 8, type: "duel", para: {12: 1, 15: 1, 16: 1, 24: 1}, name: "Range Dueler (Att)"},
+                    9: {id: 9, type: "duel", para: {12: 1, 15: 1, 16: 1, 21: 1}, name: "Range Dueler (Def)"},
+                    10: {id: 10, type: "duel", para: {6: 1, 7: 1, 11: 1, 15: 1}, name: "Melee Dueler"}
+                });
+                // load cache if version didn't not changed
                 if (!TWDB.Updater.wasUpdated()) {
                     var data = TWDB.Cache.load("calcdata");
                     if (typeof data === "object" && data !== null && isDefined(data.loaded)) { this.calcdata = data; }
                 }
             },
 
-            finishInit: function() {
-                if (typeof this.BagInt == "undefined") { return; }
+            finishInit: function () {
+                if (typeof this.BagInt === "undefined") { return; }
                 if (Bag.loaded) {
                     window.clearInterval(this.BagInt);
                     delete this.BagInt;
@@ -507,7 +524,7 @@
                     this.ready = true;
                     this.addButton();
                     var _this = this;
-                    HotkeyManager.register(new Hotkey("twdbcc", "", "tw-db ClothCalc", function() { _this.open(); }));
+                    HotkeyManager.register(new Hotkey("twdbcc", "", "tw-db ClothCalc", function () { _this.open(); }));
                     if (isDefined(this.open_param)) {
                         this.open(this.open_param[0], this.open_param[1]);
                         delete this.open_param;
@@ -515,15 +532,15 @@
                 }
             },
 
-            addButton: function() {
+            addButton: function () {
                 if (this.ready === false) { return; }
                 var _this = this;
                 var $button = jQuery('<div title="tw-db.info ClothCalc " class="menulink" />')
                         .css("background-image", "url(" + TWDB.images.button + ")")
                         .css("background-position", "0px -25px")
-                        .mouseenter( function() { jQuery(this).css("background-position", "-25px -25px"); })
-                        .mouseleave( function() { jQuery(this).css("background-position", "0px -25px"); })
-                        .click(function(){ _this.open(); });
+                        .mouseenter(function () { jQuery(this).css("background-position", "-25px -25px"); })
+                        .mouseleave(function () { jQuery(this).css("background-position", "0px -25px"); })
+                        .click(function () { _this.open(); });
                 jQuery("#TWDB_ClothCalc_menubuttons .menucontainer_bottom").before($button);
             },
 
@@ -533,172 +550,174 @@
                 if (isDefined(item) && isDefined(item.set)) {
                     debLog('isBetterItem - ID', itemId, item, 'is seen as new set item');
                     return true; // item better is set parts, don't calculate; update
-                };
-                for (var jobId in this.calcdata.jobs) {
+                }
+                var jobId,
+                    bonusCurrentItem,
+                    bonusNewItem,
+                    currentBestItem;
+                for (jobId in this.calcdata.jobs) {
                     var currentBestClothes = this.getClothForJob(jobId);
                     if (!isDefined(currentBestClothes)) {
                         debLog('isBetterItem - job ID', jobId, 'has no Calc data');
                         return true; // Found a job where we have no items at all, calculate!
-                    };
+                    }
 
-                    var bonusCurrentItem = 0;
-                    var bonusNewItem = TWDB.Calc.getItemBonusForJob(itemId, jobId);
+                    bonusCurrentItem = 0;
+                    bonusNewItem = TWDB.Calc.getItemBonusForJob(itemId, jobId);
                     if (isDefined(currentBestClothes[TWDB.ClothCalc._type2id[item.type]])) {
-                        var currentBestItem = ItemManager.get(currentBestClothes[TWDB.ClothCalc._type2id[item.type]].id);
+                        currentBestItem = ItemManager.get(currentBestClothes[TWDB.ClothCalc._type2id[item.type]].id);
                         if (isDefined(currentBestItem) && isDefined(currentBestItem.set)) {
                             continue; // item from betters is set part, don't calculate
-                        };
+                        }
                         bonusCurrentItem = TWDB.Calc.getItemBonusForJob(currentBestItem.item_id, jobId);
-                    };
+                    }
                     if (bonusNewItem > bonusCurrentItem) {
-                        debLog('isBetterItem - ID', itemId, item, 'is seen as better than ID',currentBestItem.item_id, ItemManager.get(currentBestItem.item_id),
+                        debLog('isBetterItem - ID', itemId, item, 'is seen as better than ID', currentBestItem.item_id, ItemManager.get(currentBestItem.item_id),
                                'for job ID', jobId);
                         return true; // Found a job where item is better
-                    };
-                };
+                    }
+                }
                 return false;
             },
 
             checkSkill: function () {
-                for (var skill in this.data.skills) {
-                    if (typeof this.calcdata.skills[skill] == "undefined") {
-                        return true
+                var skill;
+                for (skill in this.data.skills) {
+                    if (typeof this.calcdata.skills[skill] === "undefined") {
+                        return true;
                     }
-                    if (this.data.skills[skill].val != this.calcdata.skills[skill].val) {
-                        return true
+                    if (this.data.skills[skill].val !== this.calcdata.skills[skill].val) {
+                        return true;
                     }
                 }
-                return false
+                return false;
             },
 
-            checkItems: function() {
+            checkItems: function () {
                 var key;
                 for (key in this.data.items) {
-                    if (typeof this.calcdata.items[key] == "undefined") {
+                    if (typeof this.calcdata.items[key] === "undefined") {
                         if (this.isBetterItem(this.data.items[key].id)) {
                             debLog('checkItems -', this.data.items[key].id, 'causes update');
                             return true;
-                        };
-                    };
-                };
+                        }
+                    }
+                }
                 for (key in this.calcdata.items) {
-                    if (typeof this.data.items[key] == "undefined") {
-                        if (!isDefined(ItemManager.get(key))) { console.log("Item ID="+key+" seems to be no more defined..."); }; // rare case that an item that was previously best for a job got removed from TW .. I'm curious
+                    if (typeof this.data.items[key] === "undefined") {
+                        if (!isDefined(ItemManager.get(key))) { console.log("Item ID=" + key + " seems to be no more defined..."); } // rare case that an item that was previously best for a job got removed from TW .. I'm curious
                         // if (this.isBetterItem(this.calcdata.items[key].id)) {	// check doesn't make sense - we test CALCdata, if our previous best item is gone, we need to update!
-                            return true;
+                        return true;
                         // };
-                    };
-                };
+                    }
+                }
                 return false;
             },
 
             checkCustom: function () {
-                var e, t;
-                for (e in this.data.custom) {
-                    if (typeof this.calcdata.custom[e] == "undefined") {
-                        return true
+                var key, p;
+                for (key in this.data.custom) {
+                    if (typeof this.calcdata.custom[key] === "undefined") {
+                        return true;
                     }
-                    if (this.calcdata.custom[e].name != this.data.custom[e].name) {
-                        return true
+                    if (this.calcdata.custom[key].name !== this.data.custom[key].name) {
+                        return true;
                     }
-                    for (t in this.data.custom[e].para) {
-                        if (typeof this.calcdata.custom[e].para[t] == "undefined") {
-                            return true
+                    for (p in this.data.custom[key].para) {
+                        if (typeof this.calcdata.custom[key].para[p] === "undefined") {
+                            return true;
                         }
-                        if (this.calcdata.custom[e].para[t] != this.data.custom[e].para[t]) {
-                            return true
+                        if (this.calcdata.custom[key].para[p] !== this.data.custom[key].para[p]) {
+                            return true;
                         }
                     }
                 }
-                if (typeof this.calcdata.custom[Number(e) + 1] != "undefined") {
-                    return true
+                if (typeof this.calcdata.custom[Number(key) + 1] !== "undefined") {
+                    return true;
                 }
-                return false
+                return false;
             },
 
             checkCache: function () {
-                var e = this.checkItems();
-                var t = false; // this.checkSkill(); Dun - disable skills change test
-                var n = this.checkCustom();
-                var i;
+                var items = this.checkItems(),
+                    skills = false, // this.checkSkill(); Dun - disable skills change test
+                    customs = this.checkCustom(),
+                    $button;
                 this.gui.cache.children().remove();
-                if (e || t || n) {
-                    var r = "#DATA_OLD#";
-                    if (e) {
-                        r += " [#INVENTORY#]"
-                    }
-                    if (t) {
-                        r += " [#SKILL#]"
-                    }
-                    if (n) {
-                        r += " [#CUSTOM#]"
-                    }
-                    i = jQuery('<div title="' + r + '" style="position:absolute;top:0px;right:0px;width:20px;height:20px;background: url(' + TWDB.images.iconData + ')no-repeat 0px 0px;" />');
-                    this.up2date = false
+                if (items || skills || customs) {
+                    var mouseover_txt = "#DATA_OLD#";
+                    if (items) { mouseover_txt += " [#INVENTORY#]"; }
+                    if (skills) { mouseover_txt += " [#SKILL#]"; }
+                    if (customs) { mouseover_txt += " [#CUSTOM#]"; }
+                    $button = jQuery('<div title="' + mouseover_txt + '" style="position:absolute;top:0px;right:0px;width:20px;height:20px;background: url(' + TWDB.images.iconData + ')no-repeat 0px 0px;" />');
+                    this.up2date = false;
                 } else {
-                    i = jQuery('<div title="#DATA_OK#" style="position:absolute;top:0px;right:0px;width:20px;height:20px;background: url(' + TWDB.images.iconData + ')no-repeat -20px 0px;" /></div>');
-                    this.up2date = true
+                    $button = jQuery('<div title="#DATA_OK#" style="position:absolute;top:0px;right:0px;width:20px;height:20px;background: url(' + TWDB.images.iconData + ')no-repeat -20px 0px;" /></div>');
+                    this.up2date = true;
                 }
-                this.gui.cache.append(i);
-                var s = this;
-                i.click(function () {
-                    TWDB.DataManager.loadData(true)
-                })
+                this.gui.cache.append($button);
+                // var _self = this;
+                $button.click(function () { TWDB.DataManager.loadData(true); });
             },
 
             openWear: function () {
-                var oldInv = wman.getById(Inventory.uid);       // Inventory already existing?
+                var newInv,
+                    oldInv = wman.getById(Inventory.uid);       // Inventory already existing?
                 if (TWDB.Settings.get("wear_openmin", false)) {
                     if (!isDefined(wman.getById(Wear.uid))) {       // if we have no wear window yet
                         Wear.open();
                         wman.minimize(Wear.uid, true);
                     }
                 } else {
-                    if (!isDefined(wman.getById(Wear.uid))) { Wear.open(); }      // we have no wear window yet
-                    else { wman.reopen(Wear.uid); }
+                    if (!isDefined(wman.getById(Wear.uid))) { Wear.open();      // we have no wear window yet
+                        } else { wman.reopen(Wear.uid); }
                 }
-                var newInv = wman.getById(Inventory.uid);
-                if (typeof oldInv == "undefined" && typeof newInv != "undefined") { newInv.fireEvent(TWE("WINDOW_CLOSE"), newInv); }; // if we openend a new Inventory: close it again
+                newInv = wman.getById(Inventory.uid);
+                if (typeof oldInv === "undefined" && typeof newInv !== "undefined") { newInv.fireEvent(TWE("WINDOW_CLOSE"), newInv); } // if we openend a new Inventory: close it again
             },
 
             // ClothCalc.open()
-            open: function (e, t) {
+            open: function (p_id, p_type) {
                 var _this = this;
                 if (this.ready === false) {
-                    if (isDefined(e) && isDefined(t)) { this.open_param = [e, t]; }     // save parameters & open when CC is ready
+                    /** TODO: change to arguments **/
+                    if (isDefined(p_id) && isDefined(p_type)) { this.open_param = [p_id, p_type]; }     // save parameters & open when CC is ready
                     return;
                 }
                 if (wman.getById(this.uid)) {
                     wman.reopen(this.uid);      // maximize when needed & bring to top
                     this.openWear();
-                    if (isDefined(e) && isDefined(t)) {
-                        switch (t) {
+                    if (isDefined(p_id) && isDefined(p_type)) {
+                        var tmp;
+                        switch (p_type) {
                         case "job":
-                            var r = TWDB.Jobs.getJobById(e);
-                            if (isDefined(r)) { var r = r.name; } else { var r = ""; };
+                            tmp = TWDB.Jobs.getJobById(p_id);
+                            tmp = isDefined(tmp) ? tmp.name : null;
                             break;
                         case "item":
-                            var r = e;
+                            tmp = p_id;
                             break;
                         case "default":
-                            var r = null;
+                            tmp = null;
                             break;
                         }
-                        if (isDefined(r)) { _this.showTab(e, 'Jobs'); _this.joblist.open(r); }
-                    };
+                        if (tmp !== null) { _this.showTab(p_id, 'Jobs'); _this.joblist.open(tmp); }
+                    }
                     return;
-                };
-                if (typeof this.eventOpen != "undefined") { TWDB.Eventer.remove("getGameData", this.eventOpen); };
-                var i = 0;
-                for (var s in this.calcdata.jobs) { i++; break; };
-                if (i == 0) {
-                    this.eventOpen = TWDB.Eventer.set("getGameData", function() { TWDB.DataManager.loadData(true); }, 1);
+                }
+                if (typeof this.eventOpen !== "undefined") { TWDB.Eventer.remove("getGameData", this.eventOpen); }
+                var count = 0,
+                    key;
+                //* TODO: rewrite that ugly construct *//
+                for (key in this.calcdata.jobs) { count++; break; }
+                if (count === 0) {
+                    this.eventOpen = TWDB.Eventer.set("getGameData", function () { TWDB.DataManager.loadData(true); }, 1);
                     this.up2date = false;
                     this.getGameData();
                 } else {
-                    this.eventOpen = TWDB.Eventer.set( "getGameData", function() { _this.finishOpening(); }, 1);
+                    this.eventOpen = TWDB.Eventer.set("getGameData", function () { _this.finishOpening(); }, 1);
                     this.getGameData();
-                };
+                }
                 this.openWear();
 
                 this.jobs.selected = 0;
@@ -710,19 +729,20 @@
                     .append('<img src="' + TWDB.images.iconLuck + '" title=" #ORDER_LUCK# " alt=" #ORDER_LUCK# " onclick="javascript:TWDB.ClothCalc.joblist.order(\'luck1\')" style="margin:0px 2px 0px 2px;cursor:pointer;" />')
                     .append('<img src="' + TWDB.images.iconLaborpoints + '" title=" #ORDER_LP# " alt=" #ORDER_LP# " onclick="javascript:TWDB.ClothCalc.joblist.order(\'laborpoints\')" style="margin:0px 2px 0px 2px;cursor:pointer;" />')
                     .append('<img src="' + TWDB.images.iconMoti + '" title=" #ORDER_MOTIVATION# " alt=" #ORDER_MOTIVATION# " onclick="javascript:TWDB.ClothCalc.joblist.order(\'motivation\')" style="margin:0px 2px 0px 2px;cursor:pointer;" />')
-                    .append('<img src="' + TWDB.images.iconDanger + '" title=" #ORDER_DANGER# " alt=" #ORDER_DANGER# " onclick="javascript:TWDB.ClothCalc.joblist.order(\'danger\')" style="margin:0px 2px 0px 2px;cursor:pointer;" />');;
-                this.gui.job.title = jQuery('<div style="position:absolute;top:36px;left:0px;width:190px;height:19px;font-weight:bold;text-align:center;">#SELECTJOB# >></div>');
+                    .append('<img src="' + TWDB.images.iconDanger + '" title=" #ORDER_DANGER# " alt=" #ORDER_DANGER# " onclick="javascript:TWDB.ClothCalc.joblist.order(\'danger\')" style="margin:0px 2px 0px 2px;cursor:pointer;" />');
+                /** TODO: formatting
+                ok -- <div style="position:absolute;top: 37px;left:0px;width: 187px;height:19px;font-weight:bold;white-space: nowrap;">
+                    <div style="float: right;">[-648/-135]</div>
+                    <div style="overflow: hidden;text-overflow: ellipsis;">Den Westen erkunden nach hundert Sekunden</div>
+                </div>
+                **/
+                this.gui.job.title = jQuery('<div style="position:absolute;top:37px;left:0px;width:187px;height:19px;font-weight:bold;text-align:center;white-space: nowrap;">#SELECTJOB# >></div>');
                 this.gui.job.mode = jQuery("<div style=\"position:absolute;top:10px;right:30px;width:20px;height:20px;background:url('" + TWDB.images.jobTime + '\') no-repeat scroll 0 0 transparent;cursor:pointer;display:block;" title=" #JOB_TIME# " />');
                 this.gui.job.search = jQuery("<div style=\"position:absolute;top:35px;right:50px;width:20px;height:20px;background:url('" + TWDB.images.iconSearch + '\') no-repeat scroll 0 0 transparent;cursor:pointer;display:none;" title=" #SEARCHJOB# " />');
                 this.gui.job.checkbox = new west.gui.Checkbox("", this.joblist.all ? "" : "tw2gui_checkbox_checked",
-                    function() {
-                        if (this.isSelected()) {
-                            _this.joblist.all = false;
-                            _this.joblist.update();
-                        } else {
-                            _this.joblist.all = true;
-                            _this.joblist.update();
-                        }
+                    function () {
+                        _this.joblist.all = !this.isSelected();
+                        _this.joblist.update();
                     });
                 this.gui.job.checkbox.setTooltip("#HIDEJOBS#");
                 this.gui.job.checkbox.getMainDiv().css({position: "absolute", top: "35px", right: "30px"});
@@ -742,41 +762,44 @@
                 this.gui.job.calc = $('<div title=" #CURRENT_REWARDS# " style="position:absolute;top:60px;width:100px;right:1px;height:30px;display:block;;font-weight:bold;text-align:center;" />');
                 this.gui.job.mainDiv.append(this.gui.job.calc);
 
-                this.gui.job.button.click(function() {
+                this.gui.job.button.click(function () {
                     if (_this.joblist.getMainDiv().is(":visible")) {
                         _this.joblist.close();
                     } else {
                         _this.joblist.open();
-                    };
+                    }
                 }.bind(this));
-                this.gui.job.search.click(function() { _this.jobSearch(); }.bind(this));
+                this.gui.job.search.click(function () { _this.jobSearch(); }.bind(this));
                 this.gui.job.searchDiv = jQuery("<div />");
                 if (_this.joblist.getMainDiv().is(":visible")) {
                     _this.joblist.close();
-                };
+                }
 
                 _this.joblist.name = null;
-                if (isDefined(e) && isDefined(t)) {
-                    switch (t) {
+                if (isDefined(p_id) && isDefined(p_type)) {
+                    var tmp;
+                    switch (p_type) {
                     case "job":
-                        var r = TWDB.Jobs.getJobById(e);
-                        if (isDefined(r)) { var r = r.name; } else { var r = ""; };
+                        tmp = TWDB.Jobs.getJobById(p_id);
+                        tmp = isDefined(tmp) ? tmp.name : null;
                         break;
                     case "item":
-                        var r = e;
+                        tmp = p_id;
                         break;
                     case "default":
-                        var r = null;
+                        tmp = null;
                         break;
-                    };
-                    if (isDefined(r)) { _this.joblist.name = r; };
-                };
+                    }
+                    if (tmp !== null) { _this.joblist.name = tmp; }
+                }
+
+                // custom gui
                 this.customs.selected = 0;
                 this.gui.custom.title = jQuery('<div style="position:absolute;top:36px;left:0px;width:210px;height:19px;font-weight:bold;text-align:center;">#SELECTJOB# >></div>');
                 this.gui.custom.settings = jQuery('<div title="#SETTINGS#" style="position:absolute;top:35px;right:30px;width:20px;height:20px;background:url(' + TWDB.images.iconSetting + ');cursor:pointer;" />');
-                this.gui.custom.settings.click(function() { _this.customs.showConfig(); });
+                this.gui.custom.settings.click(function () { _this.customs.showConfig(); });
                 this.gui.custom.button = jQuery('<div style="position:absolute;top:35px;right:4px;width:26px;height:20px;background:url(\'/images/window/character/title_editbtn.jpg\') no-repeat scroll 0 0 transparent;cursor:pointer;" title=" #SELECTJOB# " />');
-                this.gui.custom.selectbox = new west.gui.Selectbox;
+                this.gui.custom.selectbox = new west.gui.Selectbox();
                 this.gui.custom.selectbox.elContent.css("max-height", "660px");
                 this.gui.custom.selectbox.setWidth(300).addListener(function (e) { _this.customs.switchCustomJob(e); });
                 this.gui.custom.skills = jQuery('<div style="position:absolute;top:60px;left:1px;width:252px;height:30px;display:block;" />');
@@ -787,266 +810,246 @@
                 this.gui.custom.mainDiv.append(this.gui.custom.skills);
                 this.gui.custom.mainDiv.append(this.gui.custom.calc);
                 this.gui.custom.button.click(function (e) { _this.gui.custom.selectbox.show(e); });
+
+                // general gui
                 this.gui.bag.children().remove();
-                var a = function(e, t) { _this.showTab(e, t); };
+                var tabclick = function (window, tabid) { _this.showTab(window, tabid); };
                 this.gui.window = wman.open(this.uid, null, "noreload").setMiniTitle("TWDB Cloth Calc").setTitle("tw-db.info Cloth Calc")
-                    .addTab("#JOB#", "Jobs", a).addTab("#CUSTOM#", "Custom", a)
+                    .addTab("#JOB#", "Jobs", tabclick).addTab("#CUSTOM#", "Custom", tabclick)
                     .appendToContentPane(this.gui.job.mainDiv).appendToContentPane(this.gui.custom.mainDiv)
                     .appendToContentPane(this.gui.cache).appendToContentPane(this.gui.bag).appendToContentPane(this.gui.copyright);
                 this.gui.window.showLoader();
                 var f = $('<div title="#SAVE_POSITION#" style="width:20px;height:20px;position:absolute;left:0px;top:0px;background:url(\'' + TWDB.images.iconSave + "') no-repeat scroll 0px -20px transparent;cursor:pointer;display:block;\" />")
-                    .hover(function() { $(this).css("background-position", "0px 0px"); },
-                           function() { $(this).css("background-position","0px -20px"); })
-                    .click(function() {
-                            TWDB.Settings.set("clothPos", "custom");
-                            var e = _this.gui.window.saveAppearance();
-                            TWDB.Settings.set("clothPosition", {x: e.x, y: e.y });
-                            (new UserMessage("#SAVE_SUCCESSFUL#", UserMessage.TYPE_SUCCESS)).show(); });
+                    .hover(function () { $(this).css("background-position", "0px 0px"); },
+                           function () { $(this).css("background-position", "0px -20px"); })
+                    .click(function () {
+                        TWDB.Settings.set("clothPos", "custom");
+                        var e = _this.gui.window.saveAppearance();
+                        TWDB.Settings.set("clothPosition", {x: e.x, y: e.y });
+                        (new UserMessage("#SAVE_SUCCESSFUL#", UserMessage.TYPE_SUCCESS)).show();
+                    });
                 $(this.gui.window.divMain).find(".tw2gui_window_buttons").append(f);
                 $(this.gui.window.divMain).children(".tw2gui_window_tabbar").css("right", "22px");
                 var l = this.gui.window.saveAppearance();
                 switch (TWDB.Settings.get("clothPos", "left")) {
-                case "right":
-                    l.x = Wear.window.divMain.offsetLeft + Wear.window.divMain.offsetWidth - 15;
-                    break;
                 case "left":
                     l.x = Wear.window.divMain.offsetLeft - 295;
                     break;
                 case "custom":
-                    var l = TWDB.Settings.get("clothPosition", {x: 0, y: 0});
+                    l = TWDB.Settings.get("clothPosition", {x: 0, y: 0});
+                    break;
+                case "default":
+                    l.x = Wear.window.divMain.offsetLeft + Wear.window.divMain.offsetWidth - 15;
                     break;
                 }
-                if (l.x < -150) {l.x = 0;} else if (l.x > ($('body').width() - 150)) {l.x = ($('body').width() - 150);}
+                if (l.x < -20) {l.x = 0; } else if (l.x > ($('body').width() - 150)) {l.x = ($('body').width() - 150); }
                 this.gui.window.restoreAppearance({h: 410, w: 310, x: l.x, y: l.y});
                 return;
             },
 
-            finishOpening: function() {
+            finishOpening: function () {
                 this.jobs.mode(2);
                 this.joblist.init(this);
                 this.customs.createSelectbox();
-                if (typeof this.gui.window != "undefined") {
+                if (typeof this.gui.window !== "undefined") {
                     this.checkCache();
                     delete this.eventOpen;
-                    var carryEventHandler = function(e) { TWDB.ClothCalc.jobs.update(); };
+                    var carryEventHandler = function (e) { TWDB.ClothCalc.jobs.update(); };
                     /** TODO: do we really need this on every opening? **/
                     EventHandler.unlisten('wear_changed', carryEventHandler);
                     EventHandler.listen('wear_changed', carryEventHandler);
                     this.gui.window.hideLoader();
-                };
+                }
             },
 
-            showTab: function(e, t) {
+            showTab: function (e, t) {
                 this.gui.window.activateTab(t);
                 this.gui.window.showLoader();
                 this.gui.bag.children().remove();
                 switch (t) {
                 case "Jobs":
                     this.gui.custom.mainDiv.hide();
-                    if (this.jobs.selected != 0) { this.jobs.switchJob(this.jobs.selected); };
+                    if (this.jobs.selected !== 0) { this.jobs.switchJob(this.jobs.selected); }
                     this.gui.job.mainDiv.show();
                     break;
                 case "Custom":
                     this.gui.job.mainDiv.hide();
-                    if (this.customs.selected != 0) { this.customs.switchCustomJob(this.customs.selected); };
+                    if (this.customs.selected !== 0) { this.customs.switchCustomJob(this.customs.selected); }
                     this.gui.custom.mainDiv.show();
                     break;
-                };
+                }
                 this.gui.window.hideLoader();
             },
 
-            getGameData: function(e) {
+            getGameData: function (e) {
                 var t = this;
-                if (typeof e == "undefined") {
+                if (typeof e === "undefined") {
                     this.getState = {skill: false, items: false, jobs: false};
-                    TWDB.Eventer.set("getSkill", function() { t.getGameData("skill"); }, 1);
-                    TWDB.Eventer.set("getItems", function() { t.getGameData("items"); }, 1);
-                    TWDB.Eventer.set("getJobs",  function() { t.getGameData("jobs");  }, 1);
+                    TWDB.Eventer.set("getSkill", function () { t.getGameData("skill"); }, 1);
+                    TWDB.Eventer.set("getItems", function () { t.getGameData("items"); }, 1);
+                    TWDB.Eventer.set("getJobs",  function () { t.getGameData("jobs");  }, 1);
                     TWDB.DataManager.loadData();
                     this.getSkill();
                     this.getJobs();
                     this.getItems();
                 } else {
                     this.getState[e] = true;
-                    var n = true;
-                    for (var r in this.getState) {
-                        if (!this.getState[r]) { n = false; break; };
-                    };
+                    var n = true,
+                        r;
+                    for (r in this.getState) {
+                        if (!this.getState[r]) { n = false; break; }
+                    }
                     if (n) {
                         delete this.getState;
                         TWDB.Eventer.trigger("getGameData");
-                    };
-                };
+                    }
+                }
             },
 
-            getSkill: function(e) {
-                if (typeof e == "undefined") {
+            getSkill: function (e) {
+                if (typeof e === "undefined") {
                     var t = this;
-                    setTimeout(function() { t.getSkill(CharacterSkills.skills); }, 10);
+                    setTimeout(function () { t.getSkill(CharacterSkills.skills); }, 10);
                     return;
                 } else {
                     this.data.skills = {};
-                    for (var n in e) {
-                        var r = TWDB.ClothCalc._skill2id[n];
+                    var n, r;
+                    for (n in e) {
+                        r = TWDB.ClothCalc._skill2id[n];
                         this.data.skills[r] = {id: r, val: e[n].points};
-                    };
+                    }
                     TWDB.Eventer.trigger("getSkill");
-                };
+                }
             },
 
-            getItems: function(e) {
-                if (typeof e == "undefined") {
+            getItems: function (e) {
+                if (typeof e === "undefined") {
                     var t = this;
-                    jQuery.post("game.php?window=inventory", {}, function(e) { t.getItems(e) }, "json");
+                    jQuery.post("game.php?window=inventory", {}, function (e) { t.getItems(e); }, "json");
                     return;
                 } else {
                     this.data.items = {};
-                    for (var n = 0; n < e.wear.length; n++) {
-                        var r = ItemManager.get(e.wear[n]);
-                        if (!this.isItemUsable(r.item_id)) { continue; }
-                        this.data.items[r.item_id] = { id: r.item_id };
-                    }
-                    for (var id in Bag.items_by_id) {
-                        var item = Bag.items_by_id[id].obj;
+                    var id, item;
+                    for (id = 0; id < e.wear.length; id++) {
+                        item = ItemManager.get(e.wear[id]);
                         if (!this.isItemUsable(item.item_id)) { continue; }
                         this.data.items[item.item_id] = { id: item.item_id };
                     }
-                    TWDB.Eventer.trigger("getItems")
+                    for (id in Bag.items_by_id) {
+                        item = Bag.items_by_id[id].obj;
+                        if (!this.isItemUsable(item.item_id)) { continue; }
+                        this.data.items[item.item_id] = { id: item.item_id };
+                    }
+                    TWDB.Eventer.trigger("getItems");
                 }
             },
 
             getJobs: function (e) {
-                if (typeof e == "undefined") {
+                if (typeof e === "undefined") {
                     var t = this;
                     jQuery.post(
                         "game.php?window=work&mode=index", {}, function (e) {
-                            t.getJobs(e)
+                            t.getJobs(e);
                         }, "json");
-                    return
+                    return;
 
                 } else {
                     this.data.jobs = e;
-                    TWDB.Eventer.trigger("getJobs")
+                    TWDB.Eventer.trigger("getJobs");
                 }
             },
 
             isItemUsable: function (e, t) {
                 var n = ItemManager.get(e);
-                if (typeof n == "undefined") {
-                    return false
+                if (typeof n === "undefined") {
+                    return false;
                 }
                 var r = false;
                 if (!this.itemHasBonus(n)) {
-                    return false
+                    return false;
                 }
                 if (n.characterClass !== null && n.characterClass !== Character.charClass) {
-                    return false
+                    return false;
                 }
                 if (n.characterSex !== null && n.characterSex !== Character.charSex) {
-                    return false
+                    return false;
                 }
-                if (n.level !== null && n.level > Character.level + Character.itemLevelRequirementDecrease["all"] + (typeof Character.itemLevelRequirementDecrease[n.type] != "undefined" ? Character.itemLevelRequirementDecrease[n.type] : 0)) {
-                    if (isDefined(t) && t) {
-                        return true
-                    } else {
-                        return false
-                    }
+                if (n.level !== null &&
+                        n.level > Character.level + Character.itemLevelRequirementDecrease.all + (typeof Character.itemLevelRequirementDecrease[n.type] !== "undefined" ? Character.itemLevelRequirementDecrease[n.type] : 0)) {
+                    return (isDefined(t) && t);
                 }
-                return true
+                return true;
             },
 
-            itemHasBonus: function (e) {
-                if (e.type == "left_arm" || e.type == "right_arm") {
-                    return true
+            itemHasBonus: function (item) {
+                if (item.type === "left_arm" || item.type === "right_arm") {
+                    return true;
                 }
-                if (typeof e.set != "undefined" && e.set != null) {
-                    return true
+                if (typeof item.set !== "undefined" && item.set !== null) {
+                    return true;
                 }
-                if (typeof e.speed != "undefined" && e.speed != null) {
-                    return true
+                if (typeof item.speed !== "undefined" && item.speed !== null) {
+                    return true;
                 }
-                if (typeof e.bonus == "undefined") {
-                    return false
+                if (typeof item.bonus === "undefined") {
+                    return false;
                 }
-                if (typeof e.bonus.skills != "undefined") {
-                    for (var t in e.bonus.skills) {
-                        if (!jQuery
-                            .isFunction(e.bonus.skills[t])) {
-                            return true
+                var index;
+                if (typeof item.bonus.skills !== "undefined") {
+                    for (index in item.bonus.skills) {
+                        if (!jQuery.isFunction(item.bonus.skills[index])) {
+                            return true;
                         }
                     }
                 }
-                if (typeof e.bonus.attributes != "undefined") {
-                    for (var t in e.bonus.attributes) {
-                        if (!jQuery
-                            .isFunction(e.bonus.attributes[t])) {
-                            return true
+                if (typeof item.bonus.attributes !== "undefined") {
+                    for (index in item.bonus.attributes) {
+                        if (!jQuery.isFunction(item.bonus.attributes[index])) {
+                            return true;
                         }
                     }
                 }
-                if (typeof e.bonus.item != "undefined") {
-                    for (var t in e.bonus.item) {
-                        if (!jQuery.isFunction(e.bonus.item[t])) {
-                            return true
+                if (typeof item.bonus.item !== "undefined") {
+                    for (index in item.bonus.item) {
+                        if (!jQuery.isFunction(item.bonus.item[index])) {
+                            return true;
                         }
                     }
                 }
 
-                if (typeof e.bonus.fortbattle != "undefined") {
-                    for (var t in e.bonus.fortbattle) {
-                        if (e.bonus.fortbattle[t] > 0) {
-                            return true
+                if (typeof item.bonus.fortbattle !== "undefined") {
+                    for (index in item.bonus.fortbattle) {
+                        if (item.bonus.fortbattle[index] > 0) {
+                            return true;
                         }
                     }
                 }
-                if (typeof e.bonus.fortbattlesector != "undefined") {
-                    for (var t in e.bonus.fortbattlesector) {
-                        if (e.bonus.fortbattle[t] > 0) {
-                            return true
+                if (typeof item.bonus.fortbattlesector !== "undefined") {
+                    for (index in item.bonus.fortbattlesector) {
+                        if (item.bonus.fortbattle[index] > 0) {
+                            return true;
                         }
                     }
                 }
-                return false
+                return false;
             },
 
             handleTWDBData: function () {
                 var e = TWDB.DataManager.getData("twdb");
                 var t = this;
-                this.calcdata.items = jQuery.extend(true, {},
-                    t.data.items);
-                this.calcdata.skills = jQuery.extend(true, {},
-                    t.data.skills);
+                this.calcdata.items = jQuery.extend(true, {}, t.data.items);
+                this.calcdata.skills = jQuery.extend(true, {}, t.data.skills);
                 this.calcdata.time = e.time;
                 this.calcdata.jobs = e.jobs;
                 this.calcdata.custom = e.custom;
                 this.calcdata.loaded = true;
                 this.calcdata.used = {};
-                try {
-                    this.jobs.init()
-                } catch (n) {
-                    TWDB.Error.report(n,
-                        "GENERICERROR#; handle Jobs")
-                }
-                try {
-                    this.joblist.reset()
-                } catch (n) {
-                    TWDB.Error.report(n,
-                        "GENERICERROR#; handle Jobslist")
-                }
-                try {
-                    this.customs.init()
-                } catch (n) {
-                    TWDB.Error.report(n,
-                        "GENERICERROR#; handle Customs")
-                }
-                try {
-                    this.setUsedItems()
-                } catch (n) {
-                    TWDB.Error.report(n,
-                        "GENERICERROR#; setUsedItems")
-                }
+                try { this.jobs.init(); } catch (n) { TWDB.Error.report(n, "GENERICERROR#; handle Jobs"); }
+                try { this.joblist.reset(); } catch (n) { TWDB.Error.report(n, "GENERICERROR#; handle Jobslist"); }
+                try { this.customs.init(); } catch (n) { TWDB.Error.report(n, "GENERICERROR#; handle Customs"); }
+                try { this.setUsedItems(); } catch (n) { TWDB.Error.report(n, "GENERICERROR#; setUsedItems"); }
                 TWDB.Cache.save("calcdata", this.calcdata);
-                this.finishOpening()
+                this.finishOpening();
             },
 
             jobs: {
@@ -1058,88 +1061,87 @@
                     type: "name",
                     order: 1
                 },
-                setParent: function (e) {
-                    this.parent = e
-                },
+                setParent: function (e) { this.parent = e; },
                 init: function () {
-                    var e = [];
-                    var t = 0;
-                    var n = 0;
+                    var e = [],
+                        t = 0,
+                        n = 0,
+                        i,
+                        r,
+                        s;
+                    /** TODO: use JobList.getAllJobs() **/
                     while (true) {
                         t++;
-                        var r = JobList.getJobById(t);
+                        r = JobList.getJobById(t);
                         if (!r) {
                             n++;
-                            if (n > 5) {
-                                break
-                            }
-                            continue
+                            if (n > 5) { break; }
+                            continue;
                         }
                         n = 0;
-                        e[r.shortname] = r.id
+                        e[r.shortname] = r.id;
                     }
-                    for (var i in this.parent.calcdata.jobs) {
-                        var r = this.parent.calcdata.jobs[i];
-                        if (typeof e[r.short_name] == "undefined") {
-                            if (r.short_name == "construction") {
+                    for (i in this.parent.calcdata.jobs) {
+                        r = this.parent.calcdata.jobs[i];
+                        if (typeof e[r.short_name] === "undefined") {
+                            if (r.short_name === "construction") {
                                 r.name = "#CONSTRUCTION#";
                                 r.skills = {};
                                 r.gameid = 0;
                                 r.laborpoints.current = 0;
                                 r.duration = 7200 * Number(this.parent.data.jobs.workspeed);
-                                r.energy = 24
+                                r.energy = 24;
                             } else {
                                 r.name = "!!".job.short_name;
                                 r.skills = {};
                                 r.gameid = 0;
                                 r.laborpoints.current = 0;
                                 r.duration = 0;
-                                r.energy = 0
+                                r.energy = 0;
                             }
-                            continue
+                            continue;
                         }
-                        var s = JobList
-                            .getJobById(e[r.short_name]);
+                        s = JobList.getJobById(e[r.short_name]);
                         r.name = s.name;
                         r.skills = s.skills;
                         r.gameid = s.id;
                         r.difficulty = s.malus;
                         r.duration = 0;
                         r.energy = s.energy;
-                        r.laborpoints.current = 0
+                        r.laborpoints.current = 0;
                     }
                 },
-                update: function () {
 
+                update: function () {
                     if (isDefined(this.parent.calcdata.jobs[this.selected])) { // Dun
                         // -
                         // change
                         // defined
-                        var e = this
-                            .calcJob(this.selected);
+                        var e = this.calcJob(this.selected);
+                        /** TODO: formatting
+                        <div style="position:absolute;top: 37px;left:0px;width: 187px;height:19px;font-weight:bold;white-space: nowrap;">
+                            <div style="float: right;">[-648/-135]</div>
+                            <div style="overflow: hidden;text-overflow: ellipsis;">Den Westen erkunden nach hundert Sekunden</div>
+                        </div>
+                        **/
                         var t = e.name.substring(0, 18) + " [" + e.laborpoints.current + "/" + e.laborpoints.sum + "]";
-                        this.parent.gui.job.title
-                            .html(t)
+                        this.parent.gui.job.title.html(t);
                             // Dun - for update current
                             // rewards
                         this.parent.jobs.showCur();
 
                     }
                 },
+
                 showCur: function () {
-
                     if (isDefined(this.selected)) {
-
                         var job = this.parent.calcdata.jobs[this.selected];
                         if (isDefined(job)) {
                             var current = "";
-
                             switch (this.parent.joblist.sort.type) {
-
                             case "luck1":
                                 current += '<img style="vertical-align: bottom;" src="' + TWDB.images.iconLuck + '"/> ';
                                 current += " $" + job.values.cur_luck1 + "-" + "$" + job.values.cur_luck2;
-
                                 break;
                             case "laborpoints":
                                 current += '<img style="vertical-align: bottom;" src="' + TWDB.images.iconLaborpoints + '"/> ';
@@ -1150,98 +1152,98 @@
                                 current += job.values.cur_experience + "exp";
                                 break;
                             case "wages":
-
                                 current += '<img style="vertical-align: bottom;" src="' + TWDB.images.iconDollar + '"/> ';
                                 current += " $" + job.values.cur_wages;
                                 break;
                             case "danger":
-
                                 current += '<img style="vertical-align: bottom;" src="' + TWDB.images.iconDanger + '"/> ';
                                 current += job.values.cur_danger + "%";
                                 break;
                             case "motivation":
                                 current += '<img style="vertical-align: bottom;" src="' + TWDB.images.iconMoti + '"/> ';
-                                current += job.values.resmotivation * 100 + " (" + Math
-                                    .round(job.values.motivation * 100) + ")%";
-                                break
+                                current += job.values.resmotivation * 100 + " (" + Math.round(job.values.motivation * 100) + ")%";
+                                break;
                             }
 
-                            this.parent.gui.job.calc
-                                .html(current);
+                            this.parent.gui.job.calc.html(current);
                         }
                     }
 
                 },
+
                 switchJob: function (e) {
-
-                    if (typeof this.parent.calcdata.jobs[e] == "undefined" || typeof this.parent.calcdata.jobs[e].cloth == "undefined") {
-                        return
-
+                    if (typeof this.parent.calcdata.jobs[e] === "undefined" ||
+                            typeof this.parent.calcdata.jobs[e].cloth === "undefined") {
+                        return;
                     }
 
-                    var t = this.parent;
-                    var n = t.calcdata.jobs[e];
-                    if (n.gameid != 0) {
+                    var t = this.parent,
+                        n = t.calcdata.jobs[e];
+                    if (n.gameid !== 0) {
                         TWDB.Map.setMinimapJob(n.name);
-                        t.gui.job.search.show()
+                        t.gui.job.search.show();
                     } else {
-                        t.gui.job.search.hide()
+                        t.gui.job.search.hide();
                     }
                     this.selected = e;
+                    /** TODO: formatting
+                    <div style="position:absolute;top: 37px;left:0px;width: 187px;height:19px;font-weight:bold;white-space: nowrap;">
+                        <div style="float: right;">[-648/-135]</div>
+                        <div style="overflow: hidden;text-overflow: ellipsis;">Den Westen erkunden nach hundert Sekunden</div>
+                    </div>
+                    **/
                     var r = n.name.substring(0, 18) + " [" + n.laborpoints.current + "/" + n.laborpoints.sum + "]";
                     t.gui.job.title.html(r);
                     t.bag.showItems(n.cloth, "jobs");
 
-                    t.gui.job.skills.children()
-                        .remove();
+                    t.gui.job.skills.children().remove();
 
-                    for (var i in n.skills) {
-                        for (var s = 0; s < n.skills[i]; s++) {
-                            var o = jQuery('<div style="float:left;width;30px;height:30px;" />');
-                            t.gui.job.skills
-                                .append(o
-                                    .append(t
-                                        .getSkillImg(
-                                            i,
-                                            30)))
+                    var i, s, o;
+                    for (i in n.skills) {
+                        for (s = 0; s < n.skills[i]; s++) {
+                            o = jQuery('<div style="float:left;width;30px;height:30px;" />');
+                            t.gui.job.skills.append(o.append(t.getSkillImg(i, 30)));
                         }
                     }
 
                     this.showCur();
 
                 },
-                mode: function (e) {
-                    var _this = this;
-                    // check the minimal allowed duration
-                    var minDur = 2, J = _this.parent.data.jobs.jobs;
-                    for (var i in _this.parent.data.jobs.jobs) { minDur = Math.min(J[i].durations.length - 1,minDur); };
-                    if (minDur < e) { return _this.mode(0); }; // Dun - correcting for level < 20
+
+                mode: function (jobDurationid) {
+                    var _this = this,
+                        minDur = 2,
+                        j = _this.parent.data.jobs.jobs,
+                        i;
+                    for (i in _this.parent.data.jobs.jobs) { minDur = Math.min(j[i].durations.length - 1, minDur); }
+                    if (minDur < jobDurationid) { return _this.mode(0); } // Dun - correcting for level < 20
 
                     /** TODO: fix this error! **/
                     try { _this.parent.gui.job.mode.unbind("click"); }          // -> Uncaught TypeError: Cannot read property 'unbind' of undefined
                     catch (err) {}
-                    switch (e) {
-                    case 0:
-                        _this.base = 0;
-                        _this.basetime = 15;
-                        _this.parent.gui.job.mode.css("background-position", "0px 0px")
-                            .click(function() { _this.mode(1); _this.parent.joblist.update(); });
-                        break;
+                    switch (jobDurationid) {
                     case 1:
                         _this.base = 1;
                         _this.basetime = 600;
                         _this.parent.gui.job.mode.css("background-position", "-20px 0px")
-                            .click(function() { _this.mode(2); _this.parent.joblist.update(); });
+                            .click(function () { _this.mode(2); _this.parent.joblist.update(); });
                         break;
                     case 2:
                         _this.base = 2;
                         _this.basetime = 3600;
                         _this.parent.gui.job.mode.css("background-position", "-40px 0px")
-                            .click(function() { _this.mode(0); _this.parent.joblist.update(); });
+                            .click(function () { _this.mode(0); _this.parent.joblist.update(); });
+                        break;
+                    default:
+                        _this.base = 0;
+                        _this.basetime = 15;
+                        _this.parent.gui.job.mode.css("background-position", "0px 0px")
+                            .click(function () { _this.mode(1); _this.parent.joblist.update(); });
                         break;
                     };
                 },
-                _calcStepFormula: function(r1, r2, formula, points, malus, magic, mot, factor, freezeBronze) {
+
+                _calcStepFormula: function (r1, r2, formula, points, malus, magic, mot, factor, freezeBronze) {
                     /*
                      * by steps until silver, then formula
                      * r1, r2 - what type of rounding is used on the calculated value
@@ -1256,33 +1258,33 @@
                         stars = Math.min(Math.floor(points / step), 15),
                         dmot = Math.ceil(mot / 25) * 0.25;
                     return points < 5 * step || points <= malus ?
-                        Math[r1](({0: 1, 1: 2, 2: 3, 3: 4, 4: 5, 5: 6.25})[freezeBronze ? 0 : stars] * magic * dmot * factor) :
-                        Math[r2](formula(points - malus, stars) * magic * dmot * factor);
+                            Math[r1](({0: 1, 1: 2, 2: 3, 3: 4, 4: 5, 5: 6.25})[freezeBronze ? 0 : stars] * magic * dmot * factor) :
+                            Math[r2](formula(points - malus, stars) * magic * dmot * factor);
                 },
-                calcWage: function(pts, mal, magic, mot, fac) {
-                    return this._calcStepFormula('ceil', 'round', function(lp) { return 6.25 * Math.pow(lp, 0.05) }, pts, mal, magic, mot, fac);
+                calcWage: function (pts, mal, magic, mot, fac) {
+                    return this._calcStepFormula('ceil', 'round', function (lp) { return 6.25 * Math.pow(lp, 0.05); }, pts, mal, magic, mot, fac);
                 },
                 calcExp: function (pts, mal, magic, mot, fac) {
-                    return this._calcStepFormula('ceil', 'ceil', function (lp) { return 6.25 }, pts, mal, magic, mot, fac);
+                    return this._calcStepFormula('ceil', 'ceil', function (lp) { return 6.25; }, pts, mal, magic, mot, fac);
                 },
                 calcLuck: function (pts, mal, magic, mot, fac) {
-                    return this._calcStepFormula('floor', 'floor', function (lp) { return 6.25 * Math.pow(lp, 0.2) }, pts, mal, (0.9 * magic + 5) / 1.25, 100, fac);
+                    return this._calcStepFormula('floor', 'floor', function (lp) { return 6.25 * Math.pow(lp, 0.2); }, pts, mal, (0.9 * magic + 5) / 1.25, 100, fac);
                 },
                 calcProductRate: function (pts, mal, magic, mot, fac) {
-                    return this._calcStepFormula('round', 'round', function (lp, stars) { return stars < 15 ? 6.25 : 9.375 }, pts, mal, magic, 100, fac);
+                    return this._calcStepFormula('round', 'round', function (lp, stars) { return stars < 15 ? 6.25 : 9.375; }, pts, mal, magic, 100, fac);
                 },
                 calcDanger: function (pts, mal, magic, mot, fac) {	// Dun change ceil by floor
-                    return this._calcStepFormula('floor', 'floor', function (lp) { return Math.pow(lp, -0.2) }, pts, mal, magic, 100, fac, true);
+                    return this._calcStepFormula('floor', 'floor', function (lp) { return Math.pow(lp, -0.2); }, pts, mal, magic, 100, fac, true);
                 },
                 addPremium: function (job) {	// Dun - adding premium bonus
-                    var premiumChar = Number(Premium.hasBonus("character"));
-                    var premium = Number(Premium.hasBonus("money"));
-                    var premWages = 1;
-                    if (premium) { premWages *= 1.5; };	// Add premium $ increase bonus
-                    var premWorker = 1;
-                    if (Character.charClass === 'worker') { premWorker = (premiumChar) ? 1.1 : 1.05; };	// Add worker increase bonus
-                    var premAv = 1;
-                    if (Character.charClass === 'adventurer') { premAv = (premiumChar) ? 0.8 : 0.9; };	// Add adventurer decrease bonus
+                    var premiumChar = Number(Premium.hasBonus("character")),
+                        premium = Number(Premium.hasBonus("money")),
+                        premWages = 1,
+                        premWorker = 1,
+                        premAv = 1;
+                    if (premium) { premWages *= 1.5; }	// Add premium $ increase bonus
+                    if (Character.charClass === 'worker') { premWorker = (premiumChar) ? 1.1 : 1.05; }	// Add worker increase bonus
+                    if (Character.charClass === 'adventurer') { premAv = (premiumChar) ? 0.8 : 0.9; }	// Add adventurer decrease bonus
 
                     job.values.cur_wages = Math.round(job.values.cur_wages * premWages);
                     job.values.cur_experience = Math.round(job.values.cur_experience * premWorker);
@@ -1293,17 +1295,18 @@
                     job.values.luck2 = Math.floor(job.values.luck2 * premWages);
                     job.values.danger = Math.round(job.values.danger * premAv);
                     return job;
-
                 },
-                calcJob: function(e) {
-                    var job = this.parent.calcdata.jobs[e];
+
+                calcJob: function (e) {
+                    var job = this.parent.calcdata.jobs[e],
+                        difficulty = job.difficulty,
+                        realjob = JobList.getJobById(job.gameid),
+                        r;
                     job.values = {};
                     job.sp = 0;
                     job.max_sp = 0;
                     job.laborpoints.skills = 0;
-                    var difficulty = job.difficulty;
-                    var realjob = JobList.getJobById(job.gameid);
-                    for (var r in job.skills) {
+                    for (r in job.skills) {
                         job.laborpoints.skills += Number(job.skills[r]) * Number(CharacterSkills.skills[r].points);
                     };
                     job.laborpoints.sum = job.laborpoints.cloth;
@@ -1316,7 +1319,7 @@
                     } else {
                         job.laborpoints.current = 0;
                     };
-                    if (job.gameid != 0) {
+                    if (job.gameid !== 0) {
                         job.values.motivation = this.parent.data.jobs.jobs[job.gameid].motivation;
                         job.values.resmotivation = Math.ceil(this.parent.data.jobs.jobs[job.gameid].motivation * 4) / 4;
                     } else {
@@ -1337,6 +1340,7 @@
                         break;
                     case 1:
                         ponderation = 0.47;
+                        break;
                     default:
                         break;
                     };
@@ -1388,50 +1392,52 @@
                     delete this.elements;
                     this.elements = [];
                     this.getMainDiv().children().remove();
-                    this
-                        .getMainDiv()
-                        .append(
-                            '<style type="text/css">.TWDB_hide{display:none;}.TWDB_filter{display:none;}</style>');
-                    this.init(this.parent)
+                    this.getMainDiv().
+                        append('<style type="text/css">.TWDB_hide{display:none;}.TWDB_filter{display:none;}</style>');
+                    this.init(this.parent);
                 },
-                init: function (e) {
+                init: function (parent) {
                     if (this.ready){ return; }
                     this.ready = true;
-                    this.parent = e;
-                    if (!this.gui.main) {
-                        this.gui.main = this.getMainDiv()
-                    }
+                    this.parent = parent;
+                    if (!this.gui.main) { this.gui.main = this.getMainDiv(); }
                     this.gui.result = jQuery('<div class="tw2gui_jobsearchbar_allresults" style="width:285px;" />');
-                    this.gui.input = (new west.gui.Textfield).maxlength(32).setClass4Input("tw2gui_jobsearch_string").setWidth(265);
+                    this.gui.input = (new west.gui.Textfield()).maxlength(32).setClass4Input("tw2gui_jobsearch_string").setWidth(265);
                     this.gui.button = jQuery('<div class="tw2gui_jobsearch_showall" style="display:block;cursor:pointer;"></div>');
-                    this.gui.scrollpane = new west.gui.Scrollpane;
+                    this.gui.scrollpane = new west.gui.Scrollpane();
                     jQuery(this.gui.scrollpane.getMainDiv()).css({"width": "285px", "height": "250px"});
-                    for (var t in e.calcdata.jobs) {
-                        var n = e.calcdata.jobs[t];
-                        var r = jQuery("<p>" + n.name + "</p>");
-                        var i = {};
-                        i.dom = r;
-                        i.id = t;
-                        // i.str = n.name.toUpperCase() + " ";
-                        i.str = "§" + n.name.toUpperCase() + "§";       // separator that doesn't occur in jobs/products
-                        if (n.gameid != 0) {
-                            var s = JobList.getJobById(n.gameid);
-                            for (var o in s.yields) {
-                                if (isNaN(o)){ continue; }
-                                var u = ItemManager.get(o);
-                                // i.str += u.name.toUpperCase() + " ";
-                                i.str += u.name.toUpperCase() + "§";
+                    var jobid,
+                        job,
+                        div,
+                        tmp;
+                    for (jobid in parent.calcdata.jobs) {
+                        job = parent.calcdata.jobs[jobid];
+                        div = jQuery("<p>" + job.name + "</p>");
+                        tmp = {};
+                        tmp.dom = div;
+                        tmp.id = jobid;
+                        // tmp.str = n.name.toUpperCase() + " ";
+                        tmp.str = "§" + job.name.toUpperCase() + "§";       // separator that doesn't occur in jobs/products
+                        if (job.gameid !== 0) {
+                            var jobData = JobList.getJobById(job.gameid),
+                                itemid;
+                            for (itemid in jobData.yields) {
+                                if (isNaN(itemid)){ continue; }
+                                // tmp.str += u.name.toUpperCase() + " ";
+                                tmp.str += ItemManager.get(itemid).name.toUpperCase() + "§";
                             }
                         }
-                        this.elements.push(i)
+                        this.elements.push(tmp);
                     }
-                    this.gui.main.append(jQuery('<div style="position:relative;top:0;left:0;width:305px" />')
-                                        .append(this.gui.input.getMainDiv()).append(this.gui.button))
-                                 .append(this.gui.result);
+                    this.gui.main.append(jQuery('<div style="position:relative;top:0;left:0;width:305px" />').
+                                         append(this.gui.input.getMainDiv()).
+                                         append(this.gui.button)).
+                    append(this.gui.result);
                     this.update();
                     if (this.name) { this.open(this.name); }
                 },
-                open: function(name){
+
+                open: function (name){
                     var _self = this;
                     this.gui.result.show();
                     jQuery(this.gui.input.getMainDiv()).unbind().keyup(function(ev){ _self.keyHandler(ev); });
@@ -1489,12 +1495,13 @@
                     });
                     if ($found.length === 1){ $found[0].click(); }   // if only one result shown - chose it
                 },
-                keyHandler: function (e) {
-                    var t = e.keyCode ? e.keyCode : e.which;
-                    if (t == 38 || t == 40) {
-                        if (t == 38) {
+                keyHandler: function (event) {
+                    var keycode = event.keyCode ? event.keyCode : event.which,
+                        i;
+                    if (keycode == 38 || keycode == 40) {
+                        if (keycode == 38) {
                             this.elements[this.focused].dom.removeClass("focused");
-                            for (var n = 0; n < this.elements.length; n++) {
+                            for (i = 0; i < this.elements.length; i++) {
                                 this.focused--;
                                 if (this.focused < 0){ this.focused = this.elements.length - 1; }
                                 if (this.elements[this.focused].dom.is(":visible")) {
@@ -1504,7 +1511,7 @@
                             }
                         } else {
                             this.elements[this.focused].dom.removeClass("focused");
-                            for (var n = 0; n < this.elements.length; n++) {
+                            for (i = 0; i < this.elements.length; i++) {
                                 this.focused++;
                                 if (this.focused >= this.elements.length){ this.focused = 0; }
                                 if (this.elements[this.focused].dom.is(":visible")) {
@@ -1513,13 +1520,14 @@
                                 }
                             }
                         }
-                        var r = this.elements[this.focused].dom.offset().top;
-                        var i = jQuery(this.gui.scrollpane.clipPane).offset().top;
-                        if (r-i > 180 || i-r > 0) {
-                            var s = (r - i - 90) / 16;
-                            this.gui.scrollpane.scrollTo(0, s);
+                        var pos1 = this.elements[this.focused].dom.offset().top,
+                            pos2 = jQuery(this.gui.scrollpane.clipPane).offset().top,
+                            diff;
+                        if (pos1 - pos2 > 180 || pos2 - pos1 > 0) {
+                            diff = (pos1 - pos2 - 90) / 16;
+                            this.gui.scrollpane.scrollTo(0, diff);
                         }
-                    } else if (t == 13) { this.elements[this.focused].dom.click(); }
+                    } else if (keycode == 13) { this.elements[this.focused].dom.click(); }
                       else { this.search(this.gui.input.getValue()); }
                 },
                 order: function (e) {
@@ -1606,55 +1614,46 @@
                         r += n.values.duration + " sec";
                         break;
                     case "motivation":
-                        r += n.values.resmotivation * 100 + " (" + Math
-                            .round(n.values.motivation * 100) + ")%";
+                        r += n.values.resmotivation * 100 + " (" + Math.round(n.values.motivation * 100) + ")%";
                         break
                     }
                     t.dom.html(r);
                     if (n.laborpoints.current < 0) {
                         if (n.laborpoints.sum < 0) {
                             if (JobList.getJobById(t.id).level <= Character.level) {
-                                t.dom.css("color", "blue")
+                                t.dom.css("color", "blue");
                             } else {
                                 t.dom.css("color", "red");
                                 if (!this.all) {
-                                    t.dom.addClass("TWDB_hide")
+                                    t.dom.addClass("TWDB_hide");
                                 }
                             }
                         } else {
-                            t.dom.css("color", "orange")
+                            t.dom.css("color", "orange");
                         }
                     } else {
-                        t.dom.css("color", "#333333")
+                        t.dom.css("color", "#333333");
                     }
-                    return n
+                    return n;
                 },
                 update: function () {
                     var e = this;
-                    jQuery.each(this.elements, function (t, n) {
-                        e.updateJob(t)
-                    });
-                    this.order()
+                    jQuery.each(this.elements, function (t, n) { e.updateJob(t); });
+                    this.order();
                 },
                 getMainDiv: function () {
                     if (!this.gui.main) {
-                        this.gui.main = jQuery(
-                                '<div style="position:absolute;left: 255px; top: 30px; display: none;" />')
-                            .append(
-                                '<style type="text/css">.TWDB_hide{display:none;}.TWDB_filter{display:none;}</style>')
+                        this.gui.main = jQuery('<div style="position:absolute;left: 255px; top: 30px; display: none;" />')
+                            .append('<style type="text/css">.TWDB_hide{display:none;}.TWDB_filter{display:none;}</style>');
                     }
-                    return this.gui.main
+                    return this.gui.main;
                 },
-                close: function () {
-                    this.gui.main.hide()
-                }
+                close: function () { this.gui.main.hide(); }
             },
 
             customs: {
                 selected: 0,
-                setParent: function (e) {
-                    this.parent = e
-                },
+                setParent: function (e) { this.parent = e; },
                 init: function () {
                     for (var e in this.parent.calcdata.custom) {
                         try {
@@ -1680,11 +1679,11 @@
                             case "fort":
                                 if (t.para.type == 0) {
                                     var i = {};
-                                    i.aim = CharacterSkills.skills.aim.points + (typeof t.boni.skill[3] != "undefined" ? t.boni.skill[3] : 0) + (typeof t.boni.skill[15] != "undefined" ? t.boni.skill[15] : 0);
-                                    i.endurance = CharacterSkills.skills.endurance.points + (typeof t.boni.skill[1] != "undefined" ? t.boni.skill[1] : 0) + (typeof t.boni.skill[8] != "undefined" ? t.boni.skill[8] : 0);
-                                    i.dodge = CharacterSkills.skills.dodge.points + (typeof t.boni.skill[2] != "undefined" ? t.boni.skill[2] : 0) + (typeof t.boni.skill[12] != "undefined" ? t.boni.skill[12] : 0);
-                                    i.leadership = CharacterSkills.skills.leadership.points + (typeof t.boni.skill[4] != "undefined" ? t.boni.skill[4] : 0) + (typeof t.boni.skill[20] != "undefined" ? t.boni.skill[20] : 0);
-                                    i.health = CharacterSkills.skills.health.points + (typeof t.boni.skill[1] != "undefined" ? t.boni.skill[1] : 0) + (typeof t.boni.skill[9] != "undefined" ? t.boni.skill[9] : 0);
+                                    i.aim = CharacterSkills.skills.aim.points + (typeof t.boni.skill[3] !== "undefined" ? t.boni.skill[3] : 0) + (typeof t.boni.skill[15] !== "undefined" ? t.boni.skill[15] : 0);
+                                    i.endurance = CharacterSkills.skills.endurance.points + (typeof t.boni.skill[1] !== "undefined" ? t.boni.skill[1] : 0) + (typeof t.boni.skill[8] !== "undefined" ? t.boni.skill[8] : 0);
+                                    i.dodge = CharacterSkills.skills.dodge.points + (typeof t.boni.skill[2] !== "undefined" ? t.boni.skill[2] : 0) + (typeof t.boni.skill[12] !== "undefined" ? t.boni.skill[12] : 0);
+                                    i.leadership = CharacterSkills.skills.leadership.points + (typeof t.boni.skill[4] !== "undefined" ? t.boni.skill[4] : 0) + (typeof t.boni.skill[20] !== "undefined" ? t.boni.skill[20] : 0);
+                                    i.health = CharacterSkills.skills.health.points + (typeof t.boni.skill[1] !== "undefined" ? t.boni.skill[1] : 0) + (typeof t.boni.skill[9] !== "undefined" ? t.boni.skill[9] : 0);
                                     var s = 100 + (Character.level - 1) * Character.lifePointPerHealthSkill + i.health * (Character.lifePointPerHealthSkill + Character.lifePointPerHealthSkillBonus) + " | ";
                                     s += Math
                                         .round((25 + Math
@@ -1712,11 +1711,11 @@
                                                 .4)) * 100) / 100
                                 } else {
                                     var i = {};
-                                    i.aim = CharacterSkills.skills.aim.points + (typeof t.boni.skill[3] != "undefined" ? t.boni.skill[3] : 0) + (typeof t.boni.skill[15] != "undefined" ? t.boni.skill[15] : 0);
-                                    i.hide = CharacterSkills.skills.hide.points + (typeof t.boni.skill[2] != "undefined" ? t.boni.skill[2] : 0) + (typeof t.boni.skill[13] != "undefined" ? t.boni.skill[13] : 0);
-                                    i.dodge = CharacterSkills.skills.dodge.points + (typeof t.boni.skill[2] != "undefined" ? t.boni.skill[2] : 0) + (typeof t.boni.skill[12] != "undefined" ? t.boni.skill[12] : 0);
-                                    i.leadership = CharacterSkills.skills.leadership.points + (typeof t.boni.skill[4] != "undefined" ? t.boni.skill[4] : 0) + (typeof t.boni.skill[20] != "undefined" ? t.boni.skill[20] : 0);
-                                    i.health = CharacterSkills.skills.health.points + (typeof t.boni.skill[1] != "undefined" ? t.boni.skill[1] : 0) + (typeof t.boni.skill[9] != "undefined" ? t.boni.skill[9] : 0);
+                                    i.aim = CharacterSkills.skills.aim.points + (typeof t.boni.skill[3] !== "undefined" ? t.boni.skill[3] : 0) + (typeof t.boni.skill[15] !== "undefined" ? t.boni.skill[15] : 0);
+                                    i.hide = CharacterSkills.skills.hide.points + (typeof t.boni.skill[2] !== "undefined" ? t.boni.skill[2] : 0) + (typeof t.boni.skill[13] !== "undefined" ? t.boni.skill[13] : 0);
+                                    i.dodge = CharacterSkills.skills.dodge.points + (typeof t.boni.skill[2] !== "undefined" ? t.boni.skill[2] : 0) + (typeof t.boni.skill[12] !== "undefined" ? t.boni.skill[12] : 0);
+                                    i.leadership = CharacterSkills.skills.leadership.points + (typeof t.boni.skill[4] !== "undefined" ? t.boni.skill[4] : 0) + (typeof t.boni.skill[20] !== "undefined" ? t.boni.skill[20] : 0);
+                                    i.health = CharacterSkills.skills.health.points + (typeof t.boni.skill[1] !== "undefined" ? t.boni.skill[1] : 0) + (typeof t.boni.skill[9] !== "undefined" ? t.boni.skill[9] : 0);
                                     var s = 100 + (Character.level - 1) * Character.lifePointPerHealthSkill + i.health * (Character.lifePointPerHealthSkill + Character.lifePointPerHealthSkillBonus) + " | ";
                                     s += Math
                                         .round((25 + Math
@@ -1752,18 +1751,18 @@
                                 for (var o in t.para) {
                                     var u = Math
                                         .floor(o / 5);
-                                    if (typeof t.boni.skill[o] != "undefined") {
+                                    if (typeof t.boni.skill[o] !== "undefined") {
                                         s += t.boni.skill[o]
                                     }
-                                    if (typeof t.boni.skill[u] != "undefined") {
+                                    if (typeof t.boni.skill[u] !== "undefined") {
                                         s += t.boni.skill[u]
                                     }
-                                    if (typeof TWDB.ClothCalc._id2skill[o] != "undefined") {
+                                    if (typeof TWDB.ClothCalc._id2skill[o] !== "undefined") {
                                         t.skills
                                             .push(TWDB.ClothCalc._id2skill[o]);
-                                        if (typeof CharacterSkills.skills[TWDB.ClothCalc._id2skill[o]] != "undefined") {
+                                        if (typeof CharacterSkills.skills[TWDB.ClothCalc._id2skill[o]] !== "undefined") {
                                             s += CharacterSkills.skills[TWDB.ClothCalc._id2skill[o]].points
-                                        } else if (typeof CharacterSkills.attributes[TWDB.ClothCalc._id2skill[o]] != "undefined") {
+                                        } else if (typeof CharacterSkills.attributes[TWDB.ClothCalc._id2skill[o]] !== "undefined") {
                                             s += CharacterSkills.attributes[TWDB.ClothCalc._id2skill[o]].points
                                         }
                                     }
@@ -1777,18 +1776,18 @@
 
                                     var u = Math
                                         .floor(o / 5);
-                                    if (typeof t.boni.skill[o] != "undefined") {
+                                    if (typeof t.boni.skill[o] !== "undefined") {
                                         s += t.boni.skill[o]
                                     }
-                                    if (typeof t.boni.skill[u] != "undefined") {
+                                    if (typeof t.boni.skill[u] !== "undefined") {
                                         s += t.boni.skill[u]
                                     }
-                                    if (typeof TWDB.ClothCalc._id2skill[o] != "undefined") {
+                                    if (typeof TWDB.ClothCalc._id2skill[o] !== "undefined") {
                                         t.skills
                                             .push(TWDB.ClothCalc._id2skill[o]);
-                                        if (typeof CharacterSkills.skills[TWDB.ClothCalc._id2skill[o]] != "undefined") {
+                                        if (typeof CharacterSkills.skills[TWDB.ClothCalc._id2skill[o]] !== "undefined") {
                                             s += CharacterSkills.skills[TWDB.ClothCalc._id2skill[o]].points
-                                        } else if (typeof CharacterSkills.attributes[TWDB.ClothCalc._id2skill[o]] != "undefined") {
+                                        } else if (typeof CharacterSkills.attributes[TWDB.ClothCalc._id2skill[o]] !== "undefined") {
                                             s += CharacterSkills.attributes[TWDB.ClothCalc._id2skill[o]].points
                                         }
                                     }
@@ -1889,13 +1888,13 @@
                         this.parent.gui.custom.skills
                             .append(r);
 
-                        if (this.parent.calcdata.custom[this.parent.customs.selected].type == "fort" && typeof t[n] != "undefined") {
+                        if (this.parent.calcdata.custom[this.parent.customs.selected].type == "fort" && typeof t[n] !== "undefined") {
                             var i = jQuery('<div style="float:left;height:25px;padding:5px 10px 0px 5px ;font-weight:bold;">' + t[n] + "</div>");
                             this.parent.gui.custom.skills
                                 .append(i)
                         }
                     }
-                    if (this.parent.calcdata.custom[this.parent.customs.selected].type != "fort") {
+                    if (this.parent.calcdata.custom[this.parent.customs.selected].type !== "fort") {
                         var i = jQuery('<div style="float:left;height:25px;padding:5px 0px 0px 5px ;font-weight:bold;">' + e + "</div>");
                         this.parent.gui.custom.skills
                             .append(i)
@@ -1983,7 +1982,7 @@
                         var r = "";
                         var i = "";
                         var s = "#ADD# - ";
-                        if (typeof this.parent.data.custom[e] != "undefined") {
+                        if (typeof this.parent.data.custom[e] !== "undefined") {
                             s = "#EDIT# - ";
                             var r = this.parent.data.custom[e].name;
                             var i = JSON
@@ -2080,7 +2079,7 @@
                         switch (i.type) {
                         case "speed":
                         case "regen":
-                            if (f != 0) {
+                            if (f !== 0) {
                                 return u("#WRONG# #CODE# [4]")
                             }
                             break;
@@ -2088,7 +2087,7 @@
                             if (typeof i.para.type == "undefined" || typeof i.para.att == "undefined" || typeof i.para.def == "undefined" || typeof i.para.health == "undefined") {
                                 return u("#WRONG# #CODE# [5]")
                             }
-                            if (i.para.type != 1 && i.para.type != 0) {
+                            if (i.para.type !== 1 && i.para.type !== 0) {
                                 return u("#WRONG# #CODE# [6]")
                             }
                             if (!jQuery
@@ -2286,9 +2285,9 @@
                     return jQuery("<div />")
                 }
                 var o = "";
-                if (typeof CharacterSkills.skills[e] != "undefined") {
+                if (typeof CharacterSkills.skills[e] !== "undefined") {
                     var o = CharacterSkills.skills[e].name
-                } else if (typeof CharacterSkills.attributes[e] != "undefined") {
+                } else if (typeof CharacterSkills.attributes[e] !== "undefined") {
                     var o = CharacterSkills.attributes[e].name
                 }
                 s = '<img src="' + s + '" height="' + t * r + '" title="' + o + '" style="margin-left:-' + i * t + 'px" />';
@@ -2415,7 +2414,7 @@
                 wear: function () {
                     for (var e in Wear.wear) {
                         var t = Wear.wear[e].obj.item_id;
-                        if (typeof this.items[t] != "undefined") {
+                        if (typeof this.items[t] !== "undefined") {
                             this.items[t].css(
                                 "opacity", "0.5")
                         }
@@ -3060,7 +3059,7 @@
                     Products.sort();
 
                     jobdata = Cache.load("jobdata");
-                    if (jobdata === null || typeof jobdata != "object") { jobdata = {}; }
+                    if (jobdata === null || typeof jobdata !== "object") { jobdata = {}; }
                     Eventer.set("TWDBdataLoaded", function() { clearJobdata(); });
                     loader.ready = true;
                 };
@@ -3217,7 +3216,7 @@
                         return
 
                     }
-                    if (s[e].title != "") {
+                    if (s[e].title !== "") {
                         r.setTitle("tw-db.info " + s[e].title)
                     } else {
                         r.setTitle("")
@@ -3746,6 +3745,10 @@
                         [0, "jobwin_ccbutton", "#HELP_JOBWINCC#", false],
                         [0, "jobwin_showlp", "#HELP_JOBWINLP#", false],
 
+                        [9, "", "#CAP_TASKLIST#", false],                    // Task List
+                        [0, "tasklistpoints", "#HELP_TL_SHOWLP#", false],
+                        // [0, "tasklistcancel", "#HELP_TL_CANCELALL#", false],
+
                         [9, "", "GUI", false],                                  // GUI
                         [0, "duelmotivation", "#HELP_DUELMOTIVATION#", false],
                         [0, "directsleep", "#HELP_DIRECTSLEEP#", false],
@@ -3987,7 +3990,7 @@
                 var init = function() {
                     if (loader.ready) { return; };
                     div = Window.addTab("notes", "Release Notes", "Release Notes", function() { open(); });
-                    if (Cache.load("version") && Script.version + " " + Script.revision != Cache.load("version")) {
+                    if (Cache.load("version") && Script.version + " " + Script.revision !== Cache.load("version")) {
                         Cache.save("version", Script.version + " " + Script.revision);
                         updated = true;
                         var title = "#WAS_UPDATED#";
@@ -4039,7 +4042,7 @@
 
                 // never touch this without adjust serverside component
                 _self.check = function (ver, rev, uid) {
-                    if (Script.version != ver || Script.revision != rev) { update(ver, rev); };
+                    if (Script.version !== ver || Script.revision !== rev) { update(ver, rev); };
                 };
                 return _self;
             })($);
@@ -4072,8 +4075,8 @@
                                      + "ul.tw2gui_selectbox_content.twdb_sleepmenu > li {padding-right: 20px!important;}";
                         TWDB.Util.addCss(sleepCss);
                         cache = Cache.load('barracks');
-                        if (cache == null || typeof(cache) != 'object') { cache = {}; };
-                        if (Character.homeTown.town_id != 0) { addButton(); getForts(); };
+                        if (cache == null || typeof(cache) !== 'object') { cache = {}; };
+                        if (Character.homeTown.town_id !== 0) { addButton(); getForts(); };
                     };
                     loader.ready = true;
                 };
@@ -4082,7 +4085,7 @@
                 var addButton = function() {
                     btn = GameInject.CharacterButton.add(Images.buttonSleep);
                     btn.addMousePopup('#SLEEP#').click(function(e) {
-                            if (w.Character.homeTown.town_id != 0 && forts.length == 0) { sleepHotel(); }
+                            if (w.Character.homeTown.town_id !== 0 && forts.length == 0) { sleepHotel(); }
                             else { createMenu(e); }; });
                 };
 
@@ -4100,7 +4103,7 @@
                                                                     default: sleepFort(key); break; }; })
                         .addItem(0, '#HOTEL#&nbsp;' + w.Map.calcWayTime(pos, w.Character.homeTown).formatDuration());
                     for (var i=0; i < forts.length; i++) {
-                        if (forts[i].stage != 0) {
+                        if (forts[i].stage !== 0) {
                             selectbox.addItem(forts[i].id, '#STAGE#&nbsp;' + forts[i].stage + '&nbsp;' + forts[i].distance.formatDuration() + '&nbsp;|&nbsp;' + forts[i].name);
                         };
                     };
@@ -4145,7 +4148,7 @@
                         var id = fort.fort_id;
                         if (!isDefined(cache[id])) { cache[id] = {'time': 0, 'stage': 0}; };
                         $.extend(cache[id], {'id': id, 'x': fort.x, 'y': fort.y, 'name': fort.name, 'type': fort.type});
-                        if (cache[id].stage != 5 && (cache[id].time + days*86400) > (new Date().getTime()/1000)) {
+                        if (cache[id].stage !== 5 && (cache[id].time + days*86400) > (new Date().getTime()/1000)) {
                             forts.push(cache[id]);
                             if (tmp.length > 0) { w.setTimeout(function(){ getFort(); }, Timer.getTimeout()); }
                             else { Cache.save('barracks',cache); };
@@ -4197,7 +4200,7 @@
                   );
 
                   var tmp = Cache.load('statistic');
-                  if ( typeof(tmp) == 'object' && tmp != null ) {
+                  if ( typeof(tmp) == 'object' && tmp !== null ) {
                     statistic = tmp;
                   }
                   else {
@@ -4404,11 +4407,11 @@
                 // put Reports into Array, which are needed to analyse from Response of Report Overview Query
                 var readReports = function (type,json) {
                   var status = true;
-                  if(typeof(json.reports) != 'object' ) {
+                  if(typeof(json.reports) !== 'object' ) {
                     json.reports = [];
                     status = false;
                   };
-                  if(typeof(json.page) == 'undefined' || lastPage != json.page) {
+                  if(typeof(json.page) == 'undefined' || lastPage !== json.page) {
                     json.reports = [];
                     status = false;
                   };
@@ -4449,7 +4452,7 @@
                     return false;
                   };
 
-                  if( typeof(json.page) != 'string' || typeof(json.title) != 'string' || typeof(json.js) != 'string') {
+                  if( typeof(json.page) !== 'string' || typeof(json.title) !== 'string' || typeof(json.js) !== 'string') {
                     failedReports.push(json.report_id);
                   }
                   else {
@@ -5767,7 +5770,7 @@
                     var f = "";
                     var l = 1;
                     var c = function (e) {
-                        if (f != e) {
+                        if (f !== e) {
                             f = e;
                             l = 1
                         } else {
@@ -5781,7 +5784,7 @@
                         var i = "";
                         for (var s = 0; s < t.length; s++) {
                             var o = t[s];
-                            if (f == "country" && i != o.country) {
+                            if (f == "country" && i !== o.country) {
                                 i = o.country;
                                 r += "-- #COUNTRY# " + i + " --" + "\n"
                             }
@@ -5824,20 +5827,20 @@
                         var i = r.split(/[\n,\r,\r\n]/);
                         for (var s = 0; s < i.length; s++) {
                             var o = i[s].split(";", 4);
-                            if (o.length != 4) {
+                            if (o.length !== 4) {
                                 continue
                             }
-                            if (Number(o[3]) != o[3]) {
+                            if (Number(o[3]) !== o[3]) {
                                 continue
                             }
                             if (!Jobs.getJobById(Number(o[3]))) {
                                 continue
                             }
                             var u = String(o[2]).split("-", 2);
-                            if (u.length != 2) {
+                            if (u.length !== 2) {
                                 continue
                             }
-                            if (Number(u[0]) != u[0] || Number(u[1]) != u[1]) {
+                            if (Number(u[0]) !== u[0] || Number(u[1]) !== u[1]) {
                                 continue
                             }
                             var f = Jobs.getJobById(Number(o[3]));
@@ -5963,7 +5966,7 @@
                             a(e)
                         });
                         var e = Cache.load("chathistory");
-                        if (typeof e == "object" && e != null) {
+                        if (typeof e == "object" && e !== null) {
                             if (e.color) {
                                 e = e.color;
                                 Cache.save("chathistory", e)
@@ -6083,7 +6086,7 @@
                         var r = s.length;
                         for (var i = 0; i < r; i++) {
                             var o = s.shift();
-                            if (o != n) {
+                            if (o !== n) {
                                 s.push(o)
                             }
                         }
@@ -6503,8 +6506,8 @@
                         var bagItem = w.Bag.getItemByItemId(item.item_id);
                         var wearItem = w.Wear.wear[item.type];
                         if (bagItem || (wearItem && wearItem.obj.item_id == item.item_id)) {
-                        var count = (bagItem != undefined ? bagItem.count : 0)
-                                  + (wearItem != undefined && wearItem.obj.item_id == item.item_id ? 1 : 0);
+                        var count = (bagItem !== undefined ? bagItem.count : 0)
+                                  + (wearItem !== undefined && wearItem.obj.item_id == item.item_id ? 1 : 0);
                         if ( count > 1 ) {
                             sell = true;
                             title = ('#DOUBLEITEM#').escapeHTML();
@@ -6591,7 +6594,7 @@
                     var r = w.Bag.getItemByItemId(n.item_id);
                     var i = w.Wear.wear[n.type];
                     if (r || i && i.obj.item_id == n.item_id) {
-                        t = (r != undefined ? r.count : 0) + (i != undefined && i.obj.item_id == n.item_id ? 1 : 0)
+                        t = (r !== undefined ? r.count : 0) + (i !== undefined && i.obj.item_id == n.item_id ? 1 : 0)
                     }
                     if (t == 0) {
                         return true
@@ -6648,7 +6651,7 @@
                     });
                     if (!Updater.wasUpdated()) {
                         r = Cache.load("betteritems");
-                        if (r == null || typeof r != "object") {
+                        if (r == null || typeof r !== "object") {
                             r = {}
                         }
                     }
@@ -6830,7 +6833,7 @@
                                     if (d.set == l) {
                                         h[l]++
                                     }
-                                    if (d.set == c && l != c) {
+                                    if (d.set == c && l !== c) {
                                         h[c]++
                                     }
                                 }
@@ -7010,7 +7013,6 @@
                 var init = function() {
                     if (loader.ready) { return; }
                     trustTWDB();
-                    injectTaskJobs();
                     TWDB.Util.addCss("@media (min-width: 1320px) { .custom_unit_counter {top: -1px!important; margin-left: 310px!important;} #hiro_friends_container {top: -1px!important; margin-right: 304px!important;} }"); // reposition counters for wide screens
                     if (Settings.get("instanthotel", true)) { InstantHotel(); }
                     if (Settings.get("qbswitch", true)) { QuestbookSwitch(); }
@@ -7030,6 +7032,10 @@
                     if (Settings.get("noshopsale", false)) { supressOnGoingEntries(); }
                     if (Settings.get("expbarvalues", true)) { expBarValues(); }
                     if (Settings.get("mini_chatgui", true)) { allowChatGuiMinimize(); }
+                    if (Settings.get("tasklistpoints", true)) {
+                        addTaskJobsHints();
+                        GameInject.injectTaskJobs();
+                    }
                     loader.ready = true;
                 };
                 loader = Loader.add("Snippets", "tw-db code Snippets", init, { Settings: true });
@@ -7072,31 +7078,35 @@
                            ));
                 };
 
-                var injectTaskJobs = function() {
-                    try {
-                        var __twdb__TaskJob = TaskJob;
-                        TaskJob = function () {
-                            var job = __twdb__TaskJob.apply(this, arguments);
-                            job.__twdb__getTitle = job.getTitle;
-                            job.getTitle = function () {
-                                return job.__twdb__getTitle() + '#LP#: ' + (this.data.job_points < 0 ? "<b class='text_red'>" : '<b>') + this.data.job_points + '</b><br />';
-                            };
-                            return job;
-                        };
-                    } catch (e) {
-                        Error.report(e, "manipulate TaskJob template");
-                    }
-                    try {
+                var addTaskJobsHints = function() {
+                    var lpHintCss = "div#ui_workcontainer div.twdb_lp_hint { position: absolute; left: 2px; width: 18px; height: 18px; background-color: #322; border: 2px ridge #976; border-radius: 11px; }" +
+                        "div.twdb_lp_hint > img { position: absolute; left: 1px; top: 1px; }";
+                    TWDB.Util.addCss(lpHintCss);
+                    var checkJobLP = function () {
                         if (TaskQueue.queue.length) {
-                            var data = $("script:contains('TaskQueue.init')").text().match(/TaskQueue\.init\(\s*(\[[^\]]*\])/);
-                            if (data.length === 2) {
-                                data = $.parseJSON(data[1]);
-                                TaskQueue.init(data, TaskQueue.limit);
+                            var i,
+                                $list_ui = $('div#ui_workcontainer'),
+                                $notice;
+                            for (i = 0; i < TaskQueue.queue.length; i++) {
+                                if (TaskQueue.queue[i].type === 'job') {
+                                    $notice = null;
+                                    if (TaskQueue.queue[i].data.job_points < 0) {                                               // negative LP
+                                        $notice = west.gui.Icon.get('exclamation-priority-3', '#TASKLIST_NEG_LP#');
+                                    } else if (TaskQueue.queue[i].data.job_points < (TaskQueue.queue[i].data.job.malus / 5)) {  // low LP (< difficulty/5)
+                                        $notice = west.gui.Icon.get('exclamation-priority-2', '#TASKLIST_LOW_LP#');
+                                    } else if (TWDB.ClothCalc.calcdata.loaded && TaskQueue.queue[i].data.job_points < TWDB.ClothCalc.calcdata.jobs[TaskQueue.queue[i].data.job.id].laborpoints.sum - 5) {  // suboptimal LP
+                                        $notice = west.gui.Icon.get('exclamation-priority-1', '#TASKLIST_SUB_LP#');
+                                    }
+                                    if ($notice !== null) {
+                                        $('.task-queuePos-' + i + ' > div.icon', $list_ui).
+                                            children('.twdb_lp_hint').remove().end().
+                                            append($('<div class="twdb_lp_hint" />').append($notice));
+                                    }
+                                }
                             }
                         }
-                    } catch (e) {
-                        Error.report(e, "manipulate existing Job tasks");
-                    }
+                    };
+                    EventHandler.listen(['taskqueue-updated', 'taskqueue-ready'], checkJobLP);
                 };
 
                 var expBarValues = function() {
@@ -7225,7 +7235,7 @@
                                     },
                                     down = function () { timeout = setTimeout(timeh, i); },
                                     up = function (ev) {
-                                        if (timeout != -1) {
+                                        if (timeout !== -1) {
                                             clearTimeout(timeout);
                                             timeout = -1;
                                         }
@@ -7299,7 +7309,7 @@
                 var changeWofNuggets = function() {
                     try {
                         var str = west.wof.WofPayHandler.prototype.toCheckbox.toString();
-                        str = str.replace(/\b0\s?==\s?i\b/, "payOption['iconName'] != 'nugget'");
+                        str = str.replace(/\b0\s?==\s?i\b/, "payOption['iconName'] !== 'nugget'");
                         eval("west.wof.WofPayHandler.prototype.toCheckbox = " + str)
                     } catch (e) {
                         Error.report(e, "manipulate changeWofNuggets");
@@ -7343,9 +7353,9 @@
                 var enhanceMarketSellDialog = function() {
                     var item4sale;
                     var settings = TWDB.Cache.load("msdsettings");
-                    if (typeof settings != "object" || settings == null) {
+                    if (typeof settings !== "object" || settings == null) {
                         settings = { cb: {} };
-                    } else if (typeof settings.cb != "object" || settings.cb == null) {
+                    } else if (typeof settings.cb !== "object" || settings.cb == null) {
                         settings.cb = {};
                     }
 
@@ -7523,7 +7533,7 @@
                         // add toggle function for "other offers" if any
                         var $head = $('h4', $dc),
                             $table = $('table#mps_otheroffers', $dc);
-                        if ($('tr', $table).length > 2 || $('tr:nth-child(2) > td', $table).attr('colspan') != 4) {
+                        if ($('tr', $table).length > 2 || $('tr:nth-child(2) > td', $table).attr('colspan') !== 4) {
                             $head.html($head.html() + '&nbsp;(' + ($('tr', $table).length-1) + ')')
                                  .click(function() { $table.toggle(); dlgCenter(); })
                                  .css({"cursor": "pointer"});
@@ -7664,6 +7674,34 @@
                     };
                     return _that;
                 })($);
+
+                /* ============================== labor points in Task List Popups ============================== */
+                _self.injectTaskJobs = function() {
+                    try {
+                        var __twdb__TaskJob = TaskJob;
+                        TaskJob = function () {
+                            var job = __twdb__TaskJob.apply(this, arguments);
+                            job.__twdb__getTitle = job.getTitle;
+                            job.getTitle = function () {
+                                return job.__twdb__getTitle() + '#LP#: ' + (this.data.job_points < 0 ? "<b class='text_red'>" : '<b>') + this.data.job_points + '</b><br />';
+                            };
+                            return job;
+                        };
+                    } catch (e) {
+                        Error.report(e, "manipulate TaskJob template");
+                    }
+                    try {
+                        if (TaskQueue.queue.length) {
+                            var data = $("script:contains('TaskQueue.init')").text().match(/TaskQueue\.init\(\s*(\[[^\]]*\])/);
+                            if (data.length === 2) {
+                                data = $.parseJSON(data[1]);
+                                TaskQueue.init(data, TaskQueue.limit);
+                            }
+                        }
+                    } catch (e) {
+                        Error.report(e, "manipulate existing Job tasks");
+                    }
+                };
 
                 /* ============================== Chat ============================== */
                 _self.ChatLayout = (function($) {
@@ -7900,7 +7938,7 @@
                         var inject = "this.TWDB" + name + "(obj.item_id)";
                         inject.replace(/ /g, "");
                         var newfunction = "";
-                        while (str.indexOf("return") != -1) {
+                        while (str.indexOf("return") !== -1) {
                             var pos = str.indexOf("return");
                             newfunction += str.slice(0, pos + 6) + " " + inject + " + String(";
                             str = str.substr(pos + 7);
@@ -8465,7 +8503,7 @@
                             var i = CharacterSkills.skills[n].points;
                             s[r] = i;
                             if (isDefined(t[r])) {
-                                if (t[r] != i) {
+                                if (t[r] !== i) {
                                     f.skills = false
                                 }
                                 delete t[r]
@@ -8637,7 +8675,7 @@
                 /*
                  * var i = function() { var t = { "#DAILIES#": e('<div
                  * class="TWDBBox" style="display:none;" / >') }; var n =
-                 * function(n) { if (n.key != "paper") { return } for
+                 * function(n) { if (n.key !== "paper") { return } for
                  * (var r in t) { t[r].children().remove() } var i = {};
                  * var s =
                  * e(wman.getById("window-quest_employer").getMainDiv());
@@ -8645,7 +8683,7 @@
                  * n.open[o]; var a = "#DAILIES#"; for (var f = 0; f <
                  * u.requirements.length; f++) { var l =
                  * u.requirements[f]; if (!isDefined(l.jsInfo) ||
-                 * l.jsInfo.type != "task-finish-walk") { continue } a =
+                 * l.jsInfo.type !== "task-finish-walk") { continue } a =
                  * l.info } if (!isDefined(t[a])) { t[a] = e('<div
                  * class="TWDBBox" style="display:none;" / >') }
                  * t[a].append(s.find("#open_quest_" + u.id)); var c =
@@ -8680,7 +8718,7 @@
                         Error.report(t, "open ClothCalc from Quest")
                     }
                     var n = function (t) {
-                        if (t.requirements.length != 0) {
+                        if (t.requirements.length !== 0) {
                             t.el
                                 .find(".quest_requirement")
                                 .each(
@@ -8769,9 +8807,9 @@
                     if (s.ready) { return; }
                     Eventer.set("TWDBdataLoaded", function() { a(); });
                     var e = Cache.load("customs");
-                    if (!e || typeof e != "object") {
+                    if (!e || typeof e !== "object") {
                         var e = Settings.get("custom");
-                        if (!e || typeof e != "object") {
+                        if (!e || typeof e !== "object") {
                             u();
                             var e = n
                         } else {
@@ -9305,7 +9343,7 @@
                         Character.twdb_setDuelProtection = Character.setDuelProtection;
                         Character.setDuelProtection = function (dp) {
                             if (dp === 0) { dp = 1 };        // workaround for Inno's bug - duel protection is set to null if dp==0; changing it to 1 has no negative effects since it's a timestamp and it's far enough in the past
-                            var changed = (dp != Character.duelProtection);
+                            var changed = (dp !== Character.duelProtection);
                             Character.twdb_setDuelProtection.apply(this, arguments);
                             if (changed) { EventHandler.signal('duelprotection_changed', []); }
                         };
@@ -9652,7 +9690,6 @@
                         } else {
                             $imgEl.css("opacity", .5);
                         }
-                        // var $imgEl = $imgEl;
                         var dialog = (new west.gui.Dialog("#MARKETREMINDER#", $msg))
                             .setIcon(west.gui.Dialog.SYS_QUESTION)
                             .setModal(true, false, {bg: w.Game.cdnURL + "/images/curtain_bg.png", opacity: .4})
@@ -9718,7 +9755,7 @@
                         };
                     }
                     var town = towns[town_id];
-                    if (auctEnded != "") {
+                    if (auctEnded !== "") {
                         if (!isDefined(town["offers_end"][auctEnded["item_id"]])) {
                             town["count"]++;
                             town["offers_end"][auctEnded["item_id"]] = auctEnded;
@@ -9726,7 +9763,7 @@
                             town["offers_end"][auctEnded["item_id"]]["count"] += auctEnded["count"];
                         }
                     }
-                    if (auctRunning != "") {
+                    if (auctRunning !== "") {
                         if (!isDefined(town["offers_unend"][auctRunning["item_id"]])) {
                             town["count"]++;
                             town["offers_unend"][auctRunning["item_id"]] = auctRunning;
@@ -9734,7 +9771,7 @@
                             town["offers_unend"][auctRunning["item_id"]]["count"] += auctRunning["count"];
                         }
                     }
-                    if (money != 0) {
+                    if (money !== 0) {
                         town["money"] += money;
                     }
                 };
@@ -9803,7 +9840,7 @@
                                 break;
                             }
                             item = town["offers_end"][item_id];
-                            if (town["offers_end"][item_id] != 0) {
+                            if (town["offers_end"][item_id] !== 0) {
                                 popup += '<div class="item item_inventory"><img width="53" height="53" src="' + ItemManager.get(item_id).image + '" class="tw_item item_inventory_img dnd_draggable dnd_dragElem" style="margin-left:3px;margin-top:4px;"><span class="count" style="display: block;"><p>' + item.count + "</p></span></div>";
                             }
                         }
@@ -9814,7 +9851,7 @@
                                 break;
                             }
                             item = town["offers_unend"][item_id];
-                            if (town["offers_unend"][item_id] != 0) {
+                            if (town["offers_unend"][item_id] !== 0) {
                                 popup += '<div style="opacity:0.35" class="item item_inventory"><img width="53" height="53" src="' + ItemManager.get(item_id).image + '" class="tw_item item_inventory_img dnd_draggable dnd_dragElem" style="margin-left:3px;margin-top:4px;"><span class="count" style="display: block;"><p>' + item.count + "</p></span></div>";
                             }
                         }
@@ -9846,23 +9883,23 @@
 
                 var createTownList = function () {
                     try {
-                        var t = [];
-                        for (var r in towns) {
-                            t.push({
-                                id: r,
-                                distance: towns[r].distance
-                            })
+                        var town_array = [],
+                            town_id,
+                            item_id,
+                            s;
+                        for (town_id in towns) {
+                            town_array.push({ id: town_id, distance: towns[town_id].distance });
                         }
-                        t.sort(function (e, t) {
+                        town_array.sort(function (e, t) {
                             return e.distance == t.distance ? 0 : e.distance > t.distance ? 1 : -1
                         });
-                        var s = "";
-                        for (var o = 0; o < t.length; o++) {
-                            var u = towns[t[o].id];
+                        s = "";
+                        for (var o = 0; o < town_array.length; o++) {
+                            var u = towns[town_array[o].id];
                             s += '<div><a onclick="TownWindow.open(' + u.x + ", " + u.y + ');">' + u.name + "</a>" + ' <a title="#SHOWTOWN#" onclick="Map.center(' + u["x"] + ", " + u["y"] + ')"><img src="' + Game.cdnURL + '/images/icons/center.png" /></a>' + " #DISTANCE#: " + u["distance"] + ' <a title="#TOWNWALK#" onclick="TaskQueue.add(new TaskWalk(' + u.town_id + ",'town'))\"><img src=\"" + Game.cdnURL + '/images/map/icons/instantwork.png"></a>' + (u["money"] == 0 ? "" : " " + u["money"] + "$") + "<br />";
                             for (item_id in u["offers_end"]) {
                                 var a = u["offers_end"][item_id];
-                                if (u["offers_end"][item_id] != 0) {
+                                if (u["offers_end"][item_id] !== 0) {
                                     var f = new ItemPopup(ItemManager
                                         .get(item_id));
                                     s += '<div class="item item_inventory" title="' + f.getXHTML().escapeHTML() + '"><img width="53" height="53" src="' + ItemManager.get(item_id).image + '" class="tw_item item_inventory_img dnd_draggable dnd_dragElem" style="margin-left:3px;margin-top:4px;"><span class="count" style="display: block;"><p>' + a.count + "</p></span></div>"
@@ -9870,7 +9907,7 @@
                             }
                             for (item_id in u["offers_unend"]) {
                                 var a = u["offers_unend"][item_id];
-                                if (u["offers_unend"][item_id] != 0) {
+                                if (u["offers_unend"][item_id] !== 0) {
                                     var f = new ItemPopup(ItemManager
                                         .get(item_id));
                                     s += '<div style="opacity:0.35" class="item item_inventory" title="' + f.getXHTML().escapeHTML() + '"><img width="53" height="53" src="' + ItemManager.get(item_id).image + '" class="tw_item item_inventory_img dnd_draggable dnd_dragElem" style="margin-left:3px;margin-top:4px;"><span class="count" style="display: block;"><p>' + a.count + "</p></span></div>"
@@ -9927,7 +9964,7 @@
                         var getGradeImg = function (e, t, n, r) {
                             try {
                                 return '<img class="' + (n || "") + '" src="' + window.Game.cdnURL + "/images/chat/servicegrade_" + gradeNames[e] + '.png" title="' + (t ? window.Chat.rankTitles[gradeNames[e]]
-                                    .escapeHTML() : "") + (isDefined(r) && r != "" ? " (" + r + ")" : "") + '" />'
+                                    .escapeHTML() : "") + (isDefined(r) && r !== "" ? " (" + r + ")" : "") + '" />'
                             } catch (i) {
                                 Error.report(i, "getGradeImg")
                             }
@@ -10000,10 +10037,10 @@
                                 } else if (Math.abs(s) <= 500 && Math.abs(o) <= 500) {
                                     u = "nearbyfort"
                                 }
-                            } else if (i != null) {
+                            } else if (i !== null) {
                                 var u = i
                             }
-                            return e != undefined && this.recruitlistVisibility[e] || t != undefined && this.recruitlistVisibility[t] || u != undefined && this.recruitlistVisibility[u]
+                            return e !== undefined && this.recruitlistVisibility[e] || t !== undefined && this.recruitlistVisibility[t] || u !== undefined && this.recruitlistVisibility[u]
                         }
                     } catch (e) {
                         Error.report(e, "Fort")
@@ -10030,7 +10067,7 @@
                 return t
             }($);
             Debugger.CCstarter = CCstarter;
-            if ((w.location.href.indexOf(".the-west.") != -1 || w.location.href.indexOf(".tw.innogames.") != -1) && w.location.href.indexOf("game.php") != -1) {
+            if ((w.location.href.indexOf(".the-west.") !== -1 || w.location.href.indexOf(".tw.innogames.") !== -1) && w.location.href.indexOf("game.php") !== -1) {
                 Loader.init();
             }
         })(jQuery)
