@@ -7139,23 +7139,24 @@
                 var fastSkillChange = function () {
                     try {
                         west.gui.Plusminusfield.prototype.__twdb__init = west.gui.Plusminusfield.prototype.init;
-                        west.gui.Plusminusfield.prototype.init = function () {
+                        west.gui.Plusminusfield.prototype.init = function (id, start_value, min_value, max_value, extra_points, callbackPlus, callbackMinus, callbackWheel) {
                             this.__twdb__init.apply(this, arguments);
                             var _this = this;
                             var buttons = {
                                 minus: $('span.butMinus', _this.divMain),
                                 plus: $('span.butPlus', _this.divMain)
                             };
-                            $(this.divMain).mousewheel(function(ev, delta) {
-                                buttons[delta < 0 ? 'minus' : 'plus'].click();
-                                ev.stopPropagation();
-                                return false;
-                            });
+                            if (!callbackWheel) {
+                                $(this.divMain).mousewheel(function(ev, delta) {
+                                    buttons[delta < 0 ? 'minus' : 'plus'].click();
+                                    ev.stopPropagation();
+                                    return false;
+                                });
+                            }
                             $.each(buttons, function (key, $elem) {
                                 var i = 400,
                                     timeout = -1,
                                     timeh = function () {
-                                        i = Math.max(Math.round(i * (i / 200 + 1) / (i / 133 + 1)), 15);
                                         $elem.click();
                                         timeout = setTimeout(timeh, i);
                                     },
