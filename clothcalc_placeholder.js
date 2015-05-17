@@ -3654,6 +3654,7 @@
                             [0, "sellTip4", "#HELP_SELLTIP4#", "#SELLTIP_SETTINGS#"],
                             [0, "sellTip5", "#HELP_SELLTIP5#", "#SELLTIP_SETTINGS#"],
                         [0, "pinitems", "#HELP_PIN_ITEMS#", false],
+                        [0, "collectorsell", "#HELP_COLLECTORSELL#", false],
 
                         [9, "", "#MENULEFT3#", false],                          // Quests
                         [0, "questwiki", "#HELP_QUESTWIKI#", false],
@@ -3673,7 +3674,7 @@
 
                         [9, "", "#CAP_TASKLIST#", false],                    // Task List
                         [0, "tasklistpoints", "#HELP_TL_SHOWLP#", false],
-                        // [0, "tasklistcancel", "#HELP_TL_CANCELALL#", false],
+                        // [0, "tasklistcancel", "##", false],
 
                         [9, "", "GUI", false],                                  // GUI
                         [0, "duelmotivation", "#HELP_DUELMOTIVATION#", false],
@@ -3682,6 +3683,8 @@
                         [0, "noshopsale", "#HELP_DISABLE_SALE#", false],
                         [0, "expbarvalues", "#HELP_EXPBAR#; #HELP_CREDITS# Leones/Slygoxx", false],
                         [0, "mini_chatgui", "#HELP_MINIMIZE_CHATGUI#", false],
+                        [0, "customcounterpos", "#HELP_GUI_COUNTER#", false],
+                        [0, "noscrollbars", "#HELP_GUI_SCROLLBARS#", false],
 
                         [9, "", "#MINIMAP_CAP#", false],                        // Mini map
                         [0, "showbonusjobs", "#HELP_SHOWBONUSJOBS#", false],
@@ -6939,7 +6942,9 @@
                 var init = function() {
                     if (loader.ready) { return; }
                     trustTWDB();
-                    TWDB.Util.addCss("@media (min-width: 1320px) { .custom_unit_counter {top: -1px!important; margin-left: 310px!important;} #hiro_friends_container {top: -1px!important; margin-right: 304px!important;} }"); // reposition counters for wide screens
+                    if (Settings.get("collectorsell", true)) { GameInject.injectWanderingTraderSellDialog(); }
+                    if (Settings.get("customcounterpos", true)) { repositionEventCounters(); }
+                    if (Settings.get("noscrollbars", false)) { disableScrollbars(); }
                     if (Settings.get("instanthotel", true)) { InstantHotel(); }
                     if (Settings.get("qbswitch", true)) { QuestbookSwitch(); }
                     if (Settings.get("qfulltext", false)) { QuestFullText(); }
@@ -6966,7 +6971,7 @@
                 };
                 loader = Loader.add("Snippets", "tw-db code Snippets", init, { Settings: true });
 
-                var trustTWDB = function() {
+                var trustTWDB = function () {
                     try {
                         var str = showlink.toString();
                         str = str.replace("the-west", "tw-db|the-west");
@@ -6975,7 +6980,15 @@
                     } catch (e) {}
                 };
 
-                var allowChatGuiMinimize = function() {
+                var repositionEventCounters = function () {
+                    TWDB.Util.addCss("@media (min-width: 1320px) { .custom_unit_counter {top: -1px!important; margin-left: 310px!important;} #hiro_friends_container {top: -1px!important; margin-right: 304px!important;} }"); // reposition counters for wide screens
+                };
+
+                var disableScrollbars = function () {
+                    $('body').css({overflow: 'hidden'});
+                };
+
+                var allowChatGuiMinimize = function () {
                     TWDB.Util.addCss('div#ui_bottomleft { width: auto; overflow: hidden; }'
                         + 'div#ui_chat { margin-top: 12px; }'
                         + 'div#ui_chat div#toggleMinChat { position: absolute; top: -14px; left: 5px; width: 27px; display: block; background-size: 108px 42px; border: 0px solid rgba(0, 0, 0, 0); background-clip: content-box; }'
@@ -8310,6 +8323,40 @@
                             + '.telegram-source.active div { background: blue; }\n');
                     } catch (t) {
                         Error.report(t, "manipulate TelegramWindow.appendTelegram (display telegram source)")
+                    }
+                };
+
+                // ====================================================================
+                // button to sell all but one item to the mobile trader
+                // ====================================================================
+                _self.injectWanderingTraderSellDialog = function () {
+                    try {
+                        west.window.shop.view.__proto__.__twdb__showSellDialog = west.window.shop.view.__proto__.showSellDialog;
+                        west.window.shop.view.__proto__.showSellDialog = function (item_id) {
+                            var controller = this.getController(),
+                                item = Bag.getItemByItemId(item_id),
+                                count = item.count,
+                                $popup,
+                                buttonTitle;
+                            this.__twdb__showSellDialog.apply(this, arguments);
+                            if (count < 3) {
+                                return;
+                            }
+                            $popup = $('div.tw2gui_dialog').has('div.textart_title:contains(' + item.getName() + ')');
+                            if ($popup.length === 1) {
+                                count--;
+                                buttonTitle = 'Max-1 (' + count + 'x = $ ' + (count * item.getSellPrice()) + ')';
+                                $popup.children('div.tw2gui_dialog_actions').prepend(new west.gui.Button(buttonTitle, function () {
+                                    controller.requestSell({
+                                        inv_id: item.inv_id,
+                                        count: count
+                                    });
+                                    $popup.find('div.tw2gui_button').last().click();
+                                }.bind(this)).getMainDiv());
+                            }
+                        };
+                    } catch (err) {
+                        Error.report(err, "manipulate .showSellDialog (wandering trader - sell all but one)")
                     }
                 };
 
