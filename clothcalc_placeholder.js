@@ -7157,6 +7157,7 @@
                                 var i = 400,
                                     timeout = -1,
                                     timeh = function () {
+                                        i = Math.max(Math.round(i * (i / 200 + 1) / (i / 133 + 1)), 5);
                                         $elem.click();
                                         timeout = setTimeout(timeh, i);
                                     },
