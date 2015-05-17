@@ -390,7 +390,7 @@
                 left_arm: 5,
                 neck: 6,
                 right_arm: 7,
-                yield: 8,
+                'yield': 8,
                 pants: 9,
                 belt: 10
             },
@@ -1219,8 +1219,8 @@
                     if (minDur < jobDurationid) { return _this.mode(0); } // Dun - correcting for level < 20
 
                     /** TODO: fix this error! **/
-                    try { _this.parent.gui.job.mode.unbind("click"); }          // -> Uncaught TypeError: Cannot read property 'unbind' of undefined
-                    catch (err) {}
+                    try { _this.parent.gui.job.mode.unbind("click"); } catch (err) {}   // -> Uncaught TypeError: Cannot read property 'unbind' of undefined
+
                     switch (jobDurationid) {
                     case 1:
                         _this.base = 1;
@@ -1240,7 +1240,7 @@
                         _this.parent.gui.job.mode.css("background-position", "0px 0px")
                             .click(function () { _this.mode(1); _this.parent.joblist.update(); });
                         break;
-                    };
+                    }
                 },
 
                 _calcStepFormula: function (r1, r2, formula, points, malus, magic, mot, factor, freezeBronze) {
@@ -1308,7 +1308,7 @@
                     job.laborpoints.skills = 0;
                     for (r in job.skills) {
                         job.laborpoints.skills += Number(job.skills[r]) * Number(CharacterSkills.skills[r].points);
-                    };
+                    }
                     job.laborpoints.sum = job.laborpoints.cloth;
                     job.laborpoints.sum += job.laborpoints.skills;
                     job.laborpoints.sum -= job.difficulty + 1;
@@ -1318,14 +1318,14 @@
                         job.max_sp = job.laborpoints.skills + job.laborpoints.cloth;
                     } else {
                         job.laborpoints.current = 0;
-                    };
+                    }
                     if (job.gameid !== 0) {
                         job.values.motivation = this.parent.data.jobs.jobs[job.gameid].motivation;
                         job.values.resmotivation = Math.ceil(this.parent.data.jobs.jobs[job.gameid].motivation * 4) / 4;
                     } else {
                         job.values.motivation = 0;
                         job.values.resmotivation = 0;
-                    };
+                    }
                     job.values.name = job.name;
                     job.values.laborpoints = Number(job.laborpoints.sum);
                     job.values.duration = Number(this.basetime);
@@ -1343,7 +1343,7 @@
                         break;
                     default:
                         break;
-                    };
+                    }
 
                     // for formulas calcul the motivation need to be *100
                     var tmpMotiv = job.values.motivation * 100;
@@ -1361,18 +1361,20 @@
                     job.values.danger = this.calcDanger(job.max_sp, difficulty, job.danger, job.values.resmotivation * 100, 1);
                     return this.addPremium(job);
                 },
-                getJobPopup: function(e) {
-                    var t = this.parent.calcdata.jobs[e].values;
-                    t.laborpoints = this.parent.calcdata.jobs[e].laborpoints.sum;
-                    var n = "<table>" + '<tr><td colspan="4" style="font-weight:bold;text-align:center;font-size:11px;">' + this.parent.calcdata.jobs[e].name + "</td></tr>"
-                        + '<tr><td><img src="' + TWDB.images.iconExperience + '" title=" #EXPERIENCE# " height="15px" width="15px" /></td><td style="font-size:10px;vertical-align:bottom;">' + t.experience + "</td>"
-                            + '<td><img src="' + TWDB.images.iconDollar + '" title=" #WAGES# " height="15px" width="15px" /></td><td style="font-size:10px;vertical-align:bottom;">' + t.wages + "</td></tr>"
-                        + '<tr><td><img src="' + TWDB.images.iconLuck + '" title=" #LUCK# " height="15px" width="15px" /></td><td style="font-size:10px;vertical-align:bottom;">' + t.luck1 + "-" + t.luck2 + "</td>"
-                            + '<td><img src="' + TWDB.images.iconDanger + '" title=" #DANGER# " height="15px" width="15px" /></td><td style="font-size:10px;vertical-align:bottom;">' + t.danger + "</td></tr>"
-                        + '<tr><td><img src="' + TWDB.images.iconLaborpoints + '" title=" #LABORPOINTS# " height="15px" width="15px" /></td><td style="font-size:10px;vertical-align:bottom;">' + t.laborpoints + "</td>"
-                            + '<td><img src="' + TWDB.images.iconClock + '" title=" #DURATION# " height="15px" width="15px" /></td><td style="font-size:10px;vertical-align:bottom;">' + t.duration + "</td></tr>"
-                        + '<tr><td><img src="' + TWDB.images.iconMoti + '" title=" #MOTIVATION# "  height="15px" width="15px" /></td><td style="font-size:10px;vertical-align:bottom;">' + t.resmotivation * 100 + ' (' + Math.round(t.motivation * 100) + ")%</td><td></td><td></td></tr>" + "</table>";
-                    return n;
+                getJobPopup: function (job_id) {
+                    var dat = this.parent.calcdata.jobs[job_id].values,
+                        content;
+                    dat.laborpoints = this.parent.calcdata.jobs[job_id].laborpoints.sum;
+                    content = "<table>" + '<tr><td colspan="4" style="font-weight:bold;text-align:center;font-size:11px;">' + this.parent.calcdata.jobs[job_id].name + "</td></tr>"
+                        + '<tr><td><img src="' + TWDB.images.iconExperience + '" title=" #EXPERIENCE# " height="15px" width="15px" /></td><td style="font-size:10px;vertical-align:bottom;">' + dat.experience + "</td>"
+                        + '<td><img src="' + TWDB.images.iconDollar + '" title=" #WAGES# " height="15px" width="15px" /></td><td style="font-size:10px;vertical-align:bottom;">' + dat.wages + "</td></tr>"
+                        + '<tr><td><img src="' + TWDB.images.iconLuck + '" title=" #LUCK# " height="15px" width="15px" /></td><td style="font-size:10px;vertical-align:bottom;">' + dat.luck1 + "-" + dat.luck2 + "</td>"
+                        + '<td><img src="' + TWDB.images.iconDanger + '" title=" #DANGER# " height="15px" width="15px" /></td><td style="font-size:10px;vertical-align:bottom;">' + dat.danger + "</td></tr>"
+                        + '<tr><td><img src="' + TWDB.images.iconLaborpoints + '" title=" #LABORPOINTS# " height="15px" width="15px" /></td><td style="font-size:10px;vertical-align:bottom;">' + dat.laborpoints + "</td>"
+                        + '<td><img src="' + TWDB.images.iconClock + '" title=" #DURATION# " height="15px" width="15px" /></td><td style="font-size:10px;vertical-align:bottom;">' + dat.duration + "</td></tr>"
+                        + '<tr><td><img src="' + TWDB.images.iconMoti + '" title=" #MOTIVATION# "  height="15px" width="15px" /></td><td style="font-size:10px;vertical-align:bottom;">' + dat.resmotivation * 100 + ' (' + Math.round(dat.motivation * 100) + ")%</td><td></td><td></td></tr>"
+                        + "</table>";
+                    return content;
                 }
             },
 
@@ -1397,7 +1399,7 @@
                     this.init(this.parent);
                 },
                 init: function (parent) {
-                    if (this.ready){ return; }
+                    if (this.ready) { return; }
                     this.ready = true;
                     this.parent = parent;
                     if (!this.gui.main) { this.gui.main = this.getMainDiv(); }
@@ -1422,7 +1424,7 @@
                             var jobData = JobList.getJobById(job.gameid),
                                 itemid;
                             for (itemid in jobData.yields) {
-                                if (isNaN(itemid)){ continue; }
+                                if (isNaN(itemid)) { continue; }
                                 // tmp.str += u.name.toUpperCase() + " ";
                                 tmp.str += ItemManager.get(itemid).name.toUpperCase() + "§";
                             }
@@ -1432,21 +1434,21 @@
                     this.gui.main.append(jQuery('<div style="position:relative;top:0;left:0;width:305px" />').
                                          append(this.gui.input.getMainDiv()).
                                          append(this.gui.button)).
-                    append(this.gui.result);
+                        append(this.gui.result);
                     this.update();
                     if (this.name) { this.open(this.name); }
                 },
 
-                open: function (name){
+                open: function (name) {
                     var _self = this;
                     this.gui.result.show();
-                    jQuery(this.gui.input.getMainDiv()).unbind().keyup(function(ev){ _self.keyHandler(ev); });
-                    jQuery(this.gui.input.getField()).unbind().focus(function(){ _self.gui.result.show(); });
+                    jQuery(this.gui.input.getMainDiv()).unbind().keyup(function (ev) { _self.keyHandler(ev); });
+                    jQuery(this.gui.input.getField()).unbind().focus(function () { _self.gui.result.show(); });
                     delete this.gui.scrollpane;
-                    this.gui.scrollpane = new west.gui.Scrollpane;
+                    this.gui.scrollpane = new west.gui.Scrollpane();
                     jQuery(this.gui.scrollpane.getMainDiv()).css({"width": "285px", "height": "250px"});
                     var state = true;
-                    jQuery.each(this.elements, function(k, el) {
+                    jQuery.each(this.elements, function (k, el) {
                         el.dom.unbind(); // Dun - remove clic listener
                         _self.updateJob(k);
                         if (state && el.dom.is(':visible')) {
@@ -1455,29 +1457,30 @@
                             state = false;
                         } else { el.dom.removeClass('focused'); }
                         el.dom.addMousePopup(TWDB.ClothCalc.jobs.getJobPopup(el.id));
-                        el.dom.click((function(id) {
-                                return function(){ _self.close(); TWDB.ClothCalc.jobs.switchJob(id)}
+                        el.dom.click((function (id) {
+                            return function () { _self.close(); TWDB.ClothCalc.jobs.switchJob(id); };
                         })(el.id));
                         _self.gui.scrollpane.appendContent(el.dom);
                     });
                     this.gui.result.children().remove();
                     this.gui.result.append(this.gui.scrollpane.getMainDiv());
-                    this.gui.button.click(function(){
-                        if(_self.gui.result.is(':visible')){ _self.gui.result.hide(); }
-                        else{ jQuery(_self.gui.input.getField()).focus(); }
+                    this.gui.button.click(function () {
+                        if (_self.gui.result.is(':visible')) { _self.gui.result.hide();
+                        } else { jQuery(_self.gui.input.getField()).focus(); }
                     });
                     this.gui.main.show();
                     if (isDefined(name)) {
-                        jQuery(this.gui.input.getField()).attr('value',name);
+                        jQuery(this.gui.input.getField()).attr('value', name);
                         this.search(name, true);
                     }
                 },
-                search: function(string, absolute){
+
+                search: function (string, absolute) {
                     var regexp = new RegExp(isDefined(absolute) ? "§" + string.toUpperCase() + "§" : string.toUpperCase(), 'i');
                     var state = true;
                     var _self = this;
                     var $found = [];
-                    jQuery.each(this.elements, function(k, el) {
+                    jQuery.each(this.elements, function (k, el) {
                         el.dom.removeClass("focused");
                         if (regexp.test(el.str)) {
                             el.dom.removeClass("TWDB_filter");
@@ -1493,17 +1496,18 @@
                             el.dom.addClass("TWDB_filter");
                         }
                     });
-                    if ($found.length === 1){ $found[0].click(); }   // if only one result shown - chose it
+                    if ($found.length === 1) { $found[0].click(); }   // if only one result shown - chose it
                 },
+
                 keyHandler: function (event) {
-                    var keycode = event.keyCode ? event.keyCode : event.which,
+                    var keycode = event.keyCode || event.which,
                         i;
-                    if (keycode == 38 || keycode == 40) {
-                        if (keycode == 38) {
+                    if (keycode === 38 || keycode === 40) {
+                        if (keycode === 38) {
                             this.elements[this.focused].dom.removeClass("focused");
                             for (i = 0; i < this.elements.length; i++) {
                                 this.focused--;
-                                if (this.focused < 0){ this.focused = this.elements.length - 1; }
+                                if (this.focused < 0) { this.focused = this.elements.length - 1; }
                                 if (this.elements[this.focused].dom.is(":visible")) {
                                     this.elements[this.focused].dom.addClass("focused");
                                     break;
@@ -1513,7 +1517,7 @@
                             this.elements[this.focused].dom.removeClass("focused");
                             for (i = 0; i < this.elements.length; i++) {
                                 this.focused++;
-                                if (this.focused >= this.elements.length){ this.focused = 0; }
+                                if (this.focused >= this.elements.length) { this.focused = 0; }
                                 if (this.elements[this.focused].dom.is(":visible")) {
                                     this.elements[this.focused].dom.addClass("focused");
                                     break;
@@ -1527,120 +1531,112 @@
                             diff = (pos1 - pos2 - 90) / 16;
                             this.gui.scrollpane.scrollTo(0, diff);
                         }
-                    } else if (keycode == 13) { this.elements[this.focused].dom.click(); }
-                      else { this.search(this.gui.input.getValue()); }
+                    } else if (keycode === 13) { this.elements[this.focused].dom.click();
+                    } else { this.search(this.gui.input.getValue()); }
                 },
-                order: function (e) {
-                    function r(t, r) {
-                        var i = TWDB.ClothCalc.calcdata.jobs[t.id].values[e];
-                        var s = TWDB.ClothCalc.calcdata.jobs[r.id].values[e];
-                        return i > s ? n : -n
-                    }
 
-                    function i(t, r) {
-                        var i = TWDB.ClothCalc.calcdata.jobs[t.id].values[e];
-                        var s = TWDB.ClothCalc.calcdata.jobs[r.id].values[e];
-                        return i * 1 > s * 1 ? n : -n
+                order: function (type) {
+                    function txt_sort(a, b) {
+                        var val_a = TWDB.ClothCalc.calcdata.jobs[a.id].values[type];
+                        var val_b = TWDB.ClothCalc.calcdata.jobs[b.id].values[type];
+                        return val_a > val_b ? order : -order;
                     }
-                    var t = true;
-                    if (e) {
-                        if (e == this.sort.type) {
-                            this.sort.order *= -1
+                    function num_sort(a, b) {
+                        var val_a = TWDB.ClothCalc.calcdata.jobs[a.id].values[type];
+                        var val_b = TWDB.ClothCalc.calcdata.jobs[b.id].values[type];
+                        return val_a * 1 > val_b * 1 ? order : -order;
+                    }
+                    var quick = true;
+                    if (type) {
+                        if (type === this.sort.type) {
+                            this.sort.order *= -1;
                         } else {
-                            t = false;
-                            if (e == "danger" || e == "name") {
-                                this.sort.order = 1
+                            quick = false;
+                            if (type === "danger" || type === "name") {
+                                this.sort.order = 1;
                             } else {
-                                this.sort.order = -1
+                                this.sort.order = -1;
                             }
-                            this.sort.type = e
+                            this.sort.type = type;
                         }
                     }
-                    var n = this.sort.order;
-                    var e = this.sort.type;
-                    if (e == "name") {
-                        this.elements.sort(r)
+                    var order = this.sort.order,
+                        _this = this,
+                        state = true;
+                    // var type = this.sort.type;
+                    if (type === "name") {
+                        this.elements.sort(txt_sort);
                     } else {
-                        this.elements.sort(i)
+                        this.elements.sort(num_sort);
                     }
-                    var s = this;
-                    var o = true;
-                    jQuery.each(this.elements, function (e, n) {
-                        if (!t) {
-                            s.updateJob(e)
-                        }
-                        if (o && n.dom.is(":visible")) {
-                            this.focused = e;
-                            n.dom.addClass("focused");
-                            o = false
+                    jQuery.each(this.elements, function (i, elem) {
+                        if (!quick) { _this.updateJob(i); }
+                        if (state && elem.dom.is(":visible")) {
+                            this.focused = i;
+                            elem.dom.addClass("focused");
+                            state = false;
                         } else {
-                            n.dom.removeClass("focused")
+                            elem.dom.removeClass("focused");
                         }
-                        s.gui.scrollpane.appendContent(n.dom)
+                        _this.gui.scrollpane.appendContent(elem.dom);
                     });
-                    // Dun - switch on current rewards when clic
-                    // on sorting button
+                    // Dun - switch on current rewards when click on sorting button
                     this.parent.jobs.showCur();
-
                 },
-                updateJob: function (e) { // Dun - Add
-                    // max/current
-                    // values
-                    var t = this.elements[e];
-                    var n = TWDB.ClothCalc.jobs.calcJob(t.id);
-                    t.dom.removeClass("TWDB_hide");
-                    var r = n.name;
-                    r += " [" + n.laborpoints.current + "/" + n.laborpoints.sum + "] ";
+
+                updateJob: function (custom_id) {
+                    // Dun - Add max/current values
+                    var el = this.elements[custom_id],
+                        job = TWDB.ClothCalc.jobs.calcJob(el.id),
+                        name = job.name;
+                    el.dom.removeClass("TWDB_hide");
+                    name += " [" + job.laborpoints.current + "/" + job.laborpoints.sum + "] ";
                     switch (this.sort.type) {
                     case "luck1":
-                        r += " $" + n.values.luck1 + "-" + "$" + n.values.luck2;
+                        name += " $" + job.values.luck1 + "-" + "$" + job.values.luck2;
                         break;
                     case "laborpoints":
-
                         break;
                     case "experience":
-                        r += n.values.experience + "exp";
-
+                        name += job.values.experience + "exp";
                         break;
                     case "wages":
-                        r += "$" + n.values.wages;
-
+                        name += "$" + job.values.wages;
                         break;
                     case "danger":
-                        r += n.values.danger + "%";
-
+                        name += job.values.danger + "%";
                         break;
                     case "duration":
-                        r += n.values.duration + " sec";
+                        name += job.values.duration + " sec";
                         break;
                     case "motivation":
-                        r += n.values.resmotivation * 100 + " (" + Math.round(n.values.motivation * 100) + ")%";
-                        break
+                        name += job.values.resmotivation * 100 + " (" + Math.round(job.values.motivation * 100) + ")%";
+                        break;
                     }
-                    t.dom.html(r);
-                    if (n.laborpoints.current < 0) {
-                        if (n.laborpoints.sum < 0) {
-                            if (JobList.getJobById(t.id).level <= Character.level) {
-                                t.dom.css("color", "blue");
+                    el.dom.html(name);
+                    if (job.laborpoints.current < 0) {
+                        if (job.laborpoints.sum < 0) {
+                            if (JobList.getJobById(el.id).level <= Character.level) {
+                                el.dom.css("color", "blue");
                             } else {
-                                t.dom.css("color", "red");
-                                if (!this.all) {
-                                    t.dom.addClass("TWDB_hide");
-                                }
+                                el.dom.css("color", "red");
+                                if (!this.all) { el.dom.addClass("TWDB_hide"); }
                             }
                         } else {
-                            t.dom.css("color", "orange");
+                            el.dom.css("color", "orange");
                         }
                     } else {
-                        t.dom.css("color", "#333333");
+                        el.dom.css("color", "#333");
                     }
-                    return n;
+                    return job;
                 },
+
                 update: function () {
-                    var e = this;
-                    jQuery.each(this.elements, function (t, n) { e.updateJob(t); });
+                    var _this = this;
+                    jQuery.each(this.elements, function (i) { _this.updateJob(i); });
                     this.order();
                 },
+
                 getMainDiv: function () {
                     if (!this.gui.main) {
                         this.gui.main = jQuery('<div style="position:absolute;left: 255px; top: 30px; display: none;" />')
@@ -1648,225 +1644,155 @@
                     }
                     return this.gui.main;
                 },
+
                 close: function () { this.gui.main.hide(); }
             },
 
+            // object that handles custom section of clothcalc
             customs: {
                 selected: 0,
-                setParent: function (e) { this.parent = e; },
+                setParent: function (parent) { this.parent = parent; },
                 init: function () {
-                    for (var e in this.parent.calcdata.custom) {
+                    var key,
+                        dat;
+                    for (key in this.parent.calcdata.custom) {
                         try {
-                            var t = this.parent.calcdata.custom[e];
-                            switch (t.type) {
+                            dat = this.parent.calcdata.custom[key];
+                            switch (dat.type) {
                             case "speed":
-                                t.skills = ["ride"];
-                                if (!t.laborpoints) {
-                                    var n = (t.cloth && t.cloth[1] && t.cloth[1]["other"] && t.cloth[1]["other"][1]) || 0;
-                                    var r = (t.boni && t.boni.other && t.boni.other[1]) || 0;
-                                    r -= n;
-                                    n += (t.boni && t.boni.skill && t.boni.skill[2]) || 0;
-                                    n += (t.boni && t.boni.skill && t.boni.skill[10]) || 0;
-                                    n += CharacterSkills.skills.ride.points;
-                                    t.laborpoints = Math.round((100 + n) * (1 + r / 100));
+                                dat.skills = ["ride"];
+                                if (!dat.laborpoints) {
+                                    var riding = (dat.cloth && dat.cloth[1] && dat.cloth[1].other && dat.cloth[1].other[1]) || 0,
+                                        speed = (dat.boni && dat.boni.other && dat.boni.other[1]) || 0;
+                                    speed -= riding;
+                                    riding += (dat.boni && dat.boni.skill && dat.boni.skill[2]) || 0;
+                                    riding += (dat.boni && dat.boni.skill && dat.boni.skill[10]) || 0;
+                                    riding += CharacterSkills.skills.ride.points;
+                                    dat.laborpoints = Math.round((100 + riding) * (1 + speed / 100));
                                 }
-                                t.laborpoints += "%";
+                                dat.laborpoints += "%";
                                 break;
                             case "regen":
-                                t.skills = ["health"];
-                                t.laborpoints = "";
+                                dat.skills = ["health"];
+                                dat.laborpoints = "";
                                 break;
                             case "fort":
-                                if (t.para.type == 0) {
-                                    var i = {};
-                                    i.aim = CharacterSkills.skills.aim.points + (typeof t.boni.skill[3] !== "undefined" ? t.boni.skill[3] : 0) + (typeof t.boni.skill[15] !== "undefined" ? t.boni.skill[15] : 0);
-                                    i.endurance = CharacterSkills.skills.endurance.points + (typeof t.boni.skill[1] !== "undefined" ? t.boni.skill[1] : 0) + (typeof t.boni.skill[8] !== "undefined" ? t.boni.skill[8] : 0);
-                                    i.dodge = CharacterSkills.skills.dodge.points + (typeof t.boni.skill[2] !== "undefined" ? t.boni.skill[2] : 0) + (typeof t.boni.skill[12] !== "undefined" ? t.boni.skill[12] : 0);
-                                    i.leadership = CharacterSkills.skills.leadership.points + (typeof t.boni.skill[4] !== "undefined" ? t.boni.skill[4] : 0) + (typeof t.boni.skill[20] !== "undefined" ? t.boni.skill[20] : 0);
-                                    i.health = CharacterSkills.skills.health.points + (typeof t.boni.skill[1] !== "undefined" ? t.boni.skill[1] : 0) + (typeof t.boni.skill[9] !== "undefined" ? t.boni.skill[9] : 0);
-                                    var s = 100 + (Character.level - 1) * Character.lifePointPerHealthSkill + i.health * (Character.lifePointPerHealthSkill + Character.lifePointPerHealthSkillBonus) + " | ";
-                                    s += Math
-                                        .round((25 + Math
-                                            .pow(
-                                                i.leadership * 1 + (Character.charClass == "soldier" ? Premium
-                                                    .hasBonus("character") ? .5 : .25 : 0),
-                                                .4) + Math
-                                            .pow(
-                                                i.aim,
-                                                .4) + Math
-                                            .pow(
-                                                i.endurance,
-                                                .4)) * 100) / 100 + " | ";
-                                    s += Math
-                                        .round((10 + Math
-                                            .pow(
-                                                i.leadership * 1 + (Character.charClass == "soldier" ? Premium
-                                                    .hasBonus("character") ? .5 : .25 : 0),
-                                                .4) + Math
-                                            .pow(
-                                                i.dodge,
-                                                .4) + Math
-                                            .pow(
-                                                i.endurance,
-                                                .4)) * 100) / 100
+                                var stats,
+                                    skill = {};
+                                if (dat.para.type === 0) {
+                                    skill.aim = CharacterSkills.skills.aim.points + (typeof dat.boni.skill[3] !== "undefined" ? dat.boni.skill[3] : 0) + (typeof dat.boni.skill[15] !== "undefined" ? dat.boni.skill[15] : 0);
+                                    skill.endurance = CharacterSkills.skills.endurance.points + (typeof dat.boni.skill[1] !== "undefined" ? dat.boni.skill[1] : 0) + (typeof dat.boni.skill[8] !== "undefined" ? dat.boni.skill[8] : 0);
+                                    skill.dodge = CharacterSkills.skills.dodge.points + (typeof dat.boni.skill[2] !== "undefined" ? dat.boni.skill[2] : 0) + (typeof dat.boni.skill[12] !== "undefined" ? dat.boni.skill[12] : 0);
+                                    skill.leadership = CharacterSkills.skills.leadership.points + (typeof dat.boni.skill[4] !== "undefined" ? dat.boni.skill[4] : 0) + (typeof dat.boni.skill[20] !== "undefined" ? dat.boni.skill[20] : 0);
+                                    skill.health = CharacterSkills.skills.health.points + (typeof dat.boni.skill[1] !== "undefined" ? dat.boni.skill[1] : 0) + (typeof dat.boni.skill[9] !== "undefined" ? dat.boni.skill[9] : 0);
+                                    stats = 100 + (Character.level - 1) * Character.lifePointPerHealthSkill + skill.health * (Character.lifePointPerHealthSkill + Character.lifePointPerHealthSkillBonus) + " | ";
+                                    stats += Math.round((25 + Math.pow(skill.leadership * 1 + (Character.charClass === "soldier" ? Premium.hasBonus("character") ? .5 : .25 : 0), .4) + Math.pow(skill.aim,.4) + Math.pow(skill.endurance, .4)) * 100) / 100 + " | ";
+                                    stats += Math.round((10 + Math.pow(skill.leadership * 1 + (Character.charClass === "soldier" ? Premium.hasBonus("character") ? .5 : .25 : 0), .4) + Math.pow(skill.dodge,.4) + Math.pow(skill.endurance, .4)) * 100) / 100;
                                 } else {
-                                    var i = {};
-                                    i.aim = CharacterSkills.skills.aim.points + (typeof t.boni.skill[3] !== "undefined" ? t.boni.skill[3] : 0) + (typeof t.boni.skill[15] !== "undefined" ? t.boni.skill[15] : 0);
-                                    i.hide = CharacterSkills.skills.hide.points + (typeof t.boni.skill[2] !== "undefined" ? t.boni.skill[2] : 0) + (typeof t.boni.skill[13] !== "undefined" ? t.boni.skill[13] : 0);
-                                    i.dodge = CharacterSkills.skills.dodge.points + (typeof t.boni.skill[2] !== "undefined" ? t.boni.skill[2] : 0) + (typeof t.boni.skill[12] !== "undefined" ? t.boni.skill[12] : 0);
-                                    i.leadership = CharacterSkills.skills.leadership.points + (typeof t.boni.skill[4] !== "undefined" ? t.boni.skill[4] : 0) + (typeof t.boni.skill[20] !== "undefined" ? t.boni.skill[20] : 0);
-                                    i.health = CharacterSkills.skills.health.points + (typeof t.boni.skill[1] !== "undefined" ? t.boni.skill[1] : 0) + (typeof t.boni.skill[9] !== "undefined" ? t.boni.skill[9] : 0);
-                                    var s = 100 + (Character.level - 1) * Character.lifePointPerHealthSkill + i.health * (Character.lifePointPerHealthSkill + Character.lifePointPerHealthSkillBonus) + " | ";
-                                    s += Math
-                                        .round((25 + Math
-                                            .pow(
-                                                i.leadership * 1 + (Character.charClass == "soldier" ? Premium
-                                                    .hasBonus("character") ? .5 : .25 : 0),
-                                                .4) + Math
-                                            .pow(
-                                                i.aim,
-                                                .4) + Math
-                                            .pow(
-                                                i.hide,
-                                                .4)) * 100) / 100 + " | ";
-                                    s += Math
-                                        .round((10 + Math
-                                            .pow(
-                                                i.leadership * 1 + (Character.charClass == "soldier" ? Premium
-                                                    .hasBonus("character") ? .5 : .25 : 0),
-                                                .4) + Math
-                                            .pow(
-                                                i.dodge,
-                                                .4) + Math
-                                            .pow(
-                                                i.hide,
-                                                .4)) * 100) / 100
+                                    skill.aim = CharacterSkills.skills.aim.points + (typeof dat.boni.skill[3] !== "undefined" ? dat.boni.skill[3] : 0) + (typeof dat.boni.skill[15] !== "undefined" ? dat.boni.skill[15] : 0);
+                                    skill.hide = CharacterSkills.skills.hide.points + (typeof dat.boni.skill[2] !== "undefined" ? dat.boni.skill[2] : 0) + (typeof dat.boni.skill[13] !== "undefined" ? dat.boni.skill[13] : 0);
+                                    skill.dodge = CharacterSkills.skills.dodge.points + (typeof dat.boni.skill[2] !== "undefined" ? dat.boni.skill[2] : 0) + (typeof dat.boni.skill[12] !== "undefined" ? dat.boni.skill[12] : 0);
+                                    skill.leadership = CharacterSkills.skills.leadership.points + (typeof dat.boni.skill[4] !== "undefined" ? dat.boni.skill[4] : 0) + (typeof dat.boni.skill[20] !== "undefined" ? dat.boni.skill[20] : 0);
+                                    skill.health = CharacterSkills.skills.health.points + (typeof dat.boni.skill[1] !== "undefined" ? dat.boni.skill[1] : 0) + (typeof dat.boni.skill[9] !== "undefined" ? dat.boni.skill[9] : 0);
+                                    stats = 100 + (Character.level - 1) * Character.lifePointPerHealthSkill + skill.health * (Character.lifePointPerHealthSkill + Character.lifePointPerHealthSkillBonus) + " | ";
+                                    stats += Math.round((25 + Math.pow(skill.leadership * 1 + (Character.charClass === "soldier" ? Premium.hasBonus("character") ? .5 : .25 : 0), .4) + Math.pow(skill.aim,.4) + Math.pow(skill.hide, .4)) * 100) / 100 + " | ";
+                                    stats += Math.round((10 + Math.pow(skill.leadership * 1 + (Character.charClass === "soldier" ? Premium.hasBonus("character") ? .5 : .25 : 0), .4) + Math.pow(skill.dodge,.4) + Math.pow(skill.hide, .4)) * 100) / 100;
                                 }
-                                t.skills = ["health", "attacker", "defender"];
-                                t.laborpoints = s;
+                                dat.skills = ["health", "attacker", "defender"];
+                                dat.laborpoints = stats;
                                 break;
                             case "duel":
-                                t.skills = [];
-                                var s = 0;
-                                for (var o in t.para) {
-                                    var u = Math
-                                        .floor(o / 5);
-                                    if (typeof t.boni.skill[o] !== "undefined") {
-                                        s += t.boni.skill[o]
+                                dat.skills = [];
+                                var stats = 0,
+                                    skill_id,
+                                    attr_id;
+                                for (skill_id in dat.para) {
+                                    attr_id = Math.floor(skill_id / 5);
+                                    if (typeof dat.boni.skill[skill_id] !== "undefined") {
+                                        stats += dat.boni.skill[skill_id];
                                     }
-                                    if (typeof t.boni.skill[u] !== "undefined") {
-                                        s += t.boni.skill[u]
+                                    if (typeof dat.boni.skill[attr_id] !== "undefined") {
+                                        stats += dat.boni.skill[attr_id];
                                     }
-                                    if (typeof TWDB.ClothCalc._id2skill[o] !== "undefined") {
-                                        t.skills
-                                            .push(TWDB.ClothCalc._id2skill[o]);
-                                        if (typeof CharacterSkills.skills[TWDB.ClothCalc._id2skill[o]] !== "undefined") {
-                                            s += CharacterSkills.skills[TWDB.ClothCalc._id2skill[o]].points
-                                        } else if (typeof CharacterSkills.attributes[TWDB.ClothCalc._id2skill[o]] !== "undefined") {
-                                            s += CharacterSkills.attributes[TWDB.ClothCalc._id2skill[o]].points
+                                    if (typeof TWDB.ClothCalc._id2skill[skill_id] !== "undefined") {
+                                        dat.skills.push(TWDB.ClothCalc._id2skill[skill_id]);
+                                        if (typeof CharacterSkills.skills[TWDB.ClothCalc._id2skill[skill_id]] !== "undefined") {
+                                            stats += CharacterSkills.skills[TWDB.ClothCalc._id2skill[skill_id]].points;
+                                        } else if (typeof CharacterSkills.attributes[TWDB.ClothCalc._id2skill[skill_id]] !== "undefined") {
+                                            stats += CharacterSkills.attributes[TWDB.ClothCalc._id2skill[skill_id]].points;
                                         }
                                     }
                                 }
-                                t.laborpoints = s;
+                                dat.laborpoints = stats;
                                 break;
                             case "custom":
-                                t.skills = [];
-                                var s = 0;
-                                for (var o in t.para) {
-
-                                    var u = Math
-                                        .floor(o / 5);
-                                    if (typeof t.boni.skill[o] !== "undefined") {
-                                        s += t.boni.skill[o]
+                                dat.skills = [];
+                                var stats = 0,
+                                    skill_id,
+                                    attr_id;
+                                for (skill_id in dat.para) {
+                                    attr_id = Math.floor(skill_id / 5);
+                                    if (typeof dat.boni.skill[skill_id] !== "undefined") {
+                                        stats += dat.boni.skill[skill_id];
                                     }
-                                    if (typeof t.boni.skill[u] !== "undefined") {
-                                        s += t.boni.skill[u]
+                                    if (typeof dat.boni.skill[attr_id] !== "undefined") {
+                                        stats += dat.boni.skill[attr_id];
                                     }
-                                    if (typeof TWDB.ClothCalc._id2skill[o] !== "undefined") {
-                                        t.skills
-                                            .push(TWDB.ClothCalc._id2skill[o]);
-                                        if (typeof CharacterSkills.skills[TWDB.ClothCalc._id2skill[o]] !== "undefined") {
-                                            s += CharacterSkills.skills[TWDB.ClothCalc._id2skill[o]].points
-                                        } else if (typeof CharacterSkills.attributes[TWDB.ClothCalc._id2skill[o]] !== "undefined") {
-                                            s += CharacterSkills.attributes[TWDB.ClothCalc._id2skill[o]].points
+                                    if (typeof TWDB.ClothCalc._id2skill[skill_id] !== "undefined") {
+                                        dat.skills.push(TWDB.ClothCalc._id2skill[skill_id]);
+                                        if (typeof CharacterSkills.skills[TWDB.ClothCalc._id2skill[skill_id]] !== "undefined") {
+                                            stats += CharacterSkills.skills[TWDB.ClothCalc._id2skill[skill_id]].points;
+                                        } else if (typeof CharacterSkills.attributes[TWDB.ClothCalc._id2skill[skill_id]] !== "undefined") {
+                                            stats += CharacterSkills.attributes[TWDB.ClothCalc._id2skill[skill_id]].points;
                                         }
                                     }
                                 }
-                                t.laborpoints = s;
+                                dat.laborpoints = stats;
                                 break;
                             default:
-                                return;
-                                break
+                                break;
                             }
-                        } catch (a) {
-                            TWDB.Error
-                                .report(a,
-                                    "GENERICERROR#; handle Customs")
+                        } catch (err) {
+                            TWDB.Error.report(err, "GENERICERROR#; handle Customs");
                         }
                     }
                 },
+
                 calc: function () {
                     // Dun - clarify condition and
                     // remove the 0 which appeared
-                    var e = this.parent.calcdata.custom[this.selected];
-                    if (isDefined(e) && e.type == "fort") {
-                        return "0|0|0"
-
-                    } else {
-                        return "";
-
-                    }
-
+                    var custom = this.parent.calcdata.custom[this.selected];
+                    return (isDefined(custom) && custom.type === "fort") ? "0|0|0" : "";
                 },
-                createSelectbox: function () {
-                    if (!this.parent.gui.custom.selectbox) {
-                        return
 
-                    }
-                    this.parent.gui.custom.selectbox.elContent
-                        .empty();
+                createSelectbox: function () {
+                    if (!this.parent.gui.custom.selectbox) { return; }
+                    var id,
+                        name;
+                    this.parent.gui.custom.selectbox.elContent.empty();
                     this.parent.gui.custom.selectbox.value = null;
                     this.parent.gui.custom.selectbox.items = [];
-                    for (var e in this.parent.calcdata.custom) {
-                        var t = this.parent.calcdata.custom[e].name + " [" + this.parent.calcdata.custom[e].laborpoints + "]";
-                        this.parent.gui.custom.selectbox
-                            .addItem(e, t)
+                    for (id in this.parent.calcdata.custom) {
+                        name = this.parent.calcdata.custom[id].name + " [" + this.parent.calcdata.custom[id].laborpoints + "]";
+                        this.parent.gui.custom.selectbox.addItem(id, name);
                     }
-                    this.switchCustomJob(this.selected)
+                    this.switchCustomJob(this.selected);
                 },
-                switchCustomJob: function (e) {
-                    // if (typeof
-                    // this.parent.calcdata.custom[e] ==
-                    // "undefined"
-                    // || typeof
-                    // this.parent.calcdata.custom[e].cloth
-                    // == "undefined") {
-                    // return
-                    // }
-                    // Dun - change for isDefined func
-                    // and simplify condition
-                    if (isDefined(this.parent.calcdata.custom[e]) && isDefined(this.parent.calcdata.custom[e].cloth)) {
 
-                        var t = this.parent;
-                        this.parent.customs.selected = e;
-                        var n = " [" + this.parent.calcdata.custom[e].laborpoints + "]";
-                        n = this.parent.calcdata.custom[e].name
-                            .substring(0,
-                                35 - n.length) + n;
-                        this.parent.gui.custom.title
-                            .html(n);
-                        this.parent.bag
-                            .showItems(
-                                this.parent.calcdata.custom[e].cloth,
-                                "custom");
-                        this.showSkill()
-                    } else {
-                        return;
+                switchCustomJob: function (cust_id) {
+                    if (isDefined(this.parent.calcdata.custom[cust_id]) && isDefined(this.parent.calcdata.custom[cust_id].cloth)) {
+                        this.parent.customs.selected = cust_id;
+                        var title = " [" + this.parent.calcdata.custom[cust_id].laborpoints + "]";
+                        /** TODO: add ellipsis variant **/
+                        title = this.parent.calcdata.custom[cust_id].name.substring(0, 35 - title.length) + title;
+                        this.parent.gui.custom.title.html(title);
+                        this.parent.bag.showItems(this.parent.calcdata.custom[cust_id].cloth, "custom");
+                        this.showSkill();
                     }
                 },
+
                 showSkill: function () {
-                    this.parent.gui.custom.skills
-                        .children().remove();
+                    this.parent.gui.custom.skills.children().remove();
                     // Dun - change for isDefined func
                     if (!isDefined(this.parent.calcdata.custom[this.parent.customs.selected])) {
                         return
@@ -3728,6 +3654,7 @@
                             [0, "sellTip4", "#HELP_SELLTIP4#", "#SELLTIP_SETTINGS#"],
                             [0, "sellTip5", "#HELP_SELLTIP5#", "#SELLTIP_SETTINGS#"],
                         [0, "pinitems", "#HELP_PIN_ITEMS#", false],
+                        [0, "collectorsell", "#HELP_COLLECTORSELL#", false],
 
                         [9, "", "#MENULEFT3#", false],                          // Quests
                         [0, "questwiki", "#HELP_QUESTWIKI#", false],
@@ -3747,7 +3674,7 @@
 
                         [9, "", "#CAP_TASKLIST#", false],                    // Task List
                         [0, "tasklistpoints", "#HELP_TL_SHOWLP#", false],
-                        // [0, "tasklistcancel", "#HELP_TL_CANCELALL#", false],
+                        // [0, "tasklistcancel", "##", false],
 
                         [9, "", "GUI", false],                                  // GUI
                         [0, "duelmotivation", "#HELP_DUELMOTIVATION#", false],
@@ -3756,6 +3683,8 @@
                         [0, "noshopsale", "#HELP_DISABLE_SALE#", false],
                         [0, "expbarvalues", "#HELP_EXPBAR#; #HELP_CREDITS# Leones/Slygoxx", false],
                         [0, "mini_chatgui", "#HELP_MINIMIZE_CHATGUI#", false],
+                        [0, "customcounterpos", "#HELP_GUI_COUNTER#", false],
+                        [0, "noscrollbars", "#HELP_GUI_SCROLLBARS#", false],
 
                         [9, "", "#MINIMAP_CAP#", false],                        // Mini map
                         [0, "showbonusjobs", "#HELP_SHOWBONUSJOBS#", false],
@@ -7013,7 +6942,9 @@
                 var init = function() {
                     if (loader.ready) { return; }
                     trustTWDB();
-                    TWDB.Util.addCss("@media (min-width: 1320px) { .custom_unit_counter {top: -1px!important; margin-left: 310px!important;} #hiro_friends_container {top: -1px!important; margin-right: 304px!important;} }"); // reposition counters for wide screens
+                    if (Settings.get("collectorsell", true)) { GameInject.injectWanderingTraderSellDialog(); }
+                    if (Settings.get("customcounterpos", true)) { repositionEventCounters(); }
+                    if (Settings.get("noscrollbars", false)) { disableScrollbars(); }
                     if (Settings.get("instanthotel", true)) { InstantHotel(); }
                     if (Settings.get("qbswitch", true)) { QuestbookSwitch(); }
                     if (Settings.get("qfulltext", false)) { QuestFullText(); }
@@ -7040,7 +6971,7 @@
                 };
                 loader = Loader.add("Snippets", "tw-db code Snippets", init, { Settings: true });
 
-                var trustTWDB = function() {
+                var trustTWDB = function () {
                     try {
                         var str = showlink.toString();
                         str = str.replace("the-west", "tw-db|the-west");
@@ -7049,11 +6980,19 @@
                     } catch (e) {}
                 };
 
-                var allowChatGuiMinimize = function() {
+                var repositionEventCounters = function () {
+                    TWDB.Util.addCss("@media (min-width: 1320px) { .custom_unit_counter {top: -1px!important; margin-left: 310px!important;} #hiro_friends_container {top: -1px!important; margin-right: 304px!important;} }"); // reposition counters for wide screens
+                };
+
+                var disableScrollbars = function () {
+                    $('body').css({overflow: 'hidden'});
+                };
+
+                var allowChatGuiMinimize = function () {
                     TWDB.Util.addCss('div#ui_bottomleft { width: auto; overflow: hidden; }'
                         + 'div#ui_chat { margin-top: 12px; }'
-                        + 'div#ui_chat div#toggleMinChat { position: absolute; top: -14px; left: 5px; width: 27px; display: block; background-size: 108px 42px; }'
-                        + 'div#ui_chat.minchat div#toggleMinChat { background-position: 0px 0px; }'
+                        + 'div#ui_chat div#toggleMinChat { position: absolute; top: -14px; left: 5px; width: 27px; display: block; background-size: 108px 42px; border: 0px solid rgba(0, 0, 0, 0); background-clip: content-box; }'
+                        + 'div#ui_chat.minchat div#toggleMinChat { background-position: 0px 0px; border-width: 0px 8px 34px 0px; }'
                         + 'div#ui_chat.minchat div#servertime { display: none; }'
                         + 'div#ui_chat.minchat > div.tabs div { display: none; }'
                         + 'div#ui_chat.minchat div.container div.friend { display: none!important; }'
@@ -7213,14 +7152,14 @@
                 var fastSkillChange = function () {
                     try {
                         west.gui.Plusminusfield.prototype.__twdb__init = west.gui.Plusminusfield.prototype.init;
-                        west.gui.Plusminusfield.prototype.init = function () {
+                        west.gui.Plusminusfield.prototype.init = function (id, start_value, min_value, max_value, extra_points, callbackPlus, callbackMinus, callbackWheel) {
                             this.__twdb__init.apply(this, arguments);
                             var _this = this;
                             var buttons = {
                                 minus: $('span.butMinus', _this.divMain),
                                 plus: $('span.butPlus', _this.divMain)
                             };
-                            $(this.divMain).mousewheel(function(ev, delta) {
+                            $(this.divMain).off("mousewheel").on("mousewheel", function(ev, delta) {
                                 buttons[delta < 0 ? 'minus' : 'plus'].click();
                                 ev.stopPropagation();
                                 return false;
@@ -7229,7 +7168,7 @@
                                 var i = 400,
                                     timeout = -1,
                                     timeh = function () {
-                                        i = Math.max(Math.round(i * (i / 200 + 1) / (i / 133 + 1)), 15);
+                                        i = Math.max(Math.round(i * (i / 200 + 1) / (i / 133 + 1)), 5);
                                         $elem.click();
                                         timeout = setTimeout(timeh, i);
                                     },
@@ -8387,6 +8326,40 @@
                     }
                 };
 
+                // ====================================================================
+                // button to sell all but one item to the mobile trader
+                // ====================================================================
+                _self.injectWanderingTraderSellDialog = function () {
+                    try {
+                        west.window.shop.view.__proto__.__twdb__showSellDialog = west.window.shop.view.__proto__.showSellDialog;
+                        west.window.shop.view.__proto__.showSellDialog = function (item_id) {
+                            var controller = this.getController(),
+                                item = Bag.getItemByItemId(item_id),
+                                count = item.count,
+                                $popup,
+                                buttonTitle;
+                            this.__twdb__showSellDialog.apply(this, arguments);
+                            if (count < 3) {
+                                return;
+                            }
+                            $popup = $('div.tw2gui_dialog').has('div.textart_title:contains(' + item.getName() + ')');
+                            if ($popup.length === 1) {
+                                count--;
+                                buttonTitle = 'Max-1 (' + count + 'x = $ ' + (count * item.getSellPrice()) + ')';
+                                $popup.children('div.tw2gui_dialog_actions').prepend(new west.gui.Button(buttonTitle, function () {
+                                    controller.requestSell({
+                                        inv_id: item.inv_id,
+                                        count: count
+                                    });
+                                    $popup.find('div.tw2gui_button').last().click();
+                                }.bind(this)).getMainDiv());
+                            }
+                        };
+                    } catch (err) {
+                        Error.report(err, "manipulate .showSellDialog (wandering trader - sell all but one)")
+                    }
+                };
+
                 return _self
             })($);
             Debugger.GameInject = GameInject;
@@ -8989,7 +8962,7 @@
                             case "speed":
                                 r.skills = ["ride"];
                                 if (!r.laborpoints) {
-                                    var directSpeed = (r.cloth && r.cloth[1] && r.cloth[1]["other"] && r.cloth[1]["other"][1]) || 0;
+                                    var directSpeed = (r.cloth && r.cloth[1] && r.cloth[1].other && r.cloth[1].other[1]) || 0;
                                     var r = (r.boni && r.boni.other && r.boni.other[1]) || 0;
                                     r -= directSpeed;
                                     directSpeed += (r.boni && r.boni.skill && r.boni.skill[2]) || 0;
