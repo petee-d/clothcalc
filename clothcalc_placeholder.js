@@ -7146,13 +7146,11 @@
                                 minus: $('span.butMinus', _this.divMain),
                                 plus: $('span.butPlus', _this.divMain)
                             };
-                            if (!callbackWheel) {
-                                $(this.divMain).mousewheel(function(ev, delta) {
-                                    buttons[delta < 0 ? 'minus' : 'plus'].click();
-                                    ev.stopPropagation();
-                                    return false;
-                                });
-                            }
+                            $(this.divMain).off("mousewheel").on("mousewheel", function(ev, delta) {
+                                buttons[delta < 0 ? 'minus' : 'plus'].click();
+                                ev.stopPropagation();
+                                return false;
+                            });
                             $.each(buttons, function (key, $elem) {
                                 var i = 400,
                                     timeout = -1,
