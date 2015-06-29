@@ -7145,13 +7145,20 @@
 
                 var changeWofNuggets = function() {
                     try {
-                        var str = west.wof.WofPayHandler.prototype.toCheckbox.toString();
-                        str = str.replace(/\b0\s?==\s?i\b/, "payOption['iconName'] !== 'nugget'");
-                        eval("west.wof.WofPayHandler.prototype.toCheckbox = " + str)
+                        west.gui.payHandler.prototype.__twdb__addPayOption = west.gui.payHandler.prototype.addPayOption;
+                        west.gui.payHandler.prototype.addPayOption = function (payOption) {
+                            this.__twdb__addPayOption.apply(this, arguments);
+                            if (false === payOption || 'nugget' === payOption) {
+                                return this;
+                            }
+                            this.setSelectedPayId(payOption.id);
+                            return this;
+                        }
                     } catch (e) {
                         Error.report(e, "manipulate changeWofNuggets");
                     }
                 };
+
 
                 var removeVariousPA = function() {
                     var excludes = [], reg;
