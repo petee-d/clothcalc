@@ -7,13 +7,10 @@
 
 /**
  * News on this update :
- * -
- * -
- * -
- * -
- * -
- * -
- * -
+ * -Toggle between start and end text of completed quests in the questbook is fixed.
+ * -Battle formula updated.
+ * -If you have an upgraded item, the base item won't be shown as new anymore.
+ * -If you placed a bid on an item, it won't be shown as new anymore.
  * */
 
 (function (f) {
@@ -471,6 +468,22 @@
             loaded: false,
             up2date: true,
             gui: { job: {}, custom: {} },
+	    bidsLoading: false,
+	    getBids: function () {
+		if (this.bidsLoading) return;
+		this.bidsLoading = true;
+		var _this = this;
+		_this.bids = [];
+		Ajax.remoteCall('building_market', 'fetch_bids', {}, function (json){
+			if (json.error) return new UserMessage(json.msg, UserMessage.TYPE_ERROR).show();
+			var jms = json.msg.search_result;
+			for (var b = 0; b < jms.length; b++){
+				_this.bids.push(jms[b].item_id);
+				if (b == jms.length-1)
+					_this.bidsLoading = false;
+			}
+		})
+	    },
 
             init: function () {
                 if (this.ready) { return; }
@@ -479,9 +492,10 @@
                 this.joblist.parent = this;
                 this.customs.setParent(this);
                 this.bag.setParent(this);
+		this.getBids();
                 TWDB.Eventer.set("TWDBdataLoaded", function () { _self.handleTWDBData(); });
                 //define gui general
-                this.gui.copyright = jQuery('<div style="position:absolute;bottom:0px;left:0px;height:15px;display:block;font-size:10px;color:#000000;">.:powered by tw-db team:. | <a href="http://tw-db.info" style="font-weight:normal;color:#000000;" target="_blank">.:tw-db.info:.</a> | ' + (TWDB.script.version / 100) + " rev. " + TWDB.script.revision + "</div>");
+                this.gui.copyright = jQuery('<div style="position:absolute;bottom:0px;left:0px;height:15px;display:block;font-size:10px;color:#000000;">.:powered by tw-db team:. | <a href="https://tw-db.info" style="font-weight:normal;color:#000000;" target="_blank">.:tw-db.info:.</a> | ' + (TWDB.script.version / 100) + " rev. " + TWDB.script.revision + "</div>");
                 this.gui.cache = jQuery('<div style="position:absolute;top:10px;right:8px;width:20px;height:20px;cursor:pointer;" />');
                 this.gui.bag = jQuery('<div style="position:absolute;top:95px;left:1px;width:252px;height:186px;" />');
                 this.BagInt = window.setInterval(function () { _self.finishInit(); }, 100);
@@ -1650,6 +1664,7 @@
                             dat = this.parent.calcdata.custom[key];
                             switch (dat.type) {
                             case "speed":
+				//100 + [horse] + [rideSkills]) * (1 + [setbonuses + buffs]/100) * 1.1 if duelist (or 1.2 if premium)
                                 dat.skills = ["ride"];
                                 if (!dat.laborpoints) {
                                     var riding = (dat.cloth && dat.cloth[1] && dat.cloth[1].other && dat.cloth[1].other[1]) || 0,
@@ -1668,25 +1683,29 @@
                                 break;
                             case "fort":
                                 var stats,
-                                    skill = {};
+                                skill = {},
+				soldierBonus = (Character.charClass === "soldier" ? Premium.hasBonus("character") ? 1.5 : 1.25 : 1),
+				workerBonus = (Character.charClass == "worker" ? Premium.hasBonus("character") ? 1.4 : 1.2 : 1),
+				multiplayerAtt = (Number(dat.boni.other[11]) || 0) + (Number(dat.boni.other[17]) || 0),
+				multiplayerDef = (Number(dat.boni.other[12]) || 0) + (Number(dat.boni.other[18]) || 0);
                                 if (dat.para.type === 0) {
-                                    skill.aim = CharacterSkills.skills.aim.points + (typeof dat.boni.skill[3] !== "undefined" ? dat.boni.skill[3] : 0) + (typeof dat.boni.skill[15] !== "undefined" ? dat.boni.skill[15] : 0);
-                                    skill.endurance = CharacterSkills.skills.endurance.points + (typeof dat.boni.skill[1] !== "undefined" ? dat.boni.skill[1] : 0) + (typeof dat.boni.skill[8] !== "undefined" ? dat.boni.skill[8] : 0);
-                                    skill.dodge = CharacterSkills.skills.dodge.points + (typeof dat.boni.skill[2] !== "undefined" ? dat.boni.skill[2] : 0) + (typeof dat.boni.skill[12] !== "undefined" ? dat.boni.skill[12] : 0);
-                                    skill.leadership = CharacterSkills.skills.leadership.points + (typeof dat.boni.skill[4] !== "undefined" ? dat.boni.skill[4] : 0) + (typeof dat.boni.skill[20] !== "undefined" ? dat.boni.skill[20] : 0);
-                                    skill.health = CharacterSkills.skills.health.points + (typeof dat.boni.skill[1] !== "undefined" ? dat.boni.skill[1] : 0) + (typeof dat.boni.skill[9] !== "undefined" ? dat.boni.skill[9] : 0);
-                                    stats = 100 + (Character.level - 1) * Character.lifePointPerHealthSkill + skill.health * (Character.lifePointPerHealthSkill + Character.lifePointPerHealthSkillBonus) + " | ";
-                                    stats += Math.round((25 + Math.pow(skill.leadership * 1 + (Character.charClass === "soldier" ? Premium.hasBonus("character") ? .5 : .25 : 0), .4) + Math.pow(skill.aim,.4) + Math.pow(skill.endurance, .4)) * 100) / 100 + " | ";
-                                    stats += Math.round((10 + Math.pow(skill.leadership * 1 + (Character.charClass === "soldier" ? Premium.hasBonus("character") ? .5 : .25 : 0), .4) + Math.pow(skill.dodge,.4) + Math.pow(skill.endurance, .4)) * 100) / 100;
-                                } else {
                                     skill.aim = CharacterSkills.skills.aim.points + (typeof dat.boni.skill[3] !== "undefined" ? dat.boni.skill[3] : 0) + (typeof dat.boni.skill[15] !== "undefined" ? dat.boni.skill[15] : 0);
                                     skill.hide = CharacterSkills.skills.hide.points + (typeof dat.boni.skill[2] !== "undefined" ? dat.boni.skill[2] : 0) + (typeof dat.boni.skill[13] !== "undefined" ? dat.boni.skill[13] : 0);
                                     skill.dodge = CharacterSkills.skills.dodge.points + (typeof dat.boni.skill[2] !== "undefined" ? dat.boni.skill[2] : 0) + (typeof dat.boni.skill[12] !== "undefined" ? dat.boni.skill[12] : 0);
                                     skill.leadership = CharacterSkills.skills.leadership.points + (typeof dat.boni.skill[4] !== "undefined" ? dat.boni.skill[4] : 0) + (typeof dat.boni.skill[20] !== "undefined" ? dat.boni.skill[20] : 0);
                                     skill.health = CharacterSkills.skills.health.points + (typeof dat.boni.skill[1] !== "undefined" ? dat.boni.skill[1] : 0) + (typeof dat.boni.skill[9] !== "undefined" ? dat.boni.skill[9] : 0);
                                     stats = 100 + (Character.level - 1) * Character.lifePointPerHealthSkill + skill.health * (Character.lifePointPerHealthSkill + Character.lifePointPerHealthSkillBonus) + " | ";
-                                    stats += Math.round((25 + Math.pow(skill.leadership * 1 + (Character.charClass === "soldier" ? Premium.hasBonus("character") ? .5 : .25 : 0), .4) + Math.pow(skill.aim,.4) + Math.pow(skill.hide, .4)) * 100) / 100 + " | ";
-                                    stats += Math.round((10 + Math.pow(skill.leadership * 1 + (Character.charClass === "soldier" ? Premium.hasBonus("character") ? .5 : .25 : 0), .4) + Math.pow(skill.dodge,.4) + Math.pow(skill.hide, .4)) * 100) / 100;
+                                    stats += Number((25 + Math.pow(skill.leadership * soldierBonus, 0.5) + Math.pow(skill.aim,0.5) + Math.pow(skill.hide, 0.6) + multiplayerAtt) * workerBonus).round(2) + " | ";
+                                    stats += Number((10 + Math.pow(skill.leadership * soldierBonus, 0.5) + Math.pow(skill.dodge,0.5) + Math.pow(skill.hide, 0.6) + multiplayerDef) * workerBonus).round(2);
+                                } else {
+                                    skill.aim = CharacterSkills.skills.aim.points + (typeof dat.boni.skill[3] !== "undefined" ? dat.boni.skill[3] : 0) + (typeof dat.boni.skill[15] !== "undefined" ? dat.boni.skill[15] : 0);
+                                    skill.pitfall = CharacterSkills.skills.pitfall.points + (typeof dat.boni.skill[3] !== "undefined" ? dat.boni.skill[3] : 0) + (typeof dat.boni.skill[17] !== "undefined" ? dat.boni.skill[17] : 0);
+                                    skill.dodge = CharacterSkills.skills.dodge.points + (typeof dat.boni.skill[2] !== "undefined" ? dat.boni.skill[2] : 0) + (typeof dat.boni.skill[12] !== "undefined" ? dat.boni.skill[12] : 0);
+                                    skill.leadership = CharacterSkills.skills.leadership.points + (typeof dat.boni.skill[4] !== "undefined" ? dat.boni.skill[4] : 0) + (typeof dat.boni.skill[20] !== "undefined" ? dat.boni.skill[20] : 0);
+                                    skill.health = CharacterSkills.skills.health.points + (typeof dat.boni.skill[1] !== "undefined" ? dat.boni.skill[1] : 0) + (typeof dat.boni.skill[9] !== "undefined" ? dat.boni.skill[9] : 0);
+                                    stats = 100 + (Character.level - 1) * Character.lifePointPerHealthSkill + skill.health * (Character.lifePointPerHealthSkill + Character.lifePointPerHealthSkillBonus) + " | ";
+                                    stats += Number((25 + Math.pow(skill.leadership * soldierBonus, 0.5) + Math.pow(skill.aim,0.5) + Math.pow(skill.pitfall, 0.6) + multiplayerAtt) * workerBonus).round(2) + " | ";
+                                    stats += Number((10 + Math.pow(skill.leadership * soldierBonus, 0.5) + Math.pow(skill.dodge,0.5) + Math.pow(skill.pitfall, 0.6) + multiplayerDef) * workerBonus).round(2);
                                 }
                                 dat.skills = ["health", "attacker", "defender"];
                                 dat.laborpoints = stats;
@@ -1943,7 +1962,7 @@
                                         this.parent.gui.custom.code
                                         .getMainDiv())));
                         o
-                            .append('<tr><td colspan="2">#CLOTHCALC_CUSTOMHELP# <a href="http://tw-db.info/?strana=calc" target="_blank">tw-db.info #CALCULATOR#</a></td></tr>');
+                            .append('<tr><td colspan="2">#CLOTHCALC_CUSTOMHELP# <a href="https://tw-db.info/?strana=calc" target="_blank">tw-db.info #CALCULATOR#</a></td></tr>');
                         var o = new west.gui.Dialog(
                             s + "#CUSTOM#", o);
                         o
@@ -2602,8 +2621,8 @@
                         "tw-db.info Cloth Calc",
                         "2.04",
                         String(Script.gameversion),
-                        "scoobydoo, Dun, Petee, Bluep [tw-db.info]",
-                        "http://tw-db.info");
+                        "scoobydoo, Dun, Petee, Bluep, Tom Robert [tw-db.info]",
+                        "https://tw-db.info");
                     var Paypal = '<br><br><form action="https://www.paypal.com/cgi-bin/webscr" method="post">'
                                + '<input name="cmd" value="_s-xclick" type="hidden">'
                                + '<input name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----" type="hidden">'
@@ -3035,7 +3054,7 @@
                     r = wman.open(n, null).setMiniTitle(
                         "tw-db.info").setTitle("tw-db.info");
                     r
-                        .appendToContentPane(e('<div style="width:100%;text-align:center;position:absolute;bottom:0px;left:0px;height:15px;display:block;font-size:12px;color:#000000;">.:powered by tw-db team:. | <a href="http://tw-db.info" style="font-weight:normal;color:#000000;" target="_blank">.:tw-db.info:.</a> | ' + (Script.version / 100 + " rev. " + Script.revision) + "</div>"));
+                        .appendToContentPane(e('<div style="width:100%;text-align:center;position:absolute;bottom:0px;left:0px;height:15px;display:block;font-size:12px;color:#000000;">.:powered by tw-db team:. | <a href="https://tw-db.info" style="font-weight:normal;color:#000000;" target="_blank">.:tw-db.info:.</a> | ' + (Script.version / 100 + " rev. " + Script.revision) + "</div>"));
                     r
                         .appendToContentPane(e(
                                 '<div title=" tw-db support " style="width:19px;height:19px;position:absolute;bottom:-5px;right:5px;display:block;cursor:pointer;" />')
@@ -3108,7 +3127,7 @@
                 };
                 t.open = function () {
 
-                    var t = e('<p style="margin:10px;">Please include the text displayed below in a bug report sent using <a href="http://tw-db.info/?strana=contact" target="_blank">our contact form</a> and also try to describe how to reproduce this error (what did you do when it occured). Thanks!</p>');
+                    var t = e('<p style="margin:10px;">Please include the text displayed below in a bug report sent using <a href="https://tw-db.info/?strana=contact" target="_blank">our contact form</a> and also try to describe how to reproduce this error (what did you do when it occured). Thanks!</p>');
                     var i = e('<div style="margin:10px;"/>');
                     var s = "[CODE]";
                     for (var o in r) {
@@ -3812,7 +3831,7 @@
                 var s = function () {
                     r.children().remove();
                     (new west.gui.Button("open Tool", function () {
-                        w.open("http://" + Script.url + "/?strana=politic_map&world=" + location.hostname.split(".")[0])
+                        w.open("https://" + Script.url + "/?strana=politic_map&world=" + location.hostname.split(".")[0])
                     })).appendTo(r);
                     var t = new west.gui.Button;
                     t.setCaption("Alliance Import".escapeHTML()).click(
@@ -6385,28 +6404,20 @@
 
                     }
                     if (Settings.get("collector", true)) {
-                        GameInject.injectItem("Trader", "collector",
-                            function (e) {
-                                return s(e)
-                            });
-                        GameInject
-                            .injectTrader(
-                                "collector",
-                                function (e) {
-
-                                    if (t.isNewItem(e.item_id)) {
-
-                                        var imgInject = '<img src="' + Images.iconNew + '" class="TWDBcollector" title=" #NOTATINV# " ' + ' style="position:absolute;top:0px;left:0px;padding:0px;border:0px;margin:0px;" />'
-
-                                        return imgInject;
-                                    }
-                                    return ""
-                                });
-
-                        GameInject.injectMarket("collector",
-                            function (e) {
-                                return o(e)
-                            })
+                        GameInject.injectItem("Trader", "collector", function (e) {
+                            return s(e)
+                        });
+                        GameInject.injectTrader("collector", function (e) {
+							if (t.isNewItem(e.item_id)) {
+								var imgInject = '<img src="' + Images.iconNew + '" class="TWDBcollector" title=" #NOTATINV# " ' + ' style="position:absolute;top:0px;left:0px;padding:0px;border:0px;margin:0px;" />'
+								return imgInject;
+						}
+							return "";
+						});
+                        GameInject.injectMarket("collector", function (e) {
+                            return o(e)
+                        });
+                        GameInject.injectGetBids();
                     }
                     r.ready = true
                 };
@@ -6414,13 +6425,10 @@
                     Settings: true
                 });
                 t.isNewItem = function (e) {
-                    var t = 0;
                     var n = w.ItemManager.get(e);
-                    var r = w.Bag.getItemByItemId(n.item_id);
-                    var i = w.Wear.wear[n.type];
-                    if (r || i && i.obj.item_id == n.item_id) {
-                        t = (r !== undefined ? r.count : 0) + (i !== undefined && i.obj.item_id == n.item_id ? 1 : 0)
-                    }
+                    var inv = w.Bag.getItemsIdsByBaseItemId(n.item_base_id);
+                    var equip = w.Wear.wear[n.type];
+                    var t = inv.length + (equip && equip.obj.item_base_id == n.item_base_id ? 1 : 0) + (TWDB.ClothCalc.bids.indexOf(n.item_id) > -1 ? 1 : 0)
                     if (t == 0) {
                         return true
                     } else {
@@ -7088,14 +7096,14 @@
 
                 var QuestbookSwitch = function() {
                     try {
-                        QuestWindowView.cc_showSolvedQuest = QuestWindowView.showSolvedQuest; // backup original
-                        QuestWindowView.showSolvedQuest = function (quest) {
-                            QuestWindowView.cc_showSolvedQuest(quest); // call original
+                        QuestGroupWindowView.cc_showSolvedQuest = QuestGroupWindowView.showSolvedQuest; // backup original
+                        QuestGroupWindowView.showSolvedQuest = function (quest) {
+                            QuestGroupWindowView.cc_showSolvedQuest(quest); // call original
                             // identify completion text & hide it
-                            var $endtext = $("div.window-quest_solved div.quest_description_container span").slice(1).hide();
+                            var $endtext = $("div.window-quest_group div.quest_description_container span").slice(1).hide();
                             // create intro text & add it
                             var $introtext = $("<span><br>" + quest.description + "</span>");
-                            $("div.window-quest_solved div.quest_description_container").append($introtext);
+                            $("div.window-quest_group div.quest_description_container").append($introtext);
                             // create switch link & add it
                             var $swbutton = $('<a href="#"> #QB_SHOWCOMP# </a>').addClass("introshown").click(function () {
                                 var $t = $(this),
@@ -7105,7 +7113,7 @@
                                 $t.text(is ? ' #QB_SHOWINTRO# ' : ' #QB_SHOWCOMP# ');
                                 $t.toggleClass("introshown");
                             });
-                            $("div.window-quest_solved div.solved_text_container").append($("<div style='text-align:center;'>").append($swbutton));
+                            $("div.window-quest_group div.solved_text_container").append($("<div style='text-align:center;margin-top:10px;'>").append($swbutton));
                         }
                     } catch (e) {
                         Error.report(e, "manipulate showSolvedQuest")
@@ -7710,8 +7718,8 @@
                         callbacks.push(callback);
                     };
                 })($);
-
-                /** TODO: create callback array instead of individual functions **/
+				
+		/** TODO: create callback array instead of individual functions **/
                 _self.injectItem = function(type, name, callback) {
                     var item = type + "Item";
                     if (typeof save[item] == "undefined") {
@@ -7799,13 +7807,26 @@
                         eval("MarketWindow.getClearName = " + save.MarketWindow)
                     }
                 };
+
+                _self.injectGetBids = function() {
+		    if (typeof save.MarketWindowTab == "undefined") {
+                        save.MarketWindowTab = MarketWindow.showTab.toString();
+                    }
+                    try {
+			var inject = "TWDB.ClothCalc.getBids();";
+			var newfunction = MarketWindow.showTab.toString().replace(/{/,"{" + inject);
+			eval("(function ($) {" + "MarketWindow.showTab = " + newfunction + "})(jQuery);")
+                    } catch (e) {
+			Error.report(e,"manipulate MarketWindow.showTab (3)");
+			eval("(function ($) {" + "MarketWindow.showTab = " + save.MarketWindowTab + "})(jQuery);")
+                    }
+                };
+				
                 _self.addTabOnMessagesWindow = function (name,
                     shortname, callback) {
                     if (typeof save.MessagesWindowOpen == "undefined") {
-                        save.MessagesWindowOpen = MessagesWindow.open
-                            .toString();
-                        save.MessagesWindowTab = MessagesWindow.showTab
-                            .toString()
+                        save.MessagesWindowOpen = MessagesWindow.open.toString();
+                        save.MessagesWindowTab = MessagesWindow.showTab.toString()
                     }
                     try {
                         var inject = "MessagesWindow.window.addTab('" + name + "', '" + shortname + "', tabclick).appendToContentPane($('<div class=\"messages-" + shortname + "\"/>'));";
@@ -7835,7 +7856,7 @@
                             .toString().replace(
                                 /switch(\s)*\(id\)(\s)*{/g,
                                 "switch (id) { " + inject);
-                        eval("(function ($) {" + "MessagesWindow.showTab = " + newfunction + "})(jQuery);;")
+                        eval("(function ($) {" + "MessagesWindow.showTab = " + newfunction + "})(jQuery);")
                     } catch (e) {
                         Error.report(e,
                             "manipulate MessagesWindow.showTab");
@@ -7847,10 +7868,10 @@
                     var first = false;
                     if (typeof save.MarketWindowOpen == "undefined") {
                         first = true;
-                        save.MarketWindowOpen = MarketWindow.open
-                            .toString();
-                        save.MarketWindowTab = MarketWindow.showTab
-                            .toString()
+                        save.MarketWindowOpen = MarketWindow.open.toString();
+		    }
+		    if (typeof save.MarketWindowTab == "undefined") {
+                        save.MarketWindowTab = MarketWindow.showTab.toString()
                     }
                     try {
                         var inject = "MarketWindow.window.addTab('" + name + "', '" + shortname + "', tabclick).appendToContentPane($('<div class=\"marketplace-" + shortname + "\"/>'));";
@@ -8328,10 +8349,7 @@
                                         .trigger("TWDBdataLoaded")
                                 }
                             } catch (t) {
-                                (new UserMessage(
-                                    Script.url + ": empty or corrupt data recieved",
-                                    UserMessage.TYPE_ERROR))
-                                .show()
+				console.log(Script.url + ": empty or corrupt data recieved");
                             }
                         }, false);
                     var l = Cache.load("datamanager");
@@ -8883,67 +8901,30 @@
                                 r.laborpoints = "";
                                 break;
                             case "fort":
+				var o = {},
+				soldierBonus = (Character.charClass == "soldier" ? Premium.hasBonus("character") ? 1.5 : 1.25 : 1),
+				workerBonus = (Character.charClass == "worker" ? Premium.hasBonus("character") ? 1.4 : 1.2 : 1),
+				multiplayerAtt = (Number(r.boni.other[11]) || 0) + (Number(r.boni.other[17]) || 0),
+				multiplayerDef = (Number(r.boni.other[12]) || 0) + (Number(r.boni.other[18]) || 0);
                                 if (r.para.type == 0) {
-                                    var o = {};
-                                    o.aim = CharacterSkills.skills.aim.points + (isDefined(r.boni.skill[3]) ? r.boni.skill[3] : 0) + (isDefined(r.boni.skill[15]) ? r.boni.skill[15] : 0);
-                                    o.endurance = CharacterSkills.skills.endurance.points + (isDefined(r.boni.skill[1]) ? r.boni.skill[1] : 0) + (isDefined(r.boni.skill[8]) ? r.boni.skill[8] : 0);
-                                    o.dodge = CharacterSkills.skills.dodge.points + (isDefined(r.boni.skill[2]) ? r.boni.skill[2] : 0) + (isDefined(r.boni.skill[12]) ? r.boni.skill[12] : 0);
-                                    o.leadership = CharacterSkills.skills.leadership.points + (isDefined(r.boni.skill[4]) ? r.boni.skill[4] : 0) + (isDefined(r.boni.skill[20]) ? r.boni.skill[20] : 0);
-                                    o.health = CharacterSkills.skills.health.points + (isDefined(r.boni.skill[1]) ? r.boni.skill[1] : 0) + (isDefined(r.boni.skill[9]) ? r.boni.skill[9] : 0);
-                                    var u = 100 + (Character.level - 1) * Character.lifePointPerHealthSkill + o.health * (Character.lifePointPerHealthSkill + Character.lifePointPerHealthSkillBonus);
-                                    var a = Number(
-                                            25 + Math
-                                            .pow(
-                                                o.leadership * 1 + (Character.charClass == "soldier" ? Premium
-                                                    .hasBonus("character") ? .5 : .25 : 0),
-                                                .4) + Math.pow(o.aim,
-                                                .4) + Math
-                                            .pow(
-                                                o.endurance,
-                                                .4))
-                                        .round(2);
-                                    var f = Number(
-                                            10 + Math
-                                            .pow(
-                                                o.leadership * 1 + (Character.charClass == "soldier" ? Premium
-                                                    .hasBonus("character") ? .5 : .25 : 0),
-                                                .4) + Math.pow(o.dodge,
-                                                .4) + Math
-                                            .pow(
-                                                o.endurance,
-                                                .4))
-                                        .round(2)
-                                } else {
-                                    var o = {};
                                     o.aim = CharacterSkills.skills.aim.points + (isDefined(r.boni.skill[3]) ? r.boni.skill[3] : 0) + (isDefined(r.boni.skill[15]) ? r.boni.skill[15] : 0);
                                     o.hide = CharacterSkills.skills.hide.points + (isDefined(r.boni.skill[2]) ? r.boni.skill[2] : 0) + (isDefined(r.boni.skill[13]) ? r.boni.skill[13] : 0);
                                     o.dodge = CharacterSkills.skills.dodge.points + (isDefined(r.boni.skill[2]) ? r.boni.skill[2] : 0) + (isDefined(r.boni.skill[12]) ? r.boni.skill[12] : 0);
                                     o.leadership = CharacterSkills.skills.leadership.points + (isDefined(r.boni.skill[4]) ? r.boni.skill[4] : 0) + (isDefined(r.boni.skill[20]) ? r.boni.skill[20] : 0);
                                     o.health = CharacterSkills.skills.health.points + (isDefined(r.boni.skill[1]) ? r.boni.skill[1] : 0) + (isDefined(r.boni.skill[9]) ? r.boni.skill[9] : 0);
                                     var u = 100 + (Character.level - 1) * Character.lifePointPerHealthSkill + o.health * (Character.lifePointPerHealthSkill + Character.lifePointPerHealthSkillBonus);
-                                    var a = Number(
-                                        25 + Math
-                                        .pow(
-                                            o.leadership * 1 + (Character.charClass == "soldier" ? Premium
-                                                .hasBonus("character") ? .5 : .25 : 0),
-                                            .4) + Math.pow(o.aim,
-                                            .4) + Math.pow(o.hide,
-                                            .4)).round(
-                                        2);
-                                    var f = Number(
-                                        10 + Math
-                                        .pow(
-                                            o.leadership * 1 + (Character.charClass == "soldier" ? Premium
-                                                .hasBonus("character") ? .5 : .25 : 0),
-                                            .4) + Math.pow(o.dodge,
-                                            .4) + Math.pow(o.hide,
-                                            .4)).round(
-                                        2)
+                                    var a = Number((25 + Math.pow(o.leadership * soldierBonus,0.5) + Math.pow(o.aim,0.5) + Math.pow(o.hide,0.6) + multiplayerAtt) * workerBonus).round(2);
+                                    var f = Number((10 + Math.pow(o.leadership * soldierBonus,0.5) + Math.pow(o.dodge,0.5) + Math.pow(o.hide,0.6) + multiplayerDef) * workerBonus).round(2)
+                                } else {
+                                    o.aim = CharacterSkills.skills.aim.points + (isDefined(r.boni.skill[3]) ? r.boni.skill[3] : 0) + (isDefined(r.boni.skill[15]) ? r.boni.skill[15] : 0);
+                                    o.pitfall = CharacterSkills.skills.pitfall.points + (isDefined(r.boni.skill[3]) ? r.boni.skill[3] : 0) + (isDefined(r.boni.skill[17]) ? r.boni.skill[17] : 0);
+                                    o.dodge = CharacterSkills.skills.dodge.points + (isDefined(r.boni.skill[2]) ? r.boni.skill[2] : 0) + (isDefined(r.boni.skill[12]) ? r.boni.skill[12] : 0);
+                                    o.leadership = CharacterSkills.skills.leadership.points + (isDefined(r.boni.skill[4]) ? r.boni.skill[4] : 0) + (isDefined(r.boni.skill[20]) ? r.boni.skill[20] : 0);
+                                    o.health = CharacterSkills.skills.health.points + (isDefined(r.boni.skill[1]) ? r.boni.skill[1] : 0) + (isDefined(r.boni.skill[9]) ? r.boni.skill[9] : 0);
+                                    var u = 100 + (Character.level - 1) * Character.lifePointPerHealthSkill + o.health * (Character.lifePointPerHealthSkill + Character.lifePointPerHealthSkillBonus);
+                                    var a = Number((25 + Math.pow(o.leadership * soldierBonus,0.5) + Math.pow(o.aim,0.5) + Math.pow(o.pitfall,0.6) + multiplayerAtt) * workerBonus).round(2);
+                                    var f = Number((10 + Math.pow(o.leadership * soldierBonus,0.5) + Math.pow(o.dodge,0.5) + Math.pow(o.pitfall,0.6) + multiplayerDef) * workerBonus).round(2)
                                 }
-                                a += isDefined(r.boni.other[11]) ? Number(r.boni.other[11]) : 0;
-                                a += isDefined(r.boni.other[17]) ? Number(r.boni.other[17]) : 0;
-                                f += isDefined(r.boni.other[12]) ? Number(r.boni.other[12]) : 0;
-                                f += isDefined(r.boni.other[18]) ? Number(r.boni.other[18]) : 0;
                                 r.skills = ["health", "attacker",
                                     "defender"
                                 ];
@@ -9124,7 +9105,7 @@
                                     u
                                     .getMainDiv())))
                         .append(
-                            e('<tr><td colspan="2">#CLOTHCALC_CUSTOMHELP# <a href="http://' + Script.url + '/?strana=calc" target="_blank">tw-db.info #CALCULATOR#</a></td></tr>'));
+                            e('<tr><td colspan="2">#CLOTHCALC_CUSTOMHELP# <a href="https://' + Script.url + '/?strana=calc" target="_blank">tw-db.info #CALCULATOR#</a></td></tr>'));
                     (new west.gui.Dialog(s, f)).addButton("ok", a)
                         .addButton("cancel").show()
                 };
@@ -9180,7 +9161,7 @@
                                     e(this)
                                         .find(".cell_3")
                                         .append(
-                                            '<img src="' + Game.forumURL + '/the-west/buttons/lastpost.gif" style="position:absolute;cursor:pointer;margin-left:3px;" onclick="Forum.openThread(' + r + ", " + n + ')"></img>')
+                                            '<img src="https://tomrobert.safe-ws.de/lastpost.png" style="position:absolute;cursor:pointer;margin-left:3px;" onclick="Forum.openThread(' + r + ", " + n + ')"></img>')
                                 })
                     }
                 };
