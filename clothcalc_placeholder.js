@@ -7720,7 +7720,7 @@
                         callbacks.push(callback);
                     };
                 })($);
-				
+
                 /** TODO: create callback array instead of individual functions **/
                 _self.injectItem = function(type, name, callback) {
                     var item = type + "Item";
@@ -7743,7 +7743,7 @@
                         tw2widget[item].prototype.getMainDiv = save[item];
                     };
                 };
-                
+
                 /** TODO: create callback array instead of individual functions **/
                 _self.injectTrader = function(name, callback) {
                     if (typeof save["west.game.shop.item.view.prototype.render"] == "undefined") {
