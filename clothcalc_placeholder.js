@@ -470,17 +470,16 @@
             up2date: true,
             gui: { job: {}, custom: {} },
             bidsLoading: false,
-            bids: [],
+            bids: {},
             getBids: function () {
                 if (this.bidsLoading) return;
                 this.bidsLoading = true;
                 var _this = this;
-                _this.bids = [];
                 Ajax.remoteCall('building_market', 'fetch_bids', {}, function (json){
                     if (json.error) return new UserMessage(json.msg, UserMessage.TYPE_ERROR).show();
                     var jms = json.msg.search_result;
                     for (var b = 0; b < jms.length; b++){
-                        _this.bids.push(jms[b].item_id);
+                        _this.bids[jms[b].item_id] = 1;
                     }
                     _this.bidsLoading = false;
                 })
@@ -6430,11 +6429,11 @@
                     var inv = w.Bag.getItemsIdsByBaseItemId(n.item_base_id);
                     var equip = w.Wear.wear[n.type];
                     var itemEquipped = equip && equip.obj.item_base_id == n.item_base_id;
-                    var itemHasBid = TWDB.ClothCalc.bids.indexOf(n.item_id) > -1;
+                    var itemHasBid = TWDB.ClothCalc.bids[n.item_id];
                     if (inv.length || itemEquipped  || itemHasBid) {
-                        return true;
-                    } else {
                         return false;
+                    } else {
+                        return true;
                     }
                 };
                 var s = function (e) {
@@ -7811,16 +7810,14 @@
                 };
 
                 _self.injectGetBids = function() {
-                    if (typeof save.MarketWindowTab == "undefined") {
-                        save.MarketWindowTab = MarketWindow.showTab.toString();
-                    }
                     try {
-                        var inject = "TWDB.ClothCalc.getBids();";
-                        var newfunction = MarketWindow.showTab.toString().replace(/{/,"{" + inject);
-                        eval("(function ($) {" + "MarketWindow.showTab = " + newfunction + "})(jQuery);")
+                        MarketWindow.twdb_showTab = MarketWindow.twdb_showTab || MarketWindow.showTab;
+                        MarketWindow.showTab = function () {
+                            MarketWindow.twdb_showTab.apply(this, arguments);
+                            TWDB.ClothCalc.getBids();
+                        }
                     } catch (e) {
                         Error.report(e,"manipulate MarketWindow.showTab (3)");
-                        eval("(function ($) {" + "MarketWindow.showTab = " + save.MarketWindowTab + "})(jQuery);")
                     }
                 };
 				
@@ -7865,57 +7862,48 @@
                         eval("(function ($) {" + "MessagesWindow.showTab = " + save.MessagesWindowTab + "})(jQuery);")
                     }
                 };
-                _self.addTabOnMarketWindow = function (name, shortname,
-                    callback) {
+                _self.addTabOnMarketWindow = function (name, shortname, callback) {
                     var first = false;
+                    var current = {};
+                    if (MarketWindow.twdb_showTab)
+                        current = {fn: MarketWindow.twdb_showTab, name: "MarketWindow.twdb_showTab"};
+                    else
+                        current = {fn: MarketWindow.showTab, name: "MarketWindow.showTab"};
                     if (typeof save.MarketWindowOpen == "undefined") {
                         first = true;
                         save.MarketWindowOpen = MarketWindow.open.toString();
-                    }
-                    if (typeof save.MarketWindowTab == "undefined") {
-                        save.MarketWindowTab = MarketWindow.showTab.toString()
+                        save.MarketWindowTab = current.fn.toString();
                     }
                     try {
                         var inject = "MarketWindow.window.addTab('" + name + "', '" + shortname + "', tabclick).appendToContentPane($('<div class=\"marketplace-" + shortname + "\"/>'));";
-                        var newfunction = MarketWindow.open.toString()
-                            .replace(/MarketWindow.DOM/,
-                                inject + "MarketWindow.DOM");
+                        var newfunction = MarketWindow.open.toString().replace(/MarketWindow.DOM/,inject + "MarketWindow.DOM");
                         eval("(function ($) {" + "MarketWindow.open = " + newfunction + "})(jQuery);")
                     } catch (e) {
                         Error.report(e, "manipulate MarketWindow.open");
                         eval("(function ($) {" + "MarketWindow.open = " + save.MarketWindowOpen + "})(jQuery);")
                     }
                     try {
-                        MarketWindow["TWDB-" + shortname] = function () {
-                            callback()
+                        MarketWindow["TWDB-" + shortname] = function () {callback()
                         }
                     } catch (e) {
                         Error.report(e, "add showTab to MarketWindow")
                     }
                     try {
                         var inject = "case '" + shortname + "':MarketWindow['TWDB-" + shortname + "']();break;";
-                        var newfunction = MarketWindow.showTab
-                            .toString().replace(
-                                /switch(\s)*\(id\)(\s)*{/,
-                                "switch (id) { " + inject);
-                        eval("(function ($) {" + "MarketWindow.showTab = " + newfunction + "})(jQuery);;")
+                        current.fn = current.fn.toString().replace(/switch(\s)*\(id\)(\s)*{/,"switch (id) { " + inject);
+                        eval("(function ($) {" + current.name + " = " + current.fn + "})(jQuery);;")
                     } catch (e) {
-                        Error.report(e,
-                            "manipulate MarketWindow.showTab (1)");
-                        eval("(function ($) {" + "MarketWindow.showTab = " + save.MarketWindowTab + "})(jQuery);")
+                        Error.report(e,"manipulate MarketWindow.showTab (1)");
+                        eval("(function ($) {" + current.name + " = " + save.MarketWindowTab + "})(jQuery);")
                     }
                     if (first) {
                         try {
                             var inject = "MarketWindow.window.setSize(748,471).removeClass('premium-buy');";
-                            var newfunction = MarketWindow.showTab
-                                .toString().replace(/{/,
-                                    "{" + inject);
-                            eval("(function ($) {" + "MarketWindow.showTab = " + newfunction + "})(jQuery);;")
+                            var newfunction = current.fn.toString().replace(/{/,"{" + inject);
+                            eval("(function ($) {" + current.name + " = " + newfunction + "})(jQuery);;")
                         } catch (e) {
-                            Error
-                                .report(e,
-                                    "manipulate MarketWindow.showTab (2)");
-                            eval("(function ($) {" + "MarketWindow.showTab = " + save.MarketWindowTab + "})(jQuery);")
+                            Error.report(e,"manipulate MarketWindow.showTab (2)");
+                            eval("(function ($) {" + current.name + " = " + save.MarketWindowTab + "})(jQuery);")
                         }
                     }
                 };
