@@ -11,6 +11,7 @@
  * -Battle formula updated.
  * -If you have an upgraded item, the base item won't be shown as new anymore.
  * -If you placed a bid on an item, it won't be shown as new anymore.
+ * -Item count in market map fixed
  * */
 
 (function (f) {
@@ -9639,12 +9640,12 @@
                                     if (t[n]["auction_ends_in"] < 0 || t[n]["current_bid"] == t[n]["max_price"]) {
                                         var r = new Object;
                                         r["item_id"] = t[n].item_id;
-                                        r["count"] = t[n].item_count;
+                                        r["count"] = parseFloat(t[n].item_count);
                                         var i = ""
                                     } else {
                                         var i = new Object;
                                         i["item_id"] = t[n].item_id;
-                                        i["count"] = t[n].item_count;
+                                        i["count"] = parseFloat(t[n].item_count);
                                         var r = ""
                                     }
                                     addObject(t[n].market_town_id,
