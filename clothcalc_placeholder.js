@@ -12,6 +12,7 @@
  * -If you have an upgraded item, the base item won't be shown as new anymore.
  * -If you placed a bid on an item, it won't be shown as new anymore.
  * -Item count in market map fixed
+ * -sellTip: High level weapons fixed
  * */
 
 (function (f) {
@@ -32,8 +33,8 @@
     } else {
         window.TWDB = {};
         TWDB.script = {
-            version: 39,
-            revision: 4,
+            version: 43,
+            revision: 2,
             name: "The West - tw-db.info Cloth Calc",
             update: "tw-db.info/cache/userscripts/clothcalc/dev_clothcalc_eng.user.js",
             check: "tw-db.info/cache/userscripts/clothcalc/dev_version",
@@ -6374,7 +6375,7 @@
                     };
 
                     if ( Settings.get('sellTip4',true) ) {
-                        if ( item.traderlevel === null || item.traderlevel > 15 ) {
+                        if ( item.traderlevel === null || item.traderlevel > 20 ) {
                         sell = false;
                         };
                     };
