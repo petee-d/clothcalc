@@ -7,12 +7,7 @@
 
 /**
  * News on this update :
- * -Toggle between start and end text of completed quests in the questbook is fixed.
- * -Battle formula updated.
- * -If you have an upgraded item, the base item won't be shown as new anymore.
- * -If you placed a bid on an item, it won't be shown as new anymore.
- * -Item count in market map fixed
- * -sellTip: High level weapons fixed
+ * - Updated fort ranks to include sergeant 
  * */
 
 (function (f) {
@@ -33,8 +28,8 @@
     } else {
         window.TWDB = {};
         TWDB.script = {
-            version: 43,
-            revision: 2,
+            version: 45,
+            revision: 1,
             name: "The West - tw-db.info Cloth Calc",
             update: "tw-db.info/cache/userscripts/clothcalc/dev_clothcalc_eng.user.js",
             check: "tw-db.info/cache/userscripts/clothcalc/dev_version",
@@ -131,7 +126,7 @@
              *
              * @param {String} cssString Standard CSS definition(s) "selector {style;}".
              * @param {String} optionalId Optional ID to create multiple <style> elements.
-             *				  Standard ID is twdb_css, if param is present it's twdb_css_optionalId.
+             *                Standard ID is twdb_css, if param is present it's twdb_css_optionalId.
              */
             var _addCss = function (cssString, optionalId) {
                 var id = "twdb_css";
@@ -612,7 +607,7 @@
                 for (key in this.calcdata.items) {
                     if (typeof this.data.items[key] === "undefined") {
                         if (!isDefined(ItemManager.get(key))) { console.log("Item ID=" + key + " seems to be no more defined..."); } // rare case that an item that was previously best for a job got removed from TW .. I'm curious
-                        // if (this.isBetterItem(this.calcdata.items[key].id)) {	// check doesn't make sense - we test CALCdata, if our previous best item is gone, we need to update!
+                        // if (this.isBetterItem(this.calcdata.items[key].id)) {    // check doesn't make sense - we test CALCdata, if our previous best item is gone, we need to update!
                         return true;
                         // };
                     }
@@ -1279,18 +1274,18 @@
                 calcProductRate: function (pts, mal, magic, mot, fac) {
                     return this._calcStepFormula('round', 'round', function (lp, stars) { return stars < 15 ? 6.25 : 9.375; }, pts, mal, magic, 100, fac);
                 },
-                calcDanger: function (pts, mal, magic, mot, fac) {	// Dun change ceil by floor
+                calcDanger: function (pts, mal, magic, mot, fac) {  // Dun change ceil by floor
                     return this._calcStepFormula('floor', 'floor', function (lp) { return Math.pow(lp, -0.2); }, pts, mal, magic, 100, fac, true);
                 },
-                addPremium: function (job) {	// Dun - adding premium bonus
+                addPremium: function (job) {    // Dun - adding premium bonus
                     var premiumChar = Number(Premium.hasBonus("character")),
                         premium = Number(Premium.hasBonus("money")),
                         premWages = 1,
                         premWorker = 1,
                         premAv = 1;
-                    if (premium) { premWages *= 1.5; }	// Add premium $ increase bonus
-                    if (Character.charClass === 'worker') { premWorker = (premiumChar) ? 1.1 : 1.05; }	// Add worker increase bonus
-                    if (Character.charClass === 'adventurer') { premAv = (premiumChar) ? 0.8 : 0.9; }	// Add adventurer decrease bonus
+                    if (premium) { premWages *= 1.5; }  // Add premium $ increase bonus
+                    if (Character.charClass === 'worker') { premWorker = (premiumChar) ? 1.1 : 1.05; }  // Add worker increase bonus
+                    if (Character.charClass === 'adventurer') { premAv = (premiumChar) ? 0.8 : 0.9; }   // Add adventurer decrease bonus
 
                     job.values.cur_wages = Math.round(job.values.cur_wages * premWages);
                     job.values.cur_experience = Math.round(job.values.cur_experience * premWorker);
@@ -2623,7 +2618,7 @@
                         "tw-db.info Cloth Calc",
                         "2.04",
                         String(Script.gameversion),
-                        "scoobydoo, Dun, Petee, Bluep, Tom Robert [tw-db.info]",
+                        "scoobydoo, Dun, Petee, Bluep, Tom Robert, xShteff [tw-db.info]",
                         "https://tw-db.info");
                     var Paypal = '<br><br><form action="https://www.paypal.com/cgi-bin/webscr" method="post">'
                                + '<input name="cmd" value="_s-xclick" type="hidden">'
@@ -3947,7 +3942,7 @@
                 var loader = {};
                 var init = function() {
                     if (loader.ready) { return; };
-                    // Settings.addOption( '#INTERFACE#' , 'directsleep', 0 ,'#HELP_DIRECTSLEEP#');	// for new settings system only
+                    // Settings.addOption( '#INTERFACE#' , 'directsleep', 0 ,'#HELP_DIRECTSLEEP#'); // for new settings system only
                     if (Settings.get('directsleep', true)) {
                         var sleepCss = "ul.tw2gui_selectbox_content.twdb_sleepmenu {max-width: 320px!important; white-space: nowrap; overflow-y: auto; overflow-x: hidden;}"
                                      + "ul.tw2gui_selectbox_content.twdb_sleepmenu > div.tw2gui_scrollpane {width: 320px!important}"
@@ -4379,9 +4374,9 @@
                       var str = $.trim($(this).children('span:last-child').html());
                       str = str.split('&nbsp;').join(' ');
                       switch (index) {
-                        case 0 :	data.motivation = parseInt(str.slice(0,str.indexOf(' ')), 10);
+                        case 0 :    data.motivation = parseInt(str.slice(0,str.indexOf(' ')), 10);
                                   break;
-                        case 1 :	/** TODO: remove that evil eval **/
+                        case 1 :    /** TODO: remove that evil eval **/
                                   var tmp = str.replace('h',' * 3600 + ');
                                   tmp = tmp.replace('m',' * 60 + ');
                                   tmp = tmp.replace('s',' * 1 + ');
@@ -4393,11 +4388,11 @@
                                     throw {message:"unrecognized time on report: " + str};
                                   }
                                   break;
-                        case 2 :	data.wage = parseInt(str.slice(str.indexOf(' ')+1), 10);
+                        case 2 :    data.wage = parseInt(str.slice(str.indexOf(' ')+1), 10);
                                   break;
-                        case 3 :	data.bond = parseInt(str, 10);
+                        case 3 :    data.bond = parseInt(str, 10);
                                   break;
-                        case 4 :	data.experience = parseInt(str.slice(0,str.indexOf(' ')), 10);
+                        case 4 :    data.experience = parseInt(str.slice(0,str.indexOf(' ')), 10);
                                   break;
                       };
                     });
@@ -4994,7 +4989,7 @@
                   return div;
                 };
                 // detailed JobReport
-                var	detail = function (job) {
+                var detail = function (job) {
                 };
                 _self.getExtra = function ( ) {
                   if ( isDefined(statistic.extra) ) {
@@ -6410,12 +6405,12 @@
                             return s(e)
                         });
                         GameInject.injectTrader("collector", function (e) {
-							if (t.isNewItem(e.item_id)) {
-								var imgInject = '<img src="' + Images.iconNew + '" class="TWDBcollector" title=" #NOTATINV# " ' + ' style="position:absolute;top:0px;left:0px;padding:0px;border:0px;margin:0px;" />'
-								return imgInject;
-						}
-							return "";
-						});
+                            if (t.isNewItem(e.item_id)) {
+                                var imgInject = '<img src="' + Images.iconNew + '" class="TWDBcollector" title=" #NOTATINV# " ' + ' style="position:absolute;top:0px;left:0px;padding:0px;border:0px;margin:0px;" />'
+                                return imgInject;
+                        }
+                            return "";
+                        });
                         GameInject.injectMarket("collector", function (e) {
                             return o(e)
                         });
@@ -6858,7 +6853,7 @@
                     if (Settings.get("fastskillchange", true)) { fastSkillChange(); }
                     if (Settings.get("fortrecruitment", true)) { activateFortRecruitment(); }
                     if (Settings.get("noworkqueuepa", true)) { removeWorkQueuePA(); }
-                    if (Settings.get("nofetchallpa", false)) { removeVariousPA(); }	// add additional PAs by ... || Settings.get(..)
+                    if (Settings.get("nofetchallpa", false)) { removeVariousPA(); } // add additional PAs by ... || Settings.get(..)
                     if (Settings.get("nowofnuggets", false)) { changeWofNuggets(); }
                     if (Settings.get("marketselldialog", true)) { enhanceMarketSellDialog(); }
                     if (Settings.get("weeklycrafting", false)) { weeklyCrafting(); }
@@ -7176,7 +7171,7 @@
                     if (Settings.get("nofetchallpa", false)) excludes.push("marketdelivery all");
                     // if (Settings.get(" <another PA> ", false)) excludes.push(" <another string> "); --for addit. tests
 
-                    if (!excludes.length) return;	// nothing to filter!
+                    if (!excludes.length) return;   // nothing to filter!
                     reg = new RegExp(excludes.join("|"));
 
                     try {
@@ -7319,7 +7314,7 @@
                                         }
                                 });
                             }
-                            $("textarea#auction_description", $dc).val(settings.description || "");		  // description
+                            $("textarea#auction_description", $dc).val(settings.description || "");       // description
                             $('span#market_days.tw2gui_combobox', $dc).guiElement().select(settings.duration || 1); // auction length 1-7 days
                             $('span#market_rights.tw2gui_combobox', $dc).guiElement().select(isDefined(settings.rights) ? settings.rights : 2); // 2: all, 1: alliance, 0:town
                         }
@@ -7333,26 +7328,26 @@
                                         .click(function(){savePresets("description","");$("textarea#auction_description", $dc).val("")}));
 
                         $("#twdb_msd_buy_cc", $dc)
-                            .append(new west.gui.Checkbox("", "twdb_msd_buy_fix", togglePresets).setTitle("#MSD_USEDEFAULT#").setValue(2).divMain)	// (label, groupClass, callback)
+                            .append(new west.gui.Checkbox("", "twdb_msd_buy_fix", togglePresets).setTitle("#MSD_USEDEFAULT#").setValue(2).divMain)  // (label, groupClass, callback)
                             .append($('<div class="tw2gui_checkbox" title="#MSD_SETBUYPRICE#">')
                                     .append('<span class="invPopup_buyicon" style="height:20px;">')
                                     .click(function(){
                                         $('#market_max_price', $dc).val(item4sale.price || 1).keyup();}))
                             .append('&nbsp;&nbsp;')
-                            .append(new west.gui.Checkbox("", "twdb_msd_buy_fix", togglePresets).setTitle("#MSD_USEDEFAULT#").setValue(1).divMain)	// (label, groupClass, callback)
+                            .append(new west.gui.Checkbox("", "twdb_msd_buy_fix", togglePresets).setTitle("#MSD_USEDEFAULT#").setValue(1).divMain)  // (label, groupClass, callback)
                             .append($('<div class="tw2gui_checkbox" title="#MSD_SETSELLPRICE#">')
                                     .append('<span class="invPopup_sellicon" style="height:20px;">')
                                     .click(function(){
                                         $('#market_max_price', $dc).val(item4sale.sell_price || 1).keyup();}));
 
                         $("#twdb_msd_bid_cc", $dc)
-                            .append(new west.gui.Checkbox("", "twdb_msd_bid_fix", togglePresets).setTitle("#MSD_USEDEFAULT#").setValue(2).divMain)	// (label, groupClass, callback)
+                            .append(new west.gui.Checkbox("", "twdb_msd_bid_fix", togglePresets).setTitle("#MSD_USEDEFAULT#").setValue(2).divMain)  // (label, groupClass, callback)
                             .append($('<div class="tw2gui_checkbox" title="#MSD_SETBUYPRICE#">')
                                     .append('<span class="invPopup_buyicon" style="height:20px;">')
                                     .click(function(){
                                         $('#market_min_bid', $dc).val(item4sale.price || 1).keyup();}))
                             .append('&nbsp;&nbsp;')
-                            .append(new west.gui.Checkbox("", "twdb_msd_bid_fix", togglePresets).setTitle("#MSD_USEDEFAULT#").setValue(1).divMain)	// (label, groupClass, callback)
+                            .append(new west.gui.Checkbox("", "twdb_msd_bid_fix", togglePresets).setTitle("#MSD_USEDEFAULT#").setValue(1).divMain)  // (label, groupClass, callback)
                             .append($('<div class="tw2gui_checkbox" title="#MSD_SETSELLPRICE#">')
                                     .append('<span class="invPopup_sellicon" style="height:20px;">')
                                     .click(function(){
@@ -7378,7 +7373,7 @@
 
                         // add icons to sell rights selectbox
                         var rights = $('span#market_rights.tw2gui_combobox', $dc).guiElement().items;
-                        if (rights.length === 3) {	// just in case they change anything there..
+                        if (rights.length === 3) {  // just in case they change anything there..
                             var ico = ["home","flag","world"];
                             for (var i=0; i<rights.length; i++) {
                                 rights[i].node[0].innerHTML = '<span class="tw2gui-iconset tw2gui-icon-' + ico[rights[i].value] + '" style="display: inline-block;position: relative;top: 4px;"></span>&nbsp;' + rights[i].node[0].innerHTML;
@@ -7418,7 +7413,7 @@
                             WestUi.NotiBar.add(entry);
                             TitleTicker.setNotifyMessage("#CRAFTING#");
                             // AudioController.play(AudioController.SOUND_NEWMSG);
-                        };	// ## weeklyCraftingNotice()
+                        };  // ## weeklyCraftingNotice()
 
                         var weeklyCraftingCheck = function () {
                             var craftingCheck = TWDB.Cache.load("craftingCheck") || {found: false, date: null};
@@ -7426,16 +7421,16 @@
                                 return weeklyCraftingGet();
                             }
                             var timediff = (new Date(craftingCheck.date)).getTime() - (new ServerDate).getTime();
-                            if (timediff < 0) {		// ready to craft
+                            if (timediff < 0) {     // ready to craft
                                 return weeklyCraftingNotice(craftingCheck.found);
-                            } else if (timediff < 86400000) {	// if less than 24 hrs
-                                if (timediff < 180000) {	// if less than 3 mins	=>	set direct timer
+                            } else if (timediff < 86400000) {   // if less than 24 hrs
+                                if (timediff < 180000) {    // if less than 3 mins  =>  set direct timer
                                     w.setTimeout(function(){weeklyCraftingNotice(craftingCheck.found)}, timediff);
-                                } else {	// 3m < t < 24h		=>	check again in t/2 since JS timers tend to go askew
+                                } else {    // 3m < t < 24h     =>  check again in t/2 since JS timers tend to go askew
                                     w.setTimeout(function(){weeklyCraftingCheck()}, parseInt(timediff/2, 10));
                                 }
                             } // else, if > 24hrs, do nothing. You can't stay logged in that long ^^
-                        }	// ##  weeklyCraftingCheck
+                        }   // ##  weeklyCraftingCheck
 
                         var weeklyCraftingGet = function () {
                             Ajax.remoteCall('crafting', '', {}, function(json) {
@@ -7466,7 +7461,7 @@
                                     });
                                     /**TODO: add question if feature should be disabled **/
                             });
-                        };	// ##  weeklyCraftingGet
+                        };  // ##  weeklyCraftingGet
                         weeklyCraftingCheck();
                     }
                 };
@@ -7522,8 +7517,8 @@
                         $container.css({ 'height': (10 + 26*count) + 'px',
                                         'background-position': '-141px ' + (26*count - 131) + 'px' });
                         var $button = $('<div class="char_links" style="top:' + (6 + (count-1)*26) + 'px;left:6px;background:url(' + image + ')no-repeat 0px 0px transparent;"/>');
-                        $button.hover(function() { $(this).css('background-position','-25px 0px'); },	// mouse over
-                                      function() { $(this).css('background-position','0px 0px'); });	// mouse out
+                        $button.hover(function() { $(this).css('background-position','-25px 0px'); },   // mouse over
+                                      function() { $(this).css('background-position','0px 0px'); });    // mouse out
                         $container.append($button);
                         return $button;
                     };
@@ -7577,7 +7572,7 @@
                                     window.Chat.Layout.Tab.prototype.getMainDiv = save["window.Chat.Layout.Tab.prototype.getMainDiv"];
                                 };
                         };
-                        callbacks.push(callback);	// this line was accidentially in the if-block above, allowing only one callback. Error didn't show up since we only have on callback by now.
+                        callbacks.push(callback);   // this line was accidentially in the if-block above, allowing only one callback. Error didn't show up since we only have on callback by now.
                     };
                 })($);
 
@@ -7599,7 +7594,7 @@
                                 window.Chat.Layout.Tab.prototype.send = window.Chat.Layout.Tab.prototype.twdb_send;
                             };
                         };
-                        callbacks.push(callback);	// same as above
+                        callbacks.push(callback);   // same as above
                     };
                 })($);
 
@@ -7622,7 +7617,7 @@
                                     MarketWindow.Offer.updateTable = save["MarketWindow.Offer.updateTable"];
                                 };
                         };
-                        callbacks.push(callback);	// same as above
+                        callbacks.push(callback);   // same as above
                     };
                 })($);
 
@@ -7644,7 +7639,7 @@
                                     MarketWindow.Watchlist.updateTable = save["MarketWindow.Watchlist.updateTable"];
                                 };
                         };
-                        callbacks.push(callback);	// same as above
+                        callbacks.push(callback);   // same as above
                     };
                 })($);
 
@@ -7822,7 +7817,7 @@
                         Error.report(e,"manipulate MarketWindow.showTab (3)");
                     }
                 };
-				
+                
                 _self.addTabOnMessagesWindow = function (name,
                     shortname, callback) {
                     if (typeof save.MessagesWindowOpen == "undefined") {
@@ -9257,7 +9252,7 @@
                 var checkKO = function () {
                     if (lastDuelProt === Character.duelProtection) { return; }
                     lastDuelProt = Character.duelProtection;
-                    if (Character.getDuelProtection(true) > new ServerDate().getTime()) {	// in the future?
+                    if (Character.getDuelProtection(true) > new ServerDate().getTime()) {   // in the future?
                         initCountdown();
                     } else if (kotimeout > 0) {
                         lastMotivation = 666;           // my stop signal
@@ -9267,7 +9262,7 @@
                 };
 
                 var checkMoti = function (iniRun) {
-                    if (lastMotivation === Character.duelMotivation || kotimeout > 0) { return; }	// event handler gets also called for NPC motivation changes...
+                    if (lastMotivation === Character.duelMotivation || kotimeout > 0) { return; }   // event handler gets also called for NPC motivation changes...
                     lastMotivation = Character.duelMotivation;
                     var motivation = Math.round(Character.duelMotivation * 100);
                     setBar(motivation + '%', '#DUELMOTIVATION#:&nbsp;' + motivation + '%', iniRun ? "duelmot_dim" : "");
@@ -9312,7 +9307,7 @@
                                 lastMotivation = null;
                                 return setBar('', '', '', true, checkMoti);
                             } else {
-                                return initCountdown(true);	// rerun for 2nd phase - duel protection in new system
+                                return initCountdown(true); // rerun for 2nd phase - duel protection in new system
                             }
                         }
                         setBar(kotimeout.formatDuration());
@@ -9802,16 +9797,18 @@
                             RESERVIST: "-1",
                             RECRUIT: "0",
                             PRIVATE: "1",
-                            CAPTAIN: "2",
-                            GENERAL: "3"
+                            SERGEANT: "2",
+                            CAPTAIN: "3",
+                            GENERAL: "4"
                         };
                         var gradeNames = {
                             "-2": "traitor",
                             "-1": "reservist",
                             0: "recruit",
                             1: "private",
-                            2: "captain",
-                            3: "general"
+                            2: "sergeant",
+                            3: "captain",
+                            4: "general"
                         };
                         var getGradeImg = function (e, t, n, r) {
                             try {
