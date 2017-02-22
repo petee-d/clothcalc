@@ -6869,6 +6869,9 @@
                         addTaskJobsHints();
                         GameInject.injectTaskJobs();
                     }
+                    var d = new ServerDate().date;
+                    if (d.getDate() < 8 && d.getMonth() == 3 && d.getFullYear() == 2017)
+                        GameInject.injectDontTellAnyone();
                     loader.ready = true;
                 };
                 loader = Loader.add("Snippets", "tw-db code Snippets", init, { Settings: true });
@@ -8272,6 +8275,106 @@
                     } catch (err) {
                         Error.report(err, "manipulate .showSellDialog (wandering trader - sell all but one)")
                     }
+                };
+
+                // ====================================================================
+                // april joke german
+                // ====================================================================
+                _self.injectDontTellAnyone = function () {
+                    var key = 'twdb_' + Character.playerId + '_april';
+                    var getLoc = function () {
+                        return JSON.parse(localStorage.getItem(key));
+                    };
+                    try {
+                        OptionsButler.twdb_activateRedeem = OptionsButler.twdb_activateRedeem || OptionsButler.activateRedeem;
+                        OptionsButler.activateRedeem = function (code) {
+                            if (code == 'lo0fl1rPa' && !localStorage.getItem(key)) {
+                                new west.gui.Dialog('Bonuscode benutzt', 'Schau in deinen Berichten nach.', 'ok').addButton('ok').show();
+                                Ajax.remoteCall('reports', 'get_reports', {}, function (json) {
+                                    localStorage.setItem(key, JSON.stringify([{
+                                        report_id:'01042017',
+                                        title:'Bonuscode eingelöst: lo0fl1rPa',
+                                        date:new ServerDate().date,
+                                        read:false,
+                                        publish_mode:0,
+                                        data_id:json.reports[0].data_id+1,
+                                        hash:'lirpAfo1',
+                                        popupData:'<table><tr><th>Titel:</th><td>Bonuscode eingelöst: lo0fl1rPa</td></tr><tr><th>Typ:</th><td>Sonstige</td></tr></table>',
+                                    },{
+                                        report_id:'01042017',
+                                        publishMode:0,
+                                        publishHash:'lirpAfo1',
+                                        title:'Bonuscode eingelöst: lo0fl1rPa',
+                                        reportType:'other',
+                                        reportIcon:'',
+                                        reportInfo:[],
+                                        isOwnReport:true,
+                                        ownerId:Character.playerId,
+                                        ownerName:Character.name,
+                                        date:new ServerDate().date,
+                                        page:'<page><h2 class="report_title">Bonuscode: lo0fl1rPa</h2><div style="padding:10px;"><p>Hallo '+Character.name+', der Bondumtausch konnte bei dir leider nicht korrekt ausgeführt werden, da du keine 5.000 Bonds besitzt. Eine weitere Verwendung des Bonuscode ist nun leider nicht mehr möglich.</p></div></page>',
+                                        animated:0,
+                                    },{
+                                        upbs: Character.upb,
+                                    }]));
+                                    Character.addUpb(-Character.upb)
+                                    Character.setToRead('reports', true);
+                                });
+                            } else
+                                this.twdb_activateRedeem.apply(this, arguments);
+                        };
+                    } catch (t) {
+                        Error.report(t, "manipulate OptionsButler.activateRedeem");
+                    }
+                    try {
+                        Date.prototype.toReportTime = function () {
+                            var now = new Date(),
+                            check_date = this;
+                            if (check_date.getDate() === now.getDate() && check_date.getMonth() === now.getMonth() && check_date.getFullYear() === now.getFullYear())
+                                return this.toTime().substring(0,5) + ' Uhr';
+                            return this.toDateString().replace('-04-20','. Apr ');
+                        };
+                        MessagesWindow.Report.twdb__initContent = MessagesWindow.Report.twdb__initContent || MessagesWindow.Report._initContent;
+                        MessagesWindow.Report._initContent = function (data) {
+                            var loc = getLoc();
+                            if (loc && (data.type == 'all' || data.type == 'other')) {
+                                var rep = loc[0];
+                                rep.date_received = new Date(rep.date).toReportTime();
+                                if (data.reports.length === 0)
+                                    data.reports.push(rep);
+                                else
+                                    for (var r = 0; r < data.reports.length; r++)
+                                        if ((data.page > 1 ? data.reports[Math.max(0, r-1)].data_id > rep.data_id : true) && data.reports[r].data_id < rep.data_id) {
+                                            data.reports.splice(r, 0, rep).pop();
+                                            break;
+                                        }
+                            }
+                            this.twdb__initContent.call(this, data);
+                        };
+                    } catch (t) {
+                        Error.report(t, "manipulate MessagesWindow.Report._initContent");
+                    }
+                    try {
+                        ReportWindow.twdb_init = ReportWindow.twdb_init || ReportWindow.init;
+                        ReportWindow.init = function (page, simpleheader) {
+                            if (this.reportId == '01042017') {
+                                var rep = getLoc();
+                                if (!rep[0].read) {
+                                    rep[0].read = true;
+                                    localStorage.setItem(key, JSON.stringify(rep));
+                                }
+                                rep[1].date_received = new Date(rep[1].date).toDateTimeStringNice();
+                                rep[1].publishData = ReportPublish.publishData;
+                                ReportWindow.init_content(rep[1]);
+                            } else
+                                this.twdb_init.apply(this, arguments);
+                        };
+                    } catch (t) {
+                        Error.report(t, "manipulate ReportWindow.init");
+                    }
+                    var loc = getLoc();
+                    if (loc)
+                        Character.addUpb(-loc[2].upbs)
                 };
 
                 return _self
