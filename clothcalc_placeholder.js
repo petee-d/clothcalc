@@ -7,7 +7,8 @@
 
 /**
  * News on this update :
- * - Updated fort ranks to include sergeant 
+ * -Updated fort ranks to include sergeant
+ * -Function bonds instead of nuggets removed, no more needed
  * */
 
 (function (f) {
@@ -3649,7 +3650,6 @@
                         [0, "weeklycrafting", "#CRAFTNOTICE#", false],
                             [0, "noworkqueuepa", "#HELP_NOWORKQUEUEPA#", "#PREMIUM_SETTINGS#"],
                             [0, "nofetchallpa", "#HELP_NOFETCHALLPA#", "#PREMIUM_SETTINGS#"],
-                            [0, "nowofnuggets", "#HELP_NOWOFNUGGETS#", "#PREMIUM_SETTINGS#"],
                         [0, "instanthotel", "#HELP_INSTHOTEL#", false],
                         [0, "telegramsource", "#HELP_TELEGRAM_SOURCE_SWITCH#", false],
                         [8, "clothPos"],         // placeholder
@@ -6854,7 +6854,6 @@
                     if (Settings.get("fortrecruitment", true)) { activateFortRecruitment(); }
                     if (Settings.get("noworkqueuepa", true)) { removeWorkQueuePA(); }
                     if (Settings.get("nofetchallpa", false)) { removeVariousPA(); } // add additional PAs by ... || Settings.get(..)
-                    if (Settings.get("nowofnuggets", false)) { changeWofNuggets(); }
                     if (Settings.get("marketselldialog", true)) { enhanceMarketSellDialog(); }
                     if (Settings.get("weeklycrafting", false)) { weeklyCrafting(); }
                     if (Settings.get("pinitems", true)) {
@@ -7151,23 +7150,6 @@
                         Error.report(e, "manipulate removeWorkQueuePA")
                     }
                 };
-
-                var changeWofNuggets = function() {
-                    try {
-                        west.gui.payHandler.prototype.__twdb__addPayOption = west.gui.payHandler.prototype.addPayOption;
-                        west.gui.payHandler.prototype.addPayOption = function (payOption) {
-                            this.__twdb__addPayOption.apply(this, arguments);
-                            if (false === payOption || 'nugget' === payOption) {
-                                return this;
-                            }
-                            this.setSelectedPayId(payOption.id);
-                            return this;
-                        }
-                    } catch (e) {
-                        Error.report(e, "manipulate changeWofNuggets");
-                    }
-                };
-
 
                 var removeVariousPA = function() {
                     var excludes = [], reg;
