@@ -9,6 +9,7 @@
  * News on this update :
  * -Updated fort ranks to include sergeant
  * -Function bonds instead of nuggets removed, no more needed
+ * -Jobanalyser for RU server fixed
  * */
 
 (function (f) {
@@ -1065,13 +1066,14 @@
                 },
                 setParent: function (e) { this.parent = e; },
                 init: function () {
-                    var e = [],
+                    var e = [], //Tom Robert: why is this an array?
                         t = 0,
                         n = 0,
                         i,
                         r,
                         s;
-                    /** TODO: use JobList.getAllJobs() **/
+                    /** TODO: use JobList.getAllJobs()
+                    Tom Robert: There are only TWDB.Jobs.getAllJobs or JobList.getSortedJobs **/
                     while (true) {
                         t++;
                         r = JobList.getJobById(t);
@@ -4374,26 +4376,17 @@
                       var str = $.trim($(this).children('span:last-child').html());
                       str = str.split('&nbsp;').join(' ');
                       switch (index) {
-                        case 0 :    data.motivation = parseInt(str.slice(0,str.indexOf(' ')), 10);
-                                  break;
-                        case 1 :    /** TODO: remove that evil eval **/
-                                  var tmp = str.replace('h',' * 3600 + ');
-                                  tmp = tmp.replace('m',' * 60 + ');
-                                  tmp = tmp.replace('s',' * 1 + ');
-                                  tmp += '0';
-                                  try {
-                                    data.duration = parseInt(eval(tmp), 10);
-                                  }
-                                  catch (e) {
-                                    throw {message:"unrecognized time on report: " + str};
-                                  }
-                                  break;
-                        case 2 :    data.wage = parseInt(str.slice(str.indexOf(' ')+1), 10);
-                                  break;
-                        case 3 :    data.bond = parseInt(str, 10);
-                                  break;
-                        case 4 :    data.experience = parseInt(str.slice(0,str.indexOf(' ')), 10);
-                                  break;
+                        case 0 : data.motivation = parseInt(str.slice(0,str.indexOf(' ')), 10);
+                                break;
+                        case 1 : var temp = parseFloat(str);
+                                 data.duration = temp == 1 ? 3600 : temp == 10 ? 600 : temp;
+                                break;
+                        case 2 : data.wage = parseInt(str.slice(str.indexOf(' ')+1), 10);
+                                break;
+                        case 3 : data.bond = parseInt(str, 10);
+                                break;
+                        case 4 : data.experience = parseInt(str.slice(0,str.indexOf(' ')), 10);
+                                break;
                       };
                     });
                     tmp.find(".rp_hurtmessage_text").each(function() {
@@ -4452,8 +4445,7 @@
 
                     for ( var key in data.items ) {
                       var id = Number(key);
-                      /** TODO: Do we still check for it??? Remove '?' expression when all worlds are migrated **/
-                      var geronimoID = TWDB.Util.isNewIDsystem() ? 138000 : 138;
+                      var geronimoID = 138000;
                       if ( id === geronimoID ) {
                         if ( !isDefined(statistic.extra) ) {
                           statistic.extra = {'count':0};
