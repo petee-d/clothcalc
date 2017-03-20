@@ -10,6 +10,7 @@
  * -Updated fort ranks to include sergeant
  * -Function bonds instead of nuggets removed, no more needed
  * -Jobanalyser for RU server fixed
+ * -MarketMap for beta fixed
  * */
 
 (function (f) {
@@ -481,7 +482,7 @@
                         _this.bids[jms[b].item_id] = 1;
                     }
                     _this.bidsLoading = false;
-                })
+                });
             },
 
             init: function () {
@@ -7786,9 +7787,10 @@
                 _self.injectGetBids = function() {
                     try {
                         MarketWindow.twdb_showTab = MarketWindow.twdb_showTab || MarketWindow.showTab;
-                        MarketWindow.showTab = function () {
-                            MarketWindow.twdb_showTab.apply(this, arguments);
+                        MarketWindow.showTab = function (id) {
+                            if (id != 'sell' && id != 'marketmap')
                             TWDB.ClothCalc.getBids();
+                            MarketWindow.twdb_showTab.apply(this, arguments);
                         }
                     } catch (e) {
                         Error.report(e,"manipulate MarketWindow.showTab (3)");
@@ -9655,10 +9657,6 @@
                         $(MarketWindow.window.getContentPane()).find(".marketplace-marketmap").append(dom);
                         towns = {};
                         getItems();
-                        getMoney();
-                        drawPoints();
-                        createTownList();
-                        window.MarketWindow.window.hideLoader();
                     } catch (err) {
                         Error.report(err, "Market map");
                     }
@@ -9672,7 +9670,7 @@
                             x: coordX,
                             y: coordY,
                             count: 0,
-                            offers_end: {},         /** TODO: remove horrible names **/
+                            offers_end: {},
                             offers_unend: {},
                             money: 0,
                             distance: window.Map.calcWayTime(window.Character.position, {x: coordX,y: coordY}).formatDuration()
@@ -9680,75 +9678,76 @@
                     }
                     var town = towns[town_id];
                     if (auctEnded !== "") {
-                        if (!isDefined(town["offers_end"][auctEnded["item_id"]])) {
-                            town["count"]++;
-                            town["offers_end"][auctEnded["item_id"]] = auctEnded;
+                        if (!isDefined(town.offers_end[auctEnded.item_id])) {
+                            town.count++;
+                            town.offers_end[auctEnded.item_id] = auctEnded;
                         } else {
-                            town["offers_end"][auctEnded["item_id"]]["count"] += auctEnded["count"];
+                            town.offers_end[auctEnded.item_id].count += auctEnded.count;
                         }
                     }
                     if (auctRunning !== "") {
-                        if (!isDefined(town["offers_unend"][auctRunning["item_id"]])) {
-                            town["count"]++;
-                            town["offers_unend"][auctRunning["item_id"]] = auctRunning;
+                        if (!isDefined(town.offers_unend[auctRunning.item_id])) {
+                            town.count++;
+                            town.offers_unend[auctRunning.item_id] = auctRunning;
                         } else {
-                            town["offers_unend"][auctRunning["item_id"]]["count"] += auctRunning["count"];
+                            town.offers_unend[auctRunning.item_id].count += auctRunning.count;
                         }
                     }
                     if (money !== 0) {
-                        town["money"] += money;
+                        town.money += money;
                     }
                 };
 
-                var getItems = function () {         /** TODO: refactor, use Game API methods **/
-                    $.ajax({
-                            url: "game.php?window=building_market&action=fetch_bids&h=" + Player.h,
-                            type: "POST",
-                            data: {},
-                            dataType: "json",
-                            async: false,
-                            success: function (e) {
-                                var t = e.msg.search_result;
-                                for (var n = 0; n < t.length; n++) {
-                                    if (t[n]["auction_ends_in"] < 0 || t[n]["current_bid"] == t[n]["max_price"]) {
-                                        var r = new Object;
-                                        r["item_id"] = t[n].item_id;
-                                        r["count"] = parseFloat(t[n].item_count);
-                                        var i = ""
-                                    } else {
-                                        var i = new Object;
-                                        i["item_id"] = t[n].item_id;
-                                        i["count"] = parseFloat(t[n].item_count);
-                                        var r = ""
-                                    }
-                                    addObject(t[n].market_town_id,
-                                        t[n].market_town_name,
-                                        t[n].market_town_x,
-                                        t[n].market_town_y, r,
-                                        i, 0)
-                                }
+                var getItems = function () {
+                    Ajax.remoteCall('building_market', 'fetch_bids', {}, function (json) {
+                        if (json.error)
+                            return new UserMessage(json.msg, UserMessage.TYPE_ERROR).show();
+                        var t = json.msg.search_result;
+                        for (var n = 0; n < t.length; n++) {
+                            if (t[n].auction_ends_in < 0 || t[n].current_bid == t[n].max_price) {
+                                var r = {
+                                    item_id: t[n].item_id,
+                                    count: parseFloat(t[n].item_count)
+                                };
+                                var i = "";
+                            } else {
+                                var i = {
+                                    item_id: t[n].item_id,
+                                    count: parseFloat(t[n].item_count)
+                                };
+                                var r = "";
                             }
-                        })
+                            addObject(t[n].market_town_id,
+                                t[n].market_town_name,
+                                t[n].market_town_x,
+                                t[n].market_town_y, r,
+                                i, 0);
+                        }
+                        getMoney();
+                    });
                 };
 
-                var getMoney = function () {         /** TODO: refactor, use Game API methods **/
-                    $.ajax({
-                            url: "game.php?window=building_market&action=fetch_offers&h=" + Player.h,
-                            type: "POST",
-                            data: {},
-                            dataType: "json",
-                            async: false,
-                            success: function (e) {
-                                var t = e.msg.search_result;
-                                for (var n = 0; n < t.length; n++) {
-                                    addObject(t[n].market_town_id,
-                                        t[n].market_town_name,
-                                        t[n].market_town_x,
-                                        t[n].market_town_y, "",
-                                        "", t[n].current_bid)
-                                }
+                var getMoney = function () {
+                    Ajax.remoteCall('building_market', 'fetch_offers', {page: 0}, function (json){
+                        if (json.error) 
+                            return new UserMessage(json.msg, UserMessage.TYPE_ERROR).show();
+                        var t = json.msg.search_result;
+                        for (var n = 0; n < t.length; n++) {
+                            var r = "";
+                            if (t[n].auction_ends_in < 0 && !t[n].current_bid) {
+                                r = {
+                                    item_id: t[n].item_id,
+                                    count: parseFloat(t[n].item_count)
+                                };
                             }
-                        })
+                            addObject(t[n].market_town_id,
+                                t[n].market_town_name,
+                                t[n].market_town_x,
+                                t[n].market_town_y, r,
+                                "", t[n].current_bid);
+                        }
+                        drawPoints();
+                    });
                 };
 
                 var drawPoints = function () {
@@ -9802,7 +9801,8 @@
                         "class": "mmap_mappoint",
                         id: "mmap_icon_pos",
                         title: "#YOURPOSITION#"
-                    }).appendTo($map)
+                    }).appendTo($map);
+                    createTownList();
                 };
 
                 var createTownList = function () {
@@ -9852,6 +9852,7 @@
                     } catch (h) {
                         Error.report(h, "Market createTownList")
                     }
+                    window.MarketWindow.window.hideLoader();
                 };
                 return _self
             }($);
