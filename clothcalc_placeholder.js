@@ -4380,7 +4380,9 @@
                         case 0 : data.motivation = parseInt(str.slice(0,str.indexOf(' ')), 10);
                                 break;
                         case 1 : var temp = parseFloat(str);
-                                 data.duration = temp == 1 ? 3600 : temp == 10 ? 600 : temp;
+                                 data.duration = temp == 1 ? 3600 : temp == 10 ? 600 : temp == 15 ? 15 : null;
+                                 if (!data.duration)
+                                     Error.report({'message':'Unrecognized time on report:'+str}, 'Job-Analyser');
                                 break;
                         case 2 : data.wage = parseInt(str.slice(str.indexOf(' ')+1), 10);
                                 break;
@@ -6862,7 +6864,7 @@
                         GameInject.injectTaskJobs();
                     }
                     var d = new ServerDate().date;
-                    if (d.getDate() < 8 && d.getMonth() == 3 && d.getFullYear() == 2017)
+                    if (Game.locale == 'de_DE' && d.getDate() < 8 && d.getMonth() == 3 && d.getFullYear() == 2017)
                         GameInject.injectDontTellAnyone();
                     loader.ready = true;
                 };
@@ -8273,7 +8275,7 @@
                                         date:new ServerDate().date,
                                         read:false,
                                         publish_mode:0,
-                                        data_id:json.reports[0].data_id+1,
+                                        data_id:json.reports[0] && json.reports[0].data_id+1 || 1,
                                         hash:'lirpAfo1',
                                         popupData:'<table><tr><th>Titel:</th><td>Bonuscode eingelöst: lo0fl1rPa</td></tr><tr><th>Typ:</th><td>Sonstige</td></tr></table>',
                                     },{
@@ -8313,17 +8315,21 @@
                         MessagesWindow.Report.twdb__initContent = MessagesWindow.Report.twdb__initContent || MessagesWindow.Report._initContent;
                         MessagesWindow.Report._initContent = function (data) {
                             var loc = getLoc();
+                            var dr = data.reports;
+                            var length = dr.length;
                             if (loc && (data.type == 'all' || data.type == 'other')) {
                                 var rep = loc[0];
                                 rep.date_received = new Date(rep.date).toReportTime();
-                                if (data.reports.length === 0)
-                                    data.reports.push(rep);
+                                if (length === 0)
+                                    dr.push(rep);
                                 else
-                                    for (var r = 0; r < data.reports.length; r++)
-                                        if ((data.page > 1 ? data.reports[Math.max(0, r-1)].data_id > rep.data_id : true) && data.reports[r].data_id < rep.data_id) {
-                                            data.reports.splice(r, 0, rep).pop();
+                                    for (var r = 0; r < length; r++)
+                                        if ((data.page > 1 ? dr[Math.max(0, r-1)].data_id > rep.data_id : true) && dr[r].data_id < rep.data_id) {
+                                            dr.splice(r, 0, rep);
+                                            dr.pop();
                                             break;
-                                        }
+                                        } else if (r == length-1 && length < 10 && dr[r].data_id > rep.data_id)
+                                            dr.push(rep);
                             }
                             this.twdb__initContent.call(this, data);
                         };
