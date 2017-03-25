@@ -7,7 +7,10 @@
 
 /**
  * News on this update :
- * - Updated fort ranks to include sergeant 
+ * -Updated fort ranks to include sergeant
+ * -Function bonds instead of nuggets removed, no more needed
+ * -Jobanalyser for RU server fixed
+ * -MarketMap for beta fixed
  * */
 
 (function (f) {
@@ -479,7 +482,7 @@
                         _this.bids[jms[b].item_id] = 1;
                     }
                     _this.bidsLoading = false;
-                })
+                });
             },
 
             init: function () {
@@ -1064,13 +1067,14 @@
                 },
                 setParent: function (e) { this.parent = e; },
                 init: function () {
-                    var e = [],
+                    var e = [], //Tom Robert: why is this an array?
                         t = 0,
                         n = 0,
                         i,
                         r,
                         s;
-                    /** TODO: use JobList.getAllJobs() **/
+                    /** TODO: use JobList.getAllJobs()
+                    Tom Robert: There are only TWDB.Jobs.getAllJobs or JobList.getSortedJobs **/
                     while (true) {
                         t++;
                         r = JobList.getJobById(t);
@@ -3649,7 +3653,6 @@
                         [0, "weeklycrafting", "#CRAFTNOTICE#", false],
                             [0, "noworkqueuepa", "#HELP_NOWORKQUEUEPA#", "#PREMIUM_SETTINGS#"],
                             [0, "nofetchallpa", "#HELP_NOFETCHALLPA#", "#PREMIUM_SETTINGS#"],
-                            [0, "nowofnuggets", "#HELP_NOWOFNUGGETS#", "#PREMIUM_SETTINGS#"],
                         [0, "instanthotel", "#HELP_INSTHOTEL#", false],
                         [0, "telegramsource", "#HELP_TELEGRAM_SOURCE_SWITCH#", false],
                         [8, "clothPos"],         // placeholder
@@ -4374,26 +4377,19 @@
                       var str = $.trim($(this).children('span:last-child').html());
                       str = str.split('&nbsp;').join(' ');
                       switch (index) {
-                        case 0 :    data.motivation = parseInt(str.slice(0,str.indexOf(' ')), 10);
-                                  break;
-                        case 1 :    /** TODO: remove that evil eval **/
-                                  var tmp = str.replace('h',' * 3600 + ');
-                                  tmp = tmp.replace('m',' * 60 + ');
-                                  tmp = tmp.replace('s',' * 1 + ');
-                                  tmp += '0';
-                                  try {
-                                    data.duration = parseInt(eval(tmp), 10);
-                                  }
-                                  catch (e) {
-                                    throw {message:"unrecognized time on report: " + str};
-                                  }
-                                  break;
-                        case 2 :    data.wage = parseInt(str.slice(str.indexOf(' ')+1), 10);
-                                  break;
-                        case 3 :    data.bond = parseInt(str, 10);
-                                  break;
-                        case 4 :    data.experience = parseInt(str.slice(0,str.indexOf(' ')), 10);
-                                  break;
+                        case 0 : data.motivation = parseInt(str.slice(0,str.indexOf(' ')), 10);
+                                break;
+                        case 1 : var temp = parseFloat(str);
+                                 data.duration = temp == 1 ? 3600 : temp == 10 ? 600 : temp == 15 ? 15 : null;
+                                 if (!data.duration)
+                                     Error.report({'message':'Unrecognized time on report:'+str}, 'Job-Analyser');
+                                break;
+                        case 2 : data.wage = parseInt(str.slice(str.indexOf(' ')+1), 10);
+                                break;
+                        case 3 : data.bond = parseInt(str, 10);
+                                break;
+                        case 4 : data.experience = parseInt(str.slice(0,str.indexOf(' ')), 10);
+                                break;
                       };
                     });
                     tmp.find(".rp_hurtmessage_text").each(function() {
@@ -4452,8 +4448,7 @@
 
                     for ( var key in data.items ) {
                       var id = Number(key);
-                      /** TODO: Do we still check for it??? Remove '?' expression when all worlds are migrated **/
-                      var geronimoID = TWDB.Util.isNewIDsystem() ? 138000 : 138;
+                      var geronimoID = 138000;
                       if ( id === geronimoID ) {
                         if ( !isDefined(statistic.extra) ) {
                           statistic.extra = {'count':0};
@@ -6854,7 +6849,6 @@
                     if (Settings.get("fortrecruitment", true)) { activateFortRecruitment(); }
                     if (Settings.get("noworkqueuepa", true)) { removeWorkQueuePA(); }
                     if (Settings.get("nofetchallpa", false)) { removeVariousPA(); } // add additional PAs by ... || Settings.get(..)
-                    if (Settings.get("nowofnuggets", false)) { changeWofNuggets(); }
                     if (Settings.get("marketselldialog", true)) { enhanceMarketSellDialog(); }
                     if (Settings.get("weeklycrafting", false)) { weeklyCrafting(); }
                     if (Settings.get("pinitems", true)) {
@@ -6869,6 +6863,9 @@
                         addTaskJobsHints();
                         GameInject.injectTaskJobs();
                     }
+                    var d = new ServerDate().date;
+                    if (Game.locale == 'de_DE' && d.getDate() < 8 && d.getMonth() == 3 && d.getFullYear() == 2017)
+                        GameInject.injectDontTellAnyone();
                     loader.ready = true;
                 };
                 loader = Loader.add("Snippets", "tw-db code Snippets", init, { Settings: true });
@@ -7148,23 +7145,6 @@
                         Error.report(e, "manipulate removeWorkQueuePA")
                     }
                 };
-
-                var changeWofNuggets = function() {
-                    try {
-                        west.gui.payHandler.prototype.__twdb__addPayOption = west.gui.payHandler.prototype.addPayOption;
-                        west.gui.payHandler.prototype.addPayOption = function (payOption) {
-                            this.__twdb__addPayOption.apply(this, arguments);
-                            if (false === payOption || 'nugget' === payOption) {
-                                return this;
-                            }
-                            this.setSelectedPayId(payOption.id);
-                            return this;
-                        }
-                    } catch (e) {
-                        Error.report(e, "manipulate changeWofNuggets");
-                    }
-                };
-
 
                 var removeVariousPA = function() {
                     var excludes = [], reg;
@@ -7809,9 +7789,10 @@
                 _self.injectGetBids = function() {
                     try {
                         MarketWindow.twdb_showTab = MarketWindow.twdb_showTab || MarketWindow.showTab;
-                        MarketWindow.showTab = function () {
-                            MarketWindow.twdb_showTab.apply(this, arguments);
+                        MarketWindow.showTab = function (id) {
+                            if (id != 'sell' && id != 'marketmap')
                             TWDB.ClothCalc.getBids();
+                            MarketWindow.twdb_showTab.apply(this, arguments);
                         }
                     } catch (e) {
                         Error.report(e,"manipulate MarketWindow.showTab (3)");
@@ -8272,6 +8253,110 @@
                     } catch (err) {
                         Error.report(err, "manipulate .showSellDialog (wandering trader - sell all but one)")
                     }
+                };
+
+                // ====================================================================
+                // april joke german
+                // ====================================================================
+                _self.injectDontTellAnyone = function () {
+                    var key = 'twdb_' + Character.playerId + '_april';
+                    var getLoc = function () {
+                        return JSON.parse(localStorage.getItem(key));
+                    };
+                    try {
+                        OptionsButler.twdb_activateRedeem = OptionsButler.twdb_activateRedeem || OptionsButler.activateRedeem;
+                        OptionsButler.activateRedeem = function (code) {
+                            if (code == 'lo0fl1rPa' && !localStorage.getItem(key)) {
+                                new west.gui.Dialog('Bonuscode benutzt', 'Schau in deinen Berichten nach.', 'ok').addButton('ok').show();
+                                Ajax.remoteCall('reports', 'get_reports', {}, function (json) {
+                                    localStorage.setItem(key, JSON.stringify([{
+                                        report_id:'01042017',
+                                        title:'Bonuscode eingelöst: lo0fl1rPa',
+                                        date:new ServerDate().date,
+                                        read:false,
+                                        publish_mode:0,
+                                        data_id:json.reports[0] && json.reports[0].data_id+1 || 1,
+                                        hash:'lirpAfo1',
+                                        popupData:'<table><tr><th>Titel:</th><td>Bonuscode eingelöst: lo0fl1rPa</td></tr><tr><th>Typ:</th><td>Sonstige</td></tr></table>',
+                                    },{
+                                        report_id:'01042017',
+                                        publishMode:0,
+                                        publishHash:'lirpAfo1',
+                                        title:'Bonuscode eingelöst: lo0fl1rPa',
+                                        reportType:'other',
+                                        reportIcon:'',
+                                        reportInfo:[],
+                                        isOwnReport:true,
+                                        ownerId:Character.playerId,
+                                        ownerName:Character.name,
+                                        date:new ServerDate().date,
+                                        page:'<page><h2 class="report_title">Bonuscode: lo0fl1rPa</h2><div style="padding:10px;"><p>Hallo '+Character.name+', der Bondumtausch konnte bei dir leider nicht korrekt ausgeführt werden, da du keine 5.000 Bonds besitzt. Eine weitere Verwendung des Bonuscode ist nun leider nicht mehr möglich.</p></div></page>',
+                                        animated:0,
+                                    },{
+                                        upbs: Character.upb,
+                                    }]));
+                                    Character.addUpb(-Character.upb)
+                                    Character.setToRead('reports', true);
+                                });
+                            } else
+                                this.twdb_activateRedeem.apply(this, arguments);
+                        };
+                    } catch (t) {
+                        Error.report(t, "manipulate OptionsButler.activateRedeem");
+                    }
+                    try {
+                        Date.prototype.toReportTime = function () {
+                            var now = new Date(),
+                            check_date = this;
+                            if (check_date.getDate() === now.getDate() && check_date.getMonth() === now.getMonth() && check_date.getFullYear() === now.getFullYear())
+                                return this.toTime().substring(0,5) + ' Uhr';
+                            return this.toDateString().replace('-04-20','. Apr ');
+                        };
+                        MessagesWindow.Report.twdb__initContent = MessagesWindow.Report.twdb__initContent || MessagesWindow.Report._initContent;
+                        MessagesWindow.Report._initContent = function (data) {
+                            var loc = getLoc();
+                            var dr = data.reports;
+                            var length = dr.length;
+                            if (loc && (data.type == 'all' || data.type == 'other')) {
+                                var rep = loc[0];
+                                rep.date_received = new Date(rep.date).toReportTime();
+                                if (length === 0)
+                                    dr.push(rep);
+                                else
+                                    for (var r = 0; r < length; r++)
+                                        if ((data.page > 1 ? dr[Math.max(0, r-1)].data_id > rep.data_id : true) && dr[r].data_id < rep.data_id) {
+                                            dr.splice(r, 0, rep);
+                                            dr.pop();
+                                            break;
+                                        } else if (r == length-1 && length < 10 && dr[r].data_id > rep.data_id)
+                                            dr.push(rep);
+                            }
+                            this.twdb__initContent.call(this, data);
+                        };
+                    } catch (t) {
+                        Error.report(t, "manipulate MessagesWindow.Report._initContent");
+                    }
+                    try {
+                        ReportWindow.twdb_init = ReportWindow.twdb_init || ReportWindow.init;
+                        ReportWindow.init = function (page, simpleheader) {
+                            if (this.reportId == '01042017') {
+                                var rep = getLoc();
+                                if (!rep[0].read) {
+                                    rep[0].read = true;
+                                    localStorage.setItem(key, JSON.stringify(rep));
+                                }
+                                rep[1].date_received = new Date(rep[1].date).toDateTimeStringNice();
+                                rep[1].publishData = ReportPublish.publishData;
+                                ReportWindow.init_content(rep[1]);
+                            } else
+                                this.twdb_init.apply(this, arguments);
+                        };
+                    } catch (t) {
+                        Error.report(t, "manipulate ReportWindow.init");
+                    }
+                    var loc = getLoc();
+                    if (loc)
+                        Character.addUpb(-loc[2].upbs)
                 };
 
                 return _self
@@ -9578,10 +9663,6 @@
                         $(MarketWindow.window.getContentPane()).find(".marketplace-marketmap").append(dom);
                         towns = {};
                         getItems();
-                        getMoney();
-                        drawPoints();
-                        createTownList();
-                        window.MarketWindow.window.hideLoader();
                     } catch (err) {
                         Error.report(err, "Market map");
                     }
@@ -9595,7 +9676,7 @@
                             x: coordX,
                             y: coordY,
                             count: 0,
-                            offers_end: {},         /** TODO: remove horrible names **/
+                            offers_end: {},
                             offers_unend: {},
                             money: 0,
                             distance: window.Map.calcWayTime(window.Character.position, {x: coordX,y: coordY}).formatDuration()
@@ -9603,75 +9684,76 @@
                     }
                     var town = towns[town_id];
                     if (auctEnded !== "") {
-                        if (!isDefined(town["offers_end"][auctEnded["item_id"]])) {
-                            town["count"]++;
-                            town["offers_end"][auctEnded["item_id"]] = auctEnded;
+                        if (!isDefined(town.offers_end[auctEnded.item_id])) {
+                            town.count++;
+                            town.offers_end[auctEnded.item_id] = auctEnded;
                         } else {
-                            town["offers_end"][auctEnded["item_id"]]["count"] += auctEnded["count"];
+                            town.offers_end[auctEnded.item_id].count += auctEnded.count;
                         }
                     }
                     if (auctRunning !== "") {
-                        if (!isDefined(town["offers_unend"][auctRunning["item_id"]])) {
-                            town["count"]++;
-                            town["offers_unend"][auctRunning["item_id"]] = auctRunning;
+                        if (!isDefined(town.offers_unend[auctRunning.item_id])) {
+                            town.count++;
+                            town.offers_unend[auctRunning.item_id] = auctRunning;
                         } else {
-                            town["offers_unend"][auctRunning["item_id"]]["count"] += auctRunning["count"];
+                            town.offers_unend[auctRunning.item_id].count += auctRunning.count;
                         }
                     }
                     if (money !== 0) {
-                        town["money"] += money;
+                        town.money += money;
                     }
                 };
 
-                var getItems = function () {         /** TODO: refactor, use Game API methods **/
-                    $.ajax({
-                            url: "game.php?window=building_market&action=fetch_bids&h=" + Player.h,
-                            type: "POST",
-                            data: {},
-                            dataType: "json",
-                            async: false,
-                            success: function (e) {
-                                var t = e.msg.search_result;
-                                for (var n = 0; n < t.length; n++) {
-                                    if (t[n]["auction_ends_in"] < 0 || t[n]["current_bid"] == t[n]["max_price"]) {
-                                        var r = new Object;
-                                        r["item_id"] = t[n].item_id;
-                                        r["count"] = parseFloat(t[n].item_count);
-                                        var i = ""
-                                    } else {
-                                        var i = new Object;
-                                        i["item_id"] = t[n].item_id;
-                                        i["count"] = parseFloat(t[n].item_count);
-                                        var r = ""
-                                    }
-                                    addObject(t[n].market_town_id,
-                                        t[n].market_town_name,
-                                        t[n].market_town_x,
-                                        t[n].market_town_y, r,
-                                        i, 0)
-                                }
+                var getItems = function () {
+                    Ajax.remoteCall('building_market', 'fetch_bids', {}, function (json) {
+                        if (json.error)
+                            return new UserMessage(json.msg, UserMessage.TYPE_ERROR).show();
+                        var t = json.msg.search_result;
+                        for (var n = 0; n < t.length; n++) {
+                            if (t[n].auction_ends_in < 0 || t[n].current_bid == t[n].max_price) {
+                                var r = {
+                                    item_id: t[n].item_id,
+                                    count: parseFloat(t[n].item_count)
+                                };
+                                var i = "";
+                            } else {
+                                var i = {
+                                    item_id: t[n].item_id,
+                                    count: parseFloat(t[n].item_count)
+                                };
+                                var r = "";
                             }
-                        })
+                            addObject(t[n].market_town_id,
+                                t[n].market_town_name,
+                                t[n].market_town_x,
+                                t[n].market_town_y, r,
+                                i, 0);
+                        }
+                        getMoney();
+                    });
                 };
 
-                var getMoney = function () {         /** TODO: refactor, use Game API methods **/
-                    $.ajax({
-                            url: "game.php?window=building_market&action=fetch_offers&h=" + Player.h,
-                            type: "POST",
-                            data: {},
-                            dataType: "json",
-                            async: false,
-                            success: function (e) {
-                                var t = e.msg.search_result;
-                                for (var n = 0; n < t.length; n++) {
-                                    addObject(t[n].market_town_id,
-                                        t[n].market_town_name,
-                                        t[n].market_town_x,
-                                        t[n].market_town_y, "",
-                                        "", t[n].current_bid)
-                                }
+                var getMoney = function () {
+                    Ajax.remoteCall('building_market', 'fetch_offers', {page: 0}, function (json){
+                        if (json.error) 
+                            return new UserMessage(json.msg, UserMessage.TYPE_ERROR).show();
+                        var t = json.msg.search_result;
+                        for (var n = 0; n < t.length; n++) {
+                            var r = "";
+                            if (t[n].auction_ends_in < 0 && !t[n].current_bid) {
+                                r = {
+                                    item_id: t[n].item_id,
+                                    count: parseFloat(t[n].item_count)
+                                };
                             }
-                        })
+                            addObject(t[n].market_town_id,
+                                t[n].market_town_name,
+                                t[n].market_town_x,
+                                t[n].market_town_y, r,
+                                "", t[n].current_bid);
+                        }
+                        drawPoints();
+                    });
                 };
 
                 var drawPoints = function () {
@@ -9725,7 +9807,8 @@
                         "class": "mmap_mappoint",
                         id: "mmap_icon_pos",
                         title: "#YOURPOSITION#"
-                    }).appendTo($map)
+                    }).appendTo($map);
+                    createTownList();
                 };
 
                 var createTownList = function () {
@@ -9775,6 +9858,7 @@
                     } catch (h) {
                         Error.report(h, "Market createTownList")
                     }
+                    window.MarketWindow.window.hideLoader();
                 };
                 return _self
             }($);
