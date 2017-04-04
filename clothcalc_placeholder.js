@@ -3955,7 +3955,7 @@
             var Sleep = (function($) {
                 var _self = {};
                 var btn = null;
-                forts = [];
+                var forts = [];
                 var tmp = [];
                 var cache = {};
                 var days = 1;
@@ -3963,7 +3963,7 @@
                 var loader = {};
                 var pos;
                 var loading = false;
-                towns = [];
+                var towns = [];
                 var roomz = ['','cubby','bedroom','hotel_room','apartment','luxurious_apartment'];
                 var init = function() {
                     if (loader.ready) { return; };
