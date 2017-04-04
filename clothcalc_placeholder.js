@@ -7862,14 +7862,14 @@
 
                 _self.injectGetBids = function() {
                     try {
-                        MarketWindow.twdb_showTab = MarketWindow.twdb_showTab || MarketWindow.showTab;
-                        MarketWindow.showTab = function (id) {
+                        MarketWindow.twdb_showTab2 = MarketWindow.twdb_showTab2 || MarketWindow.showTab;
+                        MarketWindow.showTab2 = function (id) {
                             if (id != 'sell' && id != 'marketmap')
                             TWDB.ClothCalc.getBids();
                             MarketWindow.twdb_showTab.apply(this, arguments);
                         }
                     } catch (e) {
-                        Error.report(e,"manipulate MarketWindow.showTab (3)");
+                        Error.report(e,"manipulate MarketWindow.showTab (2)");
                     }
                 };
                 
@@ -7915,48 +7915,44 @@
                     }
                 };
                 _self.addTabOnMarketWindow = function (name, shortname, callback) {
-                    var first = false;
-                    var current = {};
-                    if (MarketWindow.twdb_showTab)
-                        current = {fn: MarketWindow.twdb_showTab, name: "MarketWindow.twdb_showTab"};
-                    else
-                        current = {fn: MarketWindow.showTab, name: "MarketWindow.showTab"};
-                    if (typeof save.MarketWindowOpen == "undefined") {
-                        first = true;
-                        save.MarketWindowOpen = MarketWindow.open.toString();
-                        save.MarketWindowTab = current.fn.toString();
-                    }
+                    var tabclick = function (win, id) {
+                        if (!MarketWindow.window)
+                            return;
+                        MarketWindow.window.activateTab(id).$('div.tw2gui_window_content_pane > *', MarketWindow.DOM).each(function (i, e) {
+                            if ($(e).hasClass('marketplace-' + id)){
+                                $(e).children().fadeIn();
+                                $(e).show();
+                            } else {
+                                $(e).children().fadeOut();
+                                $(e).hide();
+                            }
+                        });
+                        MarketWindow['TWDB-' + shortname]();
+                    };
                     try {
-                        var inject = "MarketWindow.window.addTab('" + name + "', '" + shortname + "', tabclick).appendToContentPane($('<div class=\"marketplace-" + shortname + "\"/>'));";
-                        var newfunction = MarketWindow.open.toString().replace(/MarketWindow.DOM/,inject + "MarketWindow.DOM");
-                        eval("(function ($) {" + "MarketWindow.open = " + newfunction + "})(jQuery);")
+                        MarketWindow.twdb_open = MarketWindow.twdb_open || MarketWindow.open;
+                        MarketWindow.open = function () {
+                            this.twdb_open.apply(this, arguments);
+                            MarketWindow.window.addTab(name, shortname, tabclick).appendToContentPane($('<div class="marketplace-' + shortname + '"/>'));
+                        };
                     } catch (e) {
                         Error.report(e, "manipulate MarketWindow.open");
-                        eval("(function ($) {" + "MarketWindow.open = " + save.MarketWindowOpen + "})(jQuery);")
                     }
                     try {
-                        MarketWindow["TWDB-" + shortname] = function () {callback()
-                        }
+                        MarketWindow["TWDB-" + shortname] = function () {
+                            callback();
+                        };
                     } catch (e) {
-                        Error.report(e, "add showTab to MarketWindow")
+                        Error.report(e, "add showTab to MarketWindow");
                     }
                     try {
-                        var inject = "case '" + shortname + "':MarketWindow['TWDB-" + shortname + "']();break;";
-                        current.fn = current.fn.toString().replace(/switch(\s)*\(id\)(\s)*{/,"switch (id) { " + inject);
-                        eval("(function ($) {" + current.name + " = " + current.fn + "})(jQuery);;")
+                        MarketWindow.twdb_showTab = MarketWindow.twdb_showTab || MarketWindow.showTab;
+                        MarketWindow.showTab = function () {
+                            MarketWindow.window.setSize(748,471).removeClass('premium-buy');
+                            this.twdb_showTab.apply(this, arguments);
+                        };
                     } catch (e) {
-                        Error.report(e,"manipulate MarketWindow.showTab (1)");
-                        eval("(function ($) {" + current.name + " = " + save.MarketWindowTab + "})(jQuery);")
-                    }
-                    if (first) {
-                        try {
-                            var inject = "MarketWindow.window.setSize(748,471).removeClass('premium-buy');";
-                            var newfunction = current.fn.toString().replace(/{/,"{" + inject);
-                            eval("(function ($) {" + current.name + " = " + newfunction + "})(jQuery);;")
-                        } catch (e) {
-                            Error.report(e,"manipulate MarketWindow.showTab (2)");
-                            eval("(function ($) {" + current.name + " = " + save.MarketWindowTab + "})(jQuery);")
-                        }
+                            Error.report(e,"manipulate MarketWindow.showTab (1)");
                     }
                 };
                 var waitForMinimap = function (e) {
