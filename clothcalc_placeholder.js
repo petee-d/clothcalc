@@ -1,3 +1,7 @@
+// ==UserScript==
+// @include https://*.the-west.*/game.php*
+// ==/UserScript==
+
 /*jslint browser: true, devel: true, passfail: false, continue: true, forin: true, nomen: true, plusplus: true, regexp: true, sloppy: true, vars: true, indent: 4, maxerr: 999*/
 /*jshint strict: false, globalstrict: true, browser: true, jquery: true*/
 /*global isDefined, debLog, TWDB, west, wman, TWE, UserMessage, Inventory, Wear, ItemManager, JobList, Bag, Hotkey, HotkeyManager, Character, Game, TheWestApi, jQuery, $, window*/
@@ -11,6 +15,7 @@
  * [marketselldialog] If there is no selling price at the market, it takes the half of the buying price
  * [directsleep] Hotel-shortlink for townless players added
  * [nowofnuggets] Re-added and fixed for future events
+ * [chestAnalyser] Layout fixed
  * */
 
 (function (f) {
@@ -32,7 +37,7 @@
         window.TWDB = {};
         TWDB.script = {
             version: 45,
-            revision: 1,
+            revision: 2,
             name: "The West - tw-db.info Cloth Calc",
             update: "tw-db.info/cache/userscripts/clothcalc/dev_clothcalc_eng.user.js",
             check: "tw-db.info/cache/userscripts/clothcalc/dev_version",
@@ -4295,25 +4300,23 @@
                     $(bodyscroll.getMainDiv()).css('height','385px');
                     gui.append(bodyscroll.getMainDiv());
 
-                    // 680 width
+                    // 683 width
                     for ( var chest in statistic.chest ) {
                       var stat = statistic.chest[chest];
                       var item = new tw2widget.Item(ItemManager.get(chest) , 'item_inventory').setCount(stat.count);
                       item.getImgEl().addClass('item_inventory_img');
-                      bodyscroll.appendContent( $('<div style="float:left;position:relative;height:61px;width:60px;margin:5px" />').append(item.getMainDiv()) );
+                      bodyscroll.appendContent( $('<div style="float:left;position:relative;height:61px;width:61px;" />').append(item.getMainDiv()) );
                       var count = 0;
-                      var div = $('<div style="float:left;position:relative;width:590px;margin:5px" />');
+                      var div = $('<div style="float:left;position:relative;width:610px;" />');
                       for ( var itemid in stat.items ) {
                         count++;
                         var item = new tw2widget.Item(ItemManager.get(itemid) , 'item_inventory').setCount(stat.items[itemid]);
                         item.getImgEl().addClass('item_inventory_img');
                         div.append(item.getMainDiv());
                       }
-                      div.css('height', (parseInt(count/10, 10)+1)*61 + 'px');
-                      bodyscroll.appendContent('<div style="float:left;position:relative;width:10px;height:' + String((parseInt(count/10, 10)+1)*61 + 10 ) + 'px;background: url(' + Game.cdnURL + '/images/window/report/devider_report.png) repeat-x scroll 0 0 transparent;" />');
-                      bodyscroll.appendContent( div );
-
-                      bodyscroll.appendContent('<div style="clear:both;position:relative;width:100%;height:10px;display:block;background: url(' + Game.cdnURL + '/images/window/dailyactivity/wood_devider_horiz.png) repeat-x scroll 0 0 transparent;" />');
+                      bodyscroll.appendContent('<div style="float:left;position:relative;width:10px;height:' + String(Math.ceil(count/10)*61) + 'px;background: url(/images/window/report/devider_report.png) repeat-y;" />')
+                      .appendContent( div )
+                      .appendContent('<div style="clear:both;position:relative;height:10px;display:block;background: url(/images/window/dailyactivity/wood_devider_horiz.png) repeat-x;" />');
                     }
 
 
