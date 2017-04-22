@@ -1,3 +1,7 @@
+// ==UserScript==
+// @include https://*.the-west.*/game.php*
+// ==/UserScript==
+
 /*jslint browser: true, devel: true, passfail: false, continue: true, forin: true, nomen: true, plusplus: true, regexp: true, sloppy: true, vars: true, indent: 4, maxerr: 999*/
 /*jshint strict: false, globalstrict: true, browser: true, jquery: true*/
 /*global isDefined, debLog, TWDB, west, wman, TWE, UserMessage, Inventory, Wear, ItemManager, JobList, Bag, Hotkey, HotkeyManager, Character, Game, TheWestApi, jQuery, $, window*/
@@ -7,10 +11,11 @@
 
 /**
  * News on this update :
- * -Updated fort ranks to include sergeant
- * -Function bonds instead of nuggets removed, no more needed
- * -Jobanalyser for RU server fixed
- * -MarketMap for beta fixed
+ * [buyTip] If you have learned a recipe, it won't be shown as new anymore.
+ * [marketselldialog] If there is no selling price at the market, it takes the half of the buying price
+ * [directsleep] Hotel-shortlink for townless players added
+ * [nowofnuggets] Re-added and fixed for future events
+ * [chestAnalyser] Layout fixed
  * */
 
 (function (f) {
@@ -32,7 +37,7 @@
         window.TWDB = {};
         TWDB.script = {
             version: 45,
-            revision: 1,
+            revision: 2,
             name: "The West - tw-db.info Cloth Calc",
             update: "tw-db.info/cache/userscripts/clothcalc/dev_clothcalc_eng.user.js",
             check: "tw-db.info/cache/userscripts/clothcalc/dev_version",
@@ -484,6 +489,20 @@
                     _this.bidsLoading = false;
                 });
             },
+            recLoading: false,
+            recipes: {},
+            getLearned: function () {
+                if (this.recLoading) return;
+                this.recLoading = true;
+                var _this = this;
+                Ajax.remoteCall('crafting', '', {}, function (json){
+                    var rec = json.recipes_content;
+                    if (rec)
+                        for (var i = 0; i < rec.length; i++)
+                            _this.recipes[rec[i].item_id] = 1;
+                    _this.recLoading = false;
+                });
+            },
 
             init: function () {
                 if (this.ready) { return; }
@@ -493,6 +512,7 @@
                 this.customs.setParent(this);
                 this.bag.setParent(this);
                 this.getBids();
+                this.getLearned();
                 TWDB.Eventer.set("TWDBdataLoaded", function () { _self.handleTWDBData(); });
                 //define gui general
                 this.gui.copyright = jQuery('<div style="position:absolute;bottom:0px;left:0px;height:15px;display:block;font-size:10px;color:#000000;">.:powered by tw-db team:. | <a href="https://tw-db.info" style="font-weight:normal;color:#000000;" target="_blank">.:tw-db.info:.</a> | ' + (TWDB.script.version / 100) + " rev. " + TWDB.script.revision + "</div>");
@@ -3653,6 +3673,7 @@
                         [0, "weeklycrafting", "#CRAFTNOTICE#", false],
                             [0, "noworkqueuepa", "#HELP_NOWORKQUEUEPA#", "#PREMIUM_SETTINGS#"],
                             [0, "nofetchallpa", "#HELP_NOFETCHALLPA#", "#PREMIUM_SETTINGS#"],
+                            [0, "nowofnuggets", "#HELP_NOWOFNUGGETS#", "#PREMIUM_SETTINGS#"],
                         [0, "instanthotel", "#HELP_INSTHOTEL#", false],
                         [0, "telegramsource", "#HELP_TELEGRAM_SOURCE_SWITCH#", false],
                         [8, "clothPos"],         // placeholder
@@ -3867,13 +3888,15 @@
                 var init = function() {
                     if (loader.ready) { return; };
                     div = Window.addTab("notes", "Release Notes", "Release Notes", function() { open(); });
-                    if (Cache.load("version") && Script.version + " " + Script.revision !== Cache.load("version")) {
+                    if (!Cache.load("version"))
+                        Cache.save("version", Script.version + " " + Script.revision);
+                    else if (Script.version + " " + Script.revision !== Cache.load("version")) {
                         Cache.save("version", Script.version + " " + Script.revision);
                         updated = true;
                         var title = "#WAS_UPDATED#";
                         var msg = '<div class="txcenter">#OPEN_RELEASENOTES#</div>';
                         msg = msg.replace("=1=", "<b>" + Script.name + "</b>");
-                        (new west.gui.Dialog(title, msg, west.gui.Dialog.SYS_WARNING))
+                        (new west.gui.Dialog(title, msg, 'warning'))
                             .addButton("no").addButton("yes", function() { Window.open("notes"); }).show();
                     };
                     loader.ready = true;
@@ -3889,7 +3912,7 @@
                     if ($.browser.webkit) { url += "?" + Script.version + Script.revision };
                     var refresh = function() {
                         try { location.href = url; } catch (e) {};
-                        (new west.gui.Dialog(Script.name, "#UPDATE_RELOAD#.", west.gui.Dialog.SYS_WARNING)).setModal(true,false,true).show();
+                        (new west.gui.Dialog(Script.name, "#UPDATE_RELOAD#.", 'warning')).setModal(true,false,true).show();
                     };
                     (new west.gui.Dialog(title, msg, west.gui.Dialog.SYS_WARNING)).addButton("#NOTNOW#").addButton("ok", refresh).show();
                 };
@@ -3943,6 +3966,10 @@
                 var days = 1;
                 var opened = false;
                 var loader = {};
+                var pos;
+                var loading = false;
+                var towns = [];
+                var roomz = ['','cubby','bedroom','hotel_room','apartment','luxurious_apartment'];
                 var init = function() {
                     if (loader.ready) { return; };
                     // Settings.addOption( '#INTERFACE#' , 'directsleep', 0 ,'#HELP_DIRECTSLEEP#'); // for new settings system only
@@ -3952,9 +3979,11 @@
                                      + "ul.tw2gui_selectbox_content.twdb_sleepmenu > li {padding-right: 20px!important;}";
                         TWDB.Util.addCss(sleepCss);
                         cache = Cache.load('barracks');
-                        if (cache == null || typeof(cache) !== 'object') { cache = {}; };
-                        if (Character.homeTown.town_id !== 0) { addButton(); getForts(); };
-                    };
+                        if (cache == null || typeof(cache) !== 'object') { cache = {}; }
+                        addButton();
+                        if (Character.homeTown.town_id !== 0) getForts();
+                        else getTowns();
+                    }
                     loader.ready = true;
                 };
                 loader = Loader.add('Sleep', 'tw-db DirectSleep', init , {'Cache':true, 'Settings':true});
@@ -3962,59 +3991,94 @@
                 var addButton = function() {
                     btn = GameInject.CharacterButton.add(Images.buttonSleep);
                     btn.addMousePopup('#SLEEP#').click(function(e) {
-                            if (w.Character.homeTown.town_id !== 0 && forts.length == 0) { sleepHotel(); }
-                            else { createMenu(e); }; });
+                            if (w.Character.homeTown.town_id !== 0 && forts.length == 0) sleepHome();
+                            else prepareMenu(e); });
                 };
 
-                var createMenu = function(e) {
-                    if (forts.length == 0) { return; };
-                    var pos = Map.getLastPosition();
-                    pos.x = pos[0];
-                    pos.y = pos[1];
-                    for (var i=0; i < forts.length; i++) {
-                        forts[i].distance = w.Map.calcWayTime(pos,forts[i]);
-                    };
-                    forts.sort(function(a, b){ return(a.distance==b.distance)?0:(a.distance>b.distance)?1:-1;});
+                var createMenu = function(arr, e, length) {
                     var selectbox = (new west.gui.Selectbox(true))
-                        .addListener(function (key) { switch (key) { case 0: sleepHotel(); break;
-                                                                    default: sleepFort(key); break; }; })
-                        .addItem(0, '#HOTEL#&nbsp;' + w.Map.calcWayTime(pos, w.Character.homeTown).formatDuration());
-                    for (var i=0; i < forts.length; i++) {
-                        if (forts[i].stage !== 0) {
-                            selectbox.addItem(forts[i].id, '#STAGE#&nbsp;' + forts[i].stage + '&nbsp;' + forts[i].distance.formatDuration() + '&nbsp;|&nbsp;' + forts[i].name);
-                        };
-                    };
+                        .addListener(function (key) { switch (key) {
+                            case 'home': sleepHome(); break;
+                            default: sleep(key); break; }
+                        });
+                    if (w.Character.homeTown.town_id !== 0)
+                        selectbox.addItem('home', '#HOTEL#&nbsp;' + w.Map.calcWayTime(pos, w.Character.homeTown).formatDuration());
+                    for (var i=0; i < length; i++)
+                        if (arr[i].stage !== 0)
+                            selectbox.addItem(i, '#STAGE#&nbsp;' + arr[i].stage + '&nbsp;' + arr[i].distance.formatDuration() + '&nbsp;|&nbsp;' + arr[i].name);
                     $(selectbox.elContent).addClass("twdb_sleepmenu");
                     selectbox.show(e);
+                    loading = false;
+                };
+                
+                var nearTowns = function(i, max, e) {
+                    if (i == max)
+                        createMenu(towns, e, max);
+                    else if (towns[i].hasOwnProperty('stage'))
+                        nearTowns(++i, max, e);
+                    else
+                        Ajax.remoteCallMode('building_hotel', 'get_data', {town_id: towns[i].town_id}, function (data){
+                            if (data.error)
+                                return new UserMessage(data.msg).show();
+                            towns[i].stage = data.hotel_level;
+                            nearTowns(++i, max, e);
+                    });
+                };
+                
+                var prepareMenu = function(e) {
+                    if (loading) return;
+                    loading = true;
+                    pos = Map.getLastPosition();
+                    if (w.Character.homeTown.town_id === 0) {
+                        for (var i=0; i < towns.length; i++)
+                            towns[i].distance = w.Map.calcWayTime(pos,towns[i]);
+                        towns.sort(function(a, b){ return a.distance - b.distance; });
+                        var leng = towns.length > 5 ? 5 : towns.length;
+                        nearTowns(0, leng, e);
+                    } else {
+                        for (var i=0; i < forts.length; i++)
+                            forts[i].distance = w.Map.calcWayTime(pos,forts[i]);
+                        forts.sort(function(a, b){ return a.distance - b.distance; });
+                        createMenu(forts, e, forts.length);
+                    }
                 };
 
-                var sleepHotel = function() {
+                var sleepHome = function() {
                     Ajax.remoteCallMode("building_hotel", "get_data", {town_id: w.Character.homeTown.town_id}, function(resp) {
-                        if (resp.error) {
-                            new UserMessage(resp.error, UserMessage.TYPE_ERROR).show(); return;
-                        };
-                        var room = "";
-                        for (var key in resp.rooms) {
-                            if (resp.rooms[key].available) { room = key; };
-                        };
+                        if (resp.error)
+                            return new UserMessage(resp.msg).show();
+                        var room = roomz[resp.hotel_level];
                         w.TaskQueue.add(new TaskSleep(w.Character.homeTown.town_id, room));
                     });
                 };
 
-                var sleepFort = function(id) {
-                    if (isDefined(cache[id])) { w.TaskQueue.add(new TaskFortSleep(id, cache[id].x, cache[id].y)); };
+                var sleep = function(id) {
+                    if (isDefined(towns[id]))
+                        w.TaskQueue.add(new TaskSleep(towns[id].town_id, roomz[towns[id].stage]));
+                    else if (isDefined(forts[id]))
+                        w.TaskQueue.add(new TaskFortSleep(forts[id].id, forts[id].x, forts[id].y));
                 };
 
+                var getTowns = function() {
+                    Ajax.get('map', 'get_minimap', {}, function (json) {
+                        if (json.error)
+                            return new UserMessage(json.msg).show();
+                        for (var x in json.towns)
+                            if (json.towns[x].member_count)
+                                towns.push(json.towns[x]);
+                    });
+                };
+                
                 var getForts = function() {
-                    if (w.Character.homeTown.alliance_id == 0) { return; };
+                    if (w.Character.homeTown.alliance_id == 0) { return; }
                     Ajax.remoteCallMode("alliance", "get_data", {alliance_id: w.Character.homeTown.alliance_id}, function(resp) {
                         if (resp.error) {
-                            new UserMessage(resp.error, UserMessage.TYPE_ERROR).show(); return;
-                        };
+                            return new UserMessage(resp.error).show();
+                        }
                         tmp = resp.data.forts;
                         if (tmp.length > 0) {
                             w.setTimeout(function(){ getFort(); }, Timer.getTimeout());
-                        };
+                        }
                     });
                 };
 
@@ -4032,7 +4096,7 @@
                             return;
                         };
                         Ajax.remoteCallMode('fort_building_barracks', 'index', {fort_id: id}, function(resp) {
-                            if (resp.error) { new UserMessage(resp.error, UserMessage.TYPE_ERROR).show();}
+                            if (resp.error) { new UserMessage(resp.error).show();}
                             else {
                                 cache[id].time = Number(new Date().getTime()/1000).round(0);
                                 if (isDefined(resp.barrackStage)) { cache[id].stage = resp.barrackStage; };
@@ -4220,7 +4284,8 @@
                           }
                           stats.items[m.item_id] += m.count;
                         });
-                      };
+                      } else if (m.type == 'learn_recipe')
+                        TWDB.ClothCalc.recipes[m.recipe] = 1;
                     };
                     Cache.save('statistic',statistic);
                   };
@@ -4235,25 +4300,23 @@
                     $(bodyscroll.getMainDiv()).css('height','385px');
                     gui.append(bodyscroll.getMainDiv());
 
-                    // 680 width
+                    // 683 width
                     for ( var chest in statistic.chest ) {
                       var stat = statistic.chest[chest];
                       var item = new tw2widget.Item(ItemManager.get(chest) , 'item_inventory').setCount(stat.count);
                       item.getImgEl().addClass('item_inventory_img');
-                      bodyscroll.appendContent( $('<div style="float:left;position:relative;height:61px;width:60px;margin:5px" />').append(item.getMainDiv()) );
+                      bodyscroll.appendContent( $('<div style="float:left;position:relative;height:61px;width:61px;" />').append(item.getMainDiv()) );
                       var count = 0;
-                      var div = $('<div style="float:left;position:relative;width:590px;margin:5px" />');
+                      var div = $('<div style="float:left;position:relative;width:610px;" />');
                       for ( var itemid in stat.items ) {
                         count++;
                         var item = new tw2widget.Item(ItemManager.get(itemid) , 'item_inventory').setCount(stat.items[itemid]);
                         item.getImgEl().addClass('item_inventory_img');
                         div.append(item.getMainDiv());
                       }
-                      div.css('height', (parseInt(count/10, 10)+1)*61 + 'px');
-                      bodyscroll.appendContent('<div style="float:left;position:relative;width:10px;height:' + String((parseInt(count/10, 10)+1)*61 + 10 ) + 'px;background: url(' + Game.cdnURL + '/images/window/report/devider_report.png) repeat-x scroll 0 0 transparent;" />');
-                      bodyscroll.appendContent( div );
-
-                      bodyscroll.appendContent('<div style="clear:both;position:relative;width:100%;height:10px;display:block;background: url(' + Game.cdnURL + '/images/window/dailyactivity/wood_devider_horiz.png) repeat-x scroll 0 0 transparent;" />');
+                      bodyscroll.appendContent('<div style="float:left;position:relative;width:10px;height:' + String(Math.ceil(count/10)*61) + 'px;background: url(/images/window/report/devider_report.png) repeat-y;" />')
+                      .appendContent( div )
+                      .appendContent('<div style="clear:both;position:relative;height:10px;display:block;background: url(/images/window/dailyactivity/wood_devider_horiz.png) repeat-x;" />');
                     }
 
 
@@ -5163,16 +5226,13 @@
                     var i = [];
                     var s = t.getLastPosition();
                     for (var o = 0; o < r.length; o++) {
-                        var a = r[o][0] - s[0];
-                        var f = r[o][1] - s[1];
+                        var a = r[o][0] - s.x;
+                        var f = r[o][1] - s.y;
                         var l = Math.sqrt(a * a + f * f);
                         var c = window.Map.calcWayTime({
                             x: r[o][0],
                             y: r[o][1]
-                        }, {
-                            x: s[0],
-                            y: s[1]
-                        });
+                        }, s);
                         var h = Number(Math.atan(f / a) * 180 / Math.PI)
                             .round(0);
                         if (a < 0) {
@@ -5193,17 +5253,16 @@
                     return i
                 };
                 t.getLastPosition = function () {
-                    var e = Character.position.x;
-                    var t = Character.position.y;
+                    var pos = {x: Character.position.x, y: Character.position.y};
                     var n = TaskQueue.queue;
                     for (var r = 0; r < n.length; r++) {
                         var i = n[r].wayData;
                         if (i.x) {
-                            e = i.x;
-                            t = i.y
+                            pos.x = i.x;
+                            pos.y = i.y
                         }
                     }
-                    return [e, t]
+                    return pos;
                 };
                 t.setMinimapJob = function (t) {
                     if (f) {
@@ -6422,7 +6481,8 @@
                     var equip = w.Wear.wear[n.type];
                     var itemEquipped = equip && equip.obj.item_base_id == n.item_base_id;
                     var itemHasBid = TWDB.ClothCalc.bids[n.item_id];
-                    if (inv.length || itemEquipped  || itemHasBid) {
+                    var learned = TWDB.ClothCalc.recipes[n.item_id];
+                    if (inv.length || itemEquipped  || itemHasBid || learned) {
                         return false;
                     } else {
                         return true;
@@ -6849,6 +6909,7 @@
                     if (Settings.get("fortrecruitment", true)) { activateFortRecruitment(); }
                     if (Settings.get("noworkqueuepa", true)) { removeWorkQueuePA(); }
                     if (Settings.get("nofetchallpa", false)) { removeVariousPA(); } // add additional PAs by ... || Settings.get(..)
+                    if (Settings.get("nowofnuggets", false)) { changeWofNuggets(); }
                     if (Settings.get("marketselldialog", true)) { enhanceMarketSellDialog(); }
                     if (Settings.get("weeklycrafting", false)) { weeklyCrafting(); }
                     if (Settings.get("pinitems", true)) {
@@ -7145,6 +7206,22 @@
                         Error.report(e, "manipulate removeWorkQueuePA")
                     }
                 };
+                
+                var changeWofNuggets = function() {
+                    try {
+                        west.gui.payHandler.prototype.__twdb__addPayOption = west.gui.payHandler.prototype.addPayOption;
+                        west.gui.payHandler.prototype.addPayOption = function (payOption) {
+                            this.__twdb__addPayOption.apply(this, arguments);
+                            if (false === payOption || 'nugget' === payOption || 2 == payOption || 2 == payOption.id) {
+                                return this;
+                            }
+                            this.setSelectedPayId(payOption.id || payOption);
+                            return this;
+                        }
+                   } catch (e) {
+                        Error.report(e, "manipulate changeWofNuggets");
+                    }
+                };
 
                 var removeVariousPA = function() {
                     var excludes = [], reg;
@@ -7318,7 +7395,7 @@
                             .append($('<div class="tw2gui_checkbox" title="#MSD_SETSELLPRICE#">')
                                     .append('<span class="invPopup_sellicon" style="height:20px;">')
                                     .click(function(){
-                                        $('#market_max_price', $dc).val(item4sale.sell_price || 1).keyup();}));
+                                        $('#market_max_price', $dc).val(item4sale.sell_price || Math.round(item4sale.price/2)).keyup();}));
 
                         $("#twdb_msd_bid_cc", $dc)
                             .append(new west.gui.Checkbox("", "twdb_msd_bid_fix", togglePresets).setTitle("#MSD_USEDEFAULT#").setValue(2).divMain)  // (label, groupClass, callback)
@@ -7331,7 +7408,7 @@
                             .append($('<div class="tw2gui_checkbox" title="#MSD_SETSELLPRICE#">')
                                     .append('<span class="invPopup_sellicon" style="height:20px;">')
                                     .click(function(){
-                                        $('#market_min_bid', $dc).val(item4sale.sell_price || 1).keyup();}));
+                                        $('#market_min_bid', $dc).val(item4sale.sell_price || Math.round(item4sale.price/2)).keyup();}));
 
                         $("#twdb_msd_mult_cc", $dc).click(function(){
                                         var p, n = parseInt($('#market_sell_itemStack', $dc).val(), 10);
@@ -7788,14 +7865,14 @@
 
                 _self.injectGetBids = function() {
                     try {
-                        MarketWindow.twdb_showTab = MarketWindow.twdb_showTab || MarketWindow.showTab;
-                        MarketWindow.showTab = function (id) {
+                        MarketWindow.twdb_showTab2 = MarketWindow.twdb_showTab2 || MarketWindow.showTab;
+                        MarketWindow.showTab2 = function (id) {
                             if (id != 'sell' && id != 'marketmap')
                             TWDB.ClothCalc.getBids();
                             MarketWindow.twdb_showTab.apply(this, arguments);
                         }
                     } catch (e) {
-                        Error.report(e,"manipulate MarketWindow.showTab (3)");
+                        Error.report(e,"manipulate MarketWindow.showTab (2)");
                     }
                 };
                 
@@ -7841,48 +7918,44 @@
                     }
                 };
                 _self.addTabOnMarketWindow = function (name, shortname, callback) {
-                    var first = false;
-                    var current = {};
-                    if (MarketWindow.twdb_showTab)
-                        current = {fn: MarketWindow.twdb_showTab, name: "MarketWindow.twdb_showTab"};
-                    else
-                        current = {fn: MarketWindow.showTab, name: "MarketWindow.showTab"};
-                    if (typeof save.MarketWindowOpen == "undefined") {
-                        first = true;
-                        save.MarketWindowOpen = MarketWindow.open.toString();
-                        save.MarketWindowTab = current.fn.toString();
-                    }
+                    var tabclick = function (win, id) {
+                        if (!MarketWindow.window)
+                            return;
+                        MarketWindow.window.activateTab(id).$('div.tw2gui_window_content_pane > *', MarketWindow.DOM).each(function (i, e) {
+                            if ($(e).hasClass('marketplace-' + id)){
+                                $(e).children().fadeIn();
+                                $(e).show();
+                            } else {
+                                $(e).children().fadeOut();
+                                $(e).hide();
+                            }
+                        });
+                        MarketWindow['TWDB-' + shortname]();
+                    };
                     try {
-                        var inject = "MarketWindow.window.addTab('" + name + "', '" + shortname + "', tabclick).appendToContentPane($('<div class=\"marketplace-" + shortname + "\"/>'));";
-                        var newfunction = MarketWindow.open.toString().replace(/MarketWindow.DOM/,inject + "MarketWindow.DOM");
-                        eval("(function ($) {" + "MarketWindow.open = " + newfunction + "})(jQuery);")
+                        MarketWindow.twdb_open = MarketWindow.twdb_open || MarketWindow.open;
+                        MarketWindow.open = function () {
+                            this.twdb_open.apply(this, arguments);
+                            MarketWindow.window.addTab(name, shortname, tabclick).appendToContentPane($('<div class="marketplace-' + shortname + '"/>'));
+                        };
                     } catch (e) {
                         Error.report(e, "manipulate MarketWindow.open");
-                        eval("(function ($) {" + "MarketWindow.open = " + save.MarketWindowOpen + "})(jQuery);")
                     }
                     try {
-                        MarketWindow["TWDB-" + shortname] = function () {callback()
-                        }
+                        MarketWindow["TWDB-" + shortname] = function () {
+                            callback();
+                        };
                     } catch (e) {
-                        Error.report(e, "add showTab to MarketWindow")
+                        Error.report(e, "add showTab to MarketWindow");
                     }
                     try {
-                        var inject = "case '" + shortname + "':MarketWindow['TWDB-" + shortname + "']();break;";
-                        current.fn = current.fn.toString().replace(/switch(\s)*\(id\)(\s)*{/,"switch (id) { " + inject);
-                        eval("(function ($) {" + current.name + " = " + current.fn + "})(jQuery);;")
+                        MarketWindow.twdb_showTab = MarketWindow.twdb_showTab || MarketWindow.showTab;
+                        MarketWindow.showTab = function () {
+                            MarketWindow.window.setSize(748,471).removeClass('premium-buy');
+                            this.twdb_showTab.apply(this, arguments);
+                        };
                     } catch (e) {
-                        Error.report(e,"manipulate MarketWindow.showTab (1)");
-                        eval("(function ($) {" + current.name + " = " + save.MarketWindowTab + "})(jQuery);")
-                    }
-                    if (first) {
-                        try {
-                            var inject = "MarketWindow.window.setSize(748,471).removeClass('premium-buy');";
-                            var newfunction = current.fn.toString().replace(/{/,"{" + inject);
-                            eval("(function ($) {" + current.name + " = " + newfunction + "})(jQuery);;")
-                        } catch (e) {
-                            Error.report(e,"manipulate MarketWindow.showTab (2)");
-                            eval("(function ($) {" + current.name + " = " + save.MarketWindowTab + "})(jQuery);")
-                        }
+                            Error.report(e,"manipulate MarketWindow.showTab (1)");
                     }
                 };
                 var waitForMinimap = function (e) {
