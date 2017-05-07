@@ -168,61 +168,21 @@ TWDB.Q = {
     "154": [2380, 2381, 2382, 2383, 2384, 2385, 2386],
     "155": [2220, 2221, 2222, 2223, 2224, 2225, 2226, 2227, 2228, 2229, 2230, 2231, 2232, 2233, 2234, 2235, 2236, 2237, 2238, 2239, 2240, 2241, 2242, 2243, 2244, 2245],
   },
-  itemOverrideReqRaw: [{
-      "quest": "693",
-      "name": "Bow",
-      "item": "1953"
-    }, {
-      "quest": "647",
-      "name": "Sheriff's star",
-      "item": "1849"
-    }, {
-      "quest": "660",
-      "name": "Elephant",
-      "item": "1841"
-    }, {
-      "quest": "1318",
-      "name": "Uniform",
-      "item": "362"
-    }, {
-      "quest": "1333",
-      "name": "Uniform",
-      "item": "362"
-    }, {
-      "quest": "665",
-      "name": "Elephant",
-      "item": "1841"
-    }, {
-      "quest": "10032",
-      "name": "Sheriff's star",
-      "item": "1817"
-    }
-  ],
+  itemOverrideReqRaw: [],
   employerOverrideReqRaw: [{
-      "quest": "666",
-      "name": "The travelling circus",
-      "employer": "circus2"
-    }, {
       "quest": "1311",
       "name": "Thomas Herson",
       "employer": "thomas3"
-    }, {
-      "quest": "20402",
-      "name": "East Point",
-      "employer": "east2_repeat"
-    }, {
-      "quest": "20403",
-      "name": "West Point",
-      "employer": "west2_repeat"
-    }
+    },
   ],
   questOverrideReqRaw: [],
   hiddenRewards: {
-    483: ['#item# 1772', '#item# 1711'],
-    239: ['#item# 1715'],
-    1122: ['#item# 366'],
-    1216: ['#item# 367']
+    483: [1772, 1711],
+    239: [1715],
+    1122: [366],
+    1216: [367]
   },
+  hideResolveConflict: [737, 739, 741, 1963, 2055, 20673],
   ORinInfo: ['Wanted dead'],
   requirementProcessors: [/* ran in (this) context */
 
@@ -238,8 +198,7 @@ TWDB.Q = {
       }
     ],
 
-    [/^#task-finish-job (\d+) (\d+)# ([a-zA-Z *'-]+) \(\d+ ?\/ ?(\d+)\)$/, function (m, quest) { /* job - tasks */
-        //                1     2            3                      4
+    [/^#task-finish-job (\d+) (\d+)# ([a-zA-Z \*\-']+) \(\d+\/(\d+)\)$/, function (m, quest) { /* job - tasks */
         var job = this.getJobByName(m[3]);
         return job && m[4] * 1 > 0 && m[1] == job.id && m[2] == m[4] ? {
           stage: 'finish',
@@ -251,10 +210,9 @@ TWDB.Q = {
       }
     ],
 
-    [/^#task-finish-job (\d+) 0# ([a-zA-Z *'-]+) \((?:(\d+) hours?)? ?(?:(\d+) minutes?)? ?(?:(\d+) seconds?)?\)$/, function (m, quest) { /* job - tasks */
-        //                1             2                 3                  4                    5
+    [/^#task-finish-job (\d+) 0# ([a-zA-Z \*\-']+) \((?:(\d+) hours?)? ?(?:(\d+) minutes?)? ?(?:(\d+) seconds?)?\)$/, function (m, quest) { /* job - tasks */
         var job = this.getJobByName(m[2]);
-        return job && m[1] == job.id && (m[3] * 1 || m[4] * 1 || m[5] * 1) ? {
+        return job && m[1] == job.id && (m[3] || m[4] || m[5]) ? {
           stage: 'finish',
           type: 'job_time',
           s: 'job_' + job.id,
@@ -294,14 +252,13 @@ TWDB.Q = {
       }
     ],
 
-    [/^(?:#char_skills_changed [a-z_]+ \d+# )?([a-zA-Z ]+) at (\d+)(-\d+)? \(with bonus\)$/, function (m, quest) { /* skill */
-        //                                        1             2
-        var skill = this.getSkillByName(m[1]);
-        return skill && m[2] * 1 > 0 && skill ? {
+    [/^(?:#char_skills_changed ([a-z_]+) \d+# )?([a-zA-Z ]+) at (\d+)(-\d+)? \(with bonus\)$/, function (m, quest) { /* skill */
+        var skill = this.getSkillByName(m[2]);
+        return skill && m[3] * 1 > 0 ? {
           stage: 'finish',
           type: 'skill',
           s: skill,
-          n: m[2] * 1
+          n: m[3] * 1
         }
          : false;
       }
@@ -318,15 +275,28 @@ TWDB.Q = {
       }
     ],
 
-    [/^Accept: ([a-zA-Z0-9 ’':().,!?-]+)$/, function (m, quest) { /* accept same quest */
-        var thatQuest = [];
+    [/^quest_acp_to_acs:(\d+)$/, function (m, quest) { /* has to be resolved for other id */
+        return true ? {
+          stage: 'decise',
+          type: 'quest_acp_to_acs',
+          s: 'questid_' + m[1],
+          n: this.findSerie(m[1]) * 1
+        }
+         : false;
+      }
+    ],
+
+    [/^Accept: ([a-zA-Z0-9 ’':().,!?-]+)$/, function (m, quest) { /* 95% same quest*/
+        var thatQuest = this.getQuestByName(m[1]);
         if (m[1] == this.quests[quest].t)
-          thatQuest.push({
+          thatQuest = [{
             id: quest
-          });
-        else
-          thatQuest = this.getQuestByName(m[1]);
-        return this.noQuestNameConflict(quest, m[2], thatQuest) ? {
+          }];
+        else if (thatQuest.length == 1)
+            this.quests[thatQuest[0].id].r.push({
+              info: 'quest_acp_to_acs:' + quest
+            });
+        return this.noNameConflict('quest',quest, m[1], thatQuest) ? {
           stage: 'decise',
           type: 'quest_fin_to_fin',
           s: 'questid_' + thatQuest[0].id,
@@ -336,19 +306,33 @@ TWDB.Q = {
       }
     ],
 
-    [/^(?:Resolve:|You have \d+ days after completing the quest) ([a-zA-Z0-9 ’"':().,!?-]+?)\.?$/, function (m, quest) { /* normal Resolve and Resolve for repeatable holiday quests */
+    [/^(?:Resolve:|You have \d+ days after completing the quest) ([a-zA-Z0-9 ’"':().,!?-]+?)\.?$/, function (m, quest) { /* normal Resolve and Resolve for repeatable holiday quests, 90% next questid */
         var thatQuest = this.getQuestByName(m[1]);
-        if (!thatQuest || thatQuest.length != 1) {
+        if (thatQuest.length != 1) {
           var d = quest * 1 + this.sameReq;
-          if (this.quests[d] && m[1] == this.quests[d].t || !thatQuest)
+          if (this.quests[d] && m[1] == this.quests[d].t || !thatQuest.length)
             thatQuest = [{
                 id: d
               }
             ];
-          else
-            thatQuest = [thatQuest.pop()];
+          else {
+            if (!this.hideResolveConflict.includes(quest * 1))
+              this.admin.append('log', thatQuest.length + ' "RESOLVE" conflicts in ' + this.quests[quest].t + ': ' +
+                JSON.stringify({
+                  quest: quest,
+                  name: m[1],
+                  thatQuest: $.map(thatQuest, function (e) {
+                    return e.id;
+                  }).join('/')
+                }) + ' Using last match!\n');
+            thatQuest = [thatQuest.pop()]; //worked perfect so far
+          }
         }
-        return this.noQuestNameConflict(quest, m[1], thatQuest) ? {
+        if (this.quests[thatQuest[0].id])
+          this.quests[thatQuest[0].id].r.push({
+            info: 'quest_acp_to_acs:' + quest
+          });
+        return true ? {
           stage: 'decise',
           type: 'quest_fin_to_fin',
           s: 'questid_' + thatQuest[0].id,
@@ -358,18 +342,19 @@ TWDB.Q = {
       }
     ],
 
+    //'quest_fin_to_acs' most times questid-1 or save the saloon part 2 -> manually
+    //'quest_nofin_to_acs' is for quest-options -> manually
+
     [/^You have to finish quest ([a-zA-Z "':().,!?-]+) in (\d+) hours\.$/, function (m, quest) { /* time limit - same quest:finish req, other quest:access req*/
-        var thatQuest = [],
-        a = ['finish', 'special', 'quest_time_limit'];
-        if (m[1] == this.quests[quest].t)
-          thatQuest.push({
-            id: quest
-          });
-        else {
-          thatQuest = this.getQuestByName(m[1]);
+        var thatQuest = this.getQuestByName(m[1]),
           a = ['access', 'time_limit', 'questid_' + thatQuest[0].id];
+        if (m[1] == this.quests[quest].t){
+          thatQuest=[{
+            id: quest
+          }];
+        a = ['finish', 'special', 'quest_time_limit'];
         }
-        return this.noQuestNameConflict(quest, m[1], thatQuest) && m[2] * 1 > 0 ? {
+        return this.noNameConflict('quest',quest, m[1], thatQuest) && m[2] * 1 > 0 ? {
           stage: a[0],
           type: a[1],
           s: a[2],
@@ -380,7 +365,7 @@ TWDB.Q = {
     ],
 
     [/^After (?:accepting|finishing) the quest ([a-zA-Z "':().,!?-]+) you must wait (\d+) hours\.$/, function (m, quest) { /* daylies */
-        var thatQuest = [];
+        var thatQuest = this.getQuestByName(m[1]);
         /*if (this.questOverrideReq[quest] && this.questOverrideReq[quest][m[1]] && $.inArray(this.questOverrideReq[quest][m[1]], thatQuest))
         if (this.quests[this.questOverrideReq[quest][m[1]]])
         thatQuest = [{
@@ -390,19 +375,18 @@ TWDB.Q = {
         else
         this.admin.append('log', 'Invalid quest requirement override id ' + this.employerOverrideReq[quest][m[1]] + ' in quest ' + quest + '\n');*/
         if (m[1] == this.quests[quest].t)
-          thatQuest.push({
+          thatQuest=[{
             id: quest
-          });
+          }];
         else if (2043364 <= quest && quest <= 2043375) {
           var CType = m[1].match(/(Apprentice)?(Journeyman)?(Master)? \(.+\)/);
           CType = CType[1] ? 0 : (CType[2] ? 4 : (CType[3] ? 8 : NaN));
           var CId = 2043364 + (quest - 2043364) % 4 + CType;
-          thatQuest.push({
+          thatQuest=[{
             id: CId,
-          });
-        } else
-          thatQuest = this.getQuestByName(m[1]);
-        return this.noQuestNameConflict(quest, m[2], thatQuest) && m[2] * 1 > 0 ? {
+          }];
+        }
+        return this.noNameConflict('quest',quest, m[1], thatQuest) && m[2] * 1 > 0 ? {
           stage: 'access',
           type: 'wait',
           s: 'questid_' + thatQuest[0].id,
@@ -416,22 +400,22 @@ TWDB.Q = {
         //                           1                 2
         var employer = this.getEmployerByName(m[2]);
         if (this.employerOverrideReq[quest] && this.employerOverrideReq[quest][m[2]] && $.inArray(this.employerOverrideReq[quest][m[2]], employer))
-          if (this.employers[this.employerOverrideReq[quest][m[2]]])
-            employer = [this.employers[this.employerOverrideReq[quest][m[2]]]];
-          else
-            this.admin.append('log', 'Invalid employer requirement override key ' + this.employerOverrideReq[quest][m[2]] + ' in quest ' + quest + '\n');
+        if (this.employers[this.employerOverrideReq[quest][m[2]]])
+        employer = [this.employers[this.employerOverrideReq[quest][m[2]]]];
+        else
+        this.admin.append('log', 'Invalid employer requirement override key ' + this.employerOverrideReq[quest][m[2]] + ' in quest ' + quest + '\n');
         if (employer && employer.length != 1) {
-          var suitable = null;
+          var suitable = [];
+          var wasteland = this.getSerie(quest).indexOf('Wasteland');
           for (var i = 0; i < employer.length; i++)
-            if ((employer[i].activate || -1) < quest && quest <= (employer[i].deactivate || 1e12))
-              if (!suitable)
-                suitable = employer[i];
-              else {
-                suitable = null;
-                break;
-              }
-          if (suitable)
-            employer = [suitable];
+            if (wasteland > -1) {
+              var ekin = employer[i].key.includes('_new');
+              if (wasteland && ekin || !wasteland && !ekin)
+                suitable.push(employer[i]);
+            } else if ((employer[i].activate || -1) < quest && quest <= (employer[i].deactivate || 1e12))
+              suitable.push(employer[i]);
+          if (suitable.length == 1)
+            employer = suitable;
           else
             this.admin.append('log', 'Employer name requirement conflict in ' + this.quests[quest].t + ': ' +
               JSON.stringify({
@@ -450,35 +434,17 @@ TWDB.Q = {
       }
     ],
 
-    [/^(Equip )?([a-zA-Z0-9 .*'"(),-]+) \d+\/(\d+)$/, function (m, quest) { /* item */
-        var that = this;
-        function findItem(name) {
+    [/^(Equip )?([a-zA-Z0-9 .*'"(),-]+) \d+\/(\d+)$/, function (m, quest) { /* no itemIDs in quest options */
+          var name = m[2],
+          item = this.getItemByName(name);
           if (!name || name == "Fist")
-            return false;
-          var item = that.getItemByName(name);
-          if (that.itemOverrideReq[quest] && that.itemOverrideReq[quest][name] && $.inArray(that.itemOverrideReq[quest][name], item))
-            if (ItemManager.get(that.itemOverrideReq[quest][name]))
-              item = [ItemManager.get(that.itemOverrideReq[quest][name])];
+            item = [];
+          /*else if (this.itemOverrideReq[quest] && this.itemOverrideReq[quest][name] && $.inArray(this.itemOverrideReq[quest][name], item))
+            if (ItemManager.get(this.itemOverrideReq[quest][name]))
+              item = [ItemManager.get(this.itemOverrideReq[quest][name])];
             else
-              that.admin.append('log', 'Invalid item requirement override id ' + that.itemOverrideReq[quest][name] + ' in quest ' + quest + '\n');
-          if (item && item.length != 1)
-            that.admin.append('log', 'Item name conflict in ' + that.quests[quest].t + ': ' +
-              JSON.stringify({
-                quest: quest,
-                name: name,
-                item: $.map(item, function (e) {
-                  return e.item_id;
-                }).join('/')
-              }) + '\n');
-          return item ? $.map(item, function (e) {
-            return {
-              item_id: e.item_id,
-              'short': (e.item_id != 1706 ? e['short'] : 'letter1')
-            };
-          }) : item;
-        }
-        var item = findItem(m[2]);
-        return item && item.length == 1 && m[3] * 1 > 0 ? {
+              this.admin.append('log', 'Invalid item requirement override id ' + this.itemOverrideReq[quest][name] + ' in quest ' + quest + '\n');*/
+        return this.noNameConflict('item',quest,name,item) && m[3] * 1 > 0 ? {
           stage: 'finish',
           type: 'item_' + (m[1] ? 'eqp' : 'inv'),
           s: 'item_' + item[0].item_id,
@@ -490,16 +456,7 @@ TWDB.Q = {
 
     [/^Item '([a-zA-Z]+)' bought$/, function (m, quest) { /* item buy */
         var item = this.getItemByName(m[1]);
-        if (item && item.length != 1)
-          this.admin.append('log', 'Item name conflict in ' + this.quests[quest].t + ': ' +
-            JSON.stringify({
-              quest: quest,
-              name: m[1],
-              item: $.map(item, function (e) {
-                return e.item_id;
-              }).join('/')
-            }) + '\n');
-        return item && item.length == 1 ? {
+        return this.noNameConflict('item',quest,m[1],item) ? {
           stage: 'finish',
           type: 'item_buy',
           s: 'item_' + item[0].item_id,
@@ -510,7 +467,7 @@ TWDB.Q = {
     ],
 
     [/^#item_used (\d+) 0# Use '([a-zA-Z ']+)'$/, function (m, quest) { /* use item */
-        var item = ItemManager.get(m[1]);
+        var item = this.getItem(m[1]);
         return item.name == m[2] ? {
           stage: 'finish',
           type: 'use_item',
@@ -566,16 +523,7 @@ TWDB.Q = {
 
     [/^Selling "([a-zA-Z ]+)"!$/, function (m, quest) { /* item sell */
         var item = this.getItemByName(m[1]);
-        if (item && item.length != 1)
-          this.admin.append('log', 'Item name conflict in ' + this.quests[quest].t + ': ' +
-            JSON.stringify({
-              quest: quest,
-              name: m[1],
-              item: $.map(item, function (e) {
-                return e.item_id;
-              }).join('/')
-            }) + '\n');
-        return item && item.length == 1 ? {
+        return this.noNameConflict('item',quest,m[1],item) ? {
           stage: 'finish',
           type: 'item_sell',
           s: 'item_' + item[0].item_id,
@@ -768,6 +716,7 @@ TWDB.Q = {
           'Gone to pray': 'quest_pray',
           'Invite friends via email': 'invite_friends',
           'Slept': 'quest_sleep',
+          'Experience gained from jobs:': 'quest_work_xp',
           'Damage taken from jobs': 'quest_work_injury',
           'Jobs finished': 'quest_completed_jobs',
           'Amount deposited into a foreign bank': 'quest_dollars_foreign_bank',
@@ -813,12 +762,12 @@ TWDB.Q = {
       }
     ],
 
-    [/^#item# (\d+)$/, function (m, quest) { /* ONE piece of an item */
-        return (m[1] * 1 > 0 || m[1] === "0") && ItemManager.get(m[1] * 1) ? {
+    [/^(\d+)#item# (\d+)$/, function (m, quest) { /* items */
+        return (m[2] * 1 >= 0) && this.getItem(m[2]) ? {
           stage: 'reward',
           type: 'item',
-          s: 'item_' + m[1] * 1,
-          n: 1
+          s: 'item_' + m[2] * 1,
+          n: m[1] * 1
         }
          : false;
       }
@@ -887,11 +836,11 @@ TWDB.Q = {
       }
     ],
 
-    [/^#reward_title# ([a-zA-Z ]+) $/, function (m, quest) { /* title */
+    [/^#reward_title# ([a-zA-Z -]+) $/, function (m, quest) { /* title */
         return true ? {
           stage: 'reward',
           type: 'special',
-          s: 'title_' + m[1].replace(/ /g, ''),
+          s: 'title_' + m[1].replace(/[ -]/g, ''),
           n: null
         }
          : false;
@@ -934,6 +883,7 @@ TWDB.Q = {
     [/^#reward_(.*?)$/, function (m, quest) { /* other */
         var a = {
           "title# Šu?gmánitu T?a?ka Ob'wachi ": 'title_SungmanituThankaObwachi',
+          "title# Šu?gmánitu T?a?ka Ob'waèhi ": 'title_SungmanituThankaObwachi',
         }
         [m[1]];
         return a ? {
@@ -958,13 +908,14 @@ TWDB.Q = {
     useOldEmployersData: true,
     useOldItemsData: true,
     displayPreparationConflictWarnings: false,
-    loadKnown: true,
+    loadAlreadyKnown: true,
+    newItemIDs: false,
     overrideLanguage: 'eng',
 
-    exportedRequirements: "job_tasks,job_time,dollar,employer,duel_win,duel_lose,duel_koma,level",
-    exportedRewards: "dollar,exp,bonds,freeskill,skill,premium,special"
+    exportedRequirements: "job_tasks,job_time,dollar,employer,duel_win,duel_lose,duel_koma,level,use_item,item_inv,item_eqp,item_buy,item_sell,skill,place,time,wait,quest_fin_to_fin,quest_acp_to_acs,day,time_limit,special",
+    exportedRewards: "dollar,exp,bonds,freeskill,skill,premium,item,special"
   },
-
+  
   /* temporary data/cache */
   known: {},
   newSeriesByName: {},
@@ -998,20 +949,20 @@ TWDB.Q = {
   },
 
   process: function () {
+    this.saveOldData();
     this.admin.append('log', 'Preparation complete.\n\nProcessing quests (' + this.getPropertyList(this.quests).length + ')... \n');
 
     for (var id in this.quests) {
-      if (this.config.loadKnown || !this.known[id])
+      if (this.config.loadAlreadyKnown || !this.known[id])
         this.processed[id] = this.processQuest(this.quests[id], id);
     }
     var timeEnd = new Date();
     var timeDiff = (timeEnd - this.timeStart) / 1000;
-    this.admin.append('log', 'Quests processing finished > ' + timeDiff + 's\nIf you have no warning, you may click one of the tabs to get the output.');
+    this.admin.append('log', 'Quests processing finished > ' + timeDiff + 's\nIf you have no warning, you may click one of the tabs to get the output.\n');
     this.admin.add('employers', "Employers", this.outputEmployers);
     this.admin.add('npcs', "NPCs", this.outputNPCs);
     this.admin.add('requirements', "Quest requirements", this.outputRequirements);
     this.admin.add('rewards', "Quest rewards", this.outputRewards);
-    this.saveOldData();
   },
   processQuest: function (q, id) {
     return {
@@ -1037,10 +988,7 @@ TWDB.Q = {
         y: 0
       },
         $.map(this.employers, function (e) {
-          return $.extend(e, {
-            x: e.pos.x,
-            y: e.pos.y
-          });
+          return e;
         })));
 
     this.admin.append('employers', '\n\n\n' + this.admin.buildInsertUpdateSQL(
@@ -1083,11 +1031,15 @@ TWDB.Q = {
   outputRequirements: function () {
     this.admin.clear('requirements');
     var that = this;
+    var ignored = [];
     var set = this.config.exportedRequirements.split(',');
     this.admin.append('requirements', '/* Requirements SQL data */\n\n');
 
     function goodOne(r) {
-      return !!(set.indexOf(r.type) + 1);
+      var a = set.includes(r.type);
+      if (!a && !ignored.includes(r.type))
+        ignored.push(r.type);
+      return a;
     }
 
     this.admin.append('requirements', this.admin.buildDeleteSQL(
@@ -1119,16 +1071,21 @@ TWDB.Q = {
             return goodOne(r) ? r : null;
           });
         })));
+    this.admin.append('requirements', '\n/*Requirement types ignored: ' + ignored.join() + '*/');
   },
 
   outputRewards: function () {
     this.admin.clear('rewards');
     var that = this;
+    var ignored = [];
     var set = this.config.exportedRewards.split(',');
     this.admin.append('rewards', '/* Rewards SQL data */\n\n');
 
     function goodOne(r) {
-      return !!(set.indexOf(r.type) + 1);
+      var a = set.includes(r.type);
+      if (!a && !ignored.includes(r.type))
+        ignored.push(r.type);
+      return a;
     }
 
     //this.admin.append('rewards',"DELETE FROM quest_data WHERE stage = 'reward' AND (type = 'medal' OR type = 'item_opt' OR type = 'skill_opt');");
@@ -1161,7 +1118,7 @@ TWDB.Q = {
             return goodOne(r) ? r : null;
           });
         })));
-
+    this.admin.append('rewards', '\n/*Reward types ignored: ' + ignored.join() + '*/');
   },
 
   getRequirements: function (q, id) {
@@ -1178,7 +1135,7 @@ TWDB.Q = {
       else if (io.length > 1)
         options = 1;
       for (var j of io) {
-        if (this.lastInfo == j || options)
+        if (this.lastInfo == j)
           this.sameReq++;
         qri.info = j;
         var res = this.processRequirement(qri, id);
@@ -1195,25 +1152,31 @@ TWDB.Q = {
   },
   getRewards: function (q, id) {
     var w = [],
-    option = 1;
-    for (var i = 0; i < q.w.length; i++) {
-      var res = this.processReward(q.w[i], id);
-      if (res)
-        w.push($.extend(res, {
-            option: 0,
-            id: id
-          }));
-    }
-    for (var o in q.o) {
-      for (var i = 0; i < q.o[o].length; i++) {
-        var res = this.processReward(q.o[o][i], id);
+    option = 0,
+    that = this;
+    function doRewards(qs) {
+      var items = 1;
+      for (var i = 0; i < qs.length; i++) {
+        if (qs[i].isItem) {
+          qs[i].count = items;
+          if (qs[i + 1] && qs[i + 1].isItem && qs[i].info == qs[i + 1].info) {
+            items++;
+            continue;
+          }
+          items = 1;
+        }
+        var res = that.processReward(qs[i], id);
         if (res)
           w.push($.extend(res, {
               option: option,
               id: id * 1
             }));
       }
+    }
+    doRewards(q.w);
+    for (var o in q.o) {
       option++;
+      doRewards(q.o[o]);
     }
     return w;
   },
@@ -1247,8 +1210,7 @@ TWDB.Q = {
       } else
         w.info = hw;
     }
-    var info = (typeof(w.info) == "string" ? w.info :
-      (w.isItem ? "#item# " + w.info : "#" + w.info.css + "# " + (w.info.text || w.info.val || 0) + ' ' + (w.info.popup_text || ''))) +
+    var info = (w.isItem ? w.count + "#item# " + w.info : "#" + w.info.css + "# " + (w.info.text || w.info.val || 0) + ' ' + (w.info.popup_text || '')) +
     (w.jsInfo ? " #" + w.jsInfo.type + " " + w.jsInfo.id + " " + w.jsInfo.count + "#" : '');
     var matches = 0,
     lastProcessed = null;
@@ -1312,10 +1274,8 @@ TWDB.Q = {
   },
 
   prepareSkills: function (callback) {
-    for (var key in CharacterSkills.skills)
-      this.skillsByName[CharacterSkills.skills[key].name.toLowerCase()] = key;
-    for (var key in CharacterSkills.attributes)
-      this.skillsByName[CharacterSkills.attributes[key].name.toLowerCase()] = key;
+    for (var key in CharacterSkills.keyNames)
+      this.skillsByName[CharacterSkills.keyNames[key].toLowerCase()] = key;
     callback();
   },
   getSkillByName: function (name) {
@@ -1353,7 +1313,12 @@ TWDB.Q = {
         }), processItems);
   },
   getItemByName: function (name) {
-    return this.itemsByName[name] || false;
+    return this.itemsByName[name] || [];
+  },
+  getItem: function (itemId) {
+    if (this.config.newItemIDs)
+      return ItemManager.get(itemId);
+    return ItemManager.getByBaseId(itemId);
   },
   makeItemOverrideReq: function (callback) {
     for (var i = 0; i < this.itemOverrideReqRaw.length; i++) {
@@ -1369,8 +1334,16 @@ TWDB.Q = {
     var that = this;
     function makeByName() {
       for (var key in that.employers) {
-        var employer = that.employers[key];
-        (that.employersByName[employer.name] = that.employersByName[employer.name] || []).push(employer);
+        var emp = that.employers[key];
+        if (that.employersByName[emp.name]) {
+          var newCoords = true;
+          for (var k of that.employersByName[emp.name])
+            if (k.x.toString() + k.y == emp.x.toString() + emp.y)
+              newCoords = false;
+          if (newCoords)
+            that.employersByName[emp.name].push(emp);
+        } else
+          that.employersByName[emp.name] = [emp];
       }
       if (that.config.displayPreparationConflictWarnings)
         for (var name in that.employersByName)
@@ -1424,23 +1397,22 @@ TWDB.Q = {
                     if (jy == 0 || jy > 0)
                       for (var kx in r.quests[jx][jy])
                         if (kx == 0 || kx > 0)
-                          for (var ky in r.quests[jx][jy][kx])
-                            if (ky == 0 || ky > 0)
-                              if (r.quests[jx][jy][kx][ky].employer)
-                                for (var i in r.quests[jx][jy][kx][ky].employer)
-                                  if (i == 0 || i > 0) {
-                                    var e = r.quests[jx][jy][kx][ky].employer[i];
-                                    (that.employers[e.key] = that.employers[e.key] || {
-                                        activate: e.activate,
-                                        deactivate: e.deactivate,
-                                        key: e.key,
-                                        name: e.name,
-                                        pos: null
-                                      }).pos = {
-                                      x: r.quests[jx][jy][kx][ky].x,
-                                      y: r.quests[jx][jy][kx][ky].y
-                                    };
-                                  }
+                          for (var ky in r.quests[jx][jy][kx]) {
+                            var k = r.quests[jx][jy][kx][ky];
+                            if ((ky == 0 || ky > 0) && k.employer)
+                              for (var i in k.employer)
+                                if (i == 0 || i > 0) {
+                                  var e = k.employer[i];
+                                  that.employers[e.key] = that.employers[e.key] || {
+                                    activate: e.activate,
+                                    deactivate: e.deactivate,
+                                    key: e.key,
+                                    name: e.name,
+                                    x: k.x,
+                                    y: k.y
+                                  };
+                                }
+                          }
             }
             if (++com == req) {
               that.admin.append('log', '> Employer data received; Processing... \n');
@@ -1490,17 +1462,17 @@ TWDB.Q = {
       this.transformQuestBookData(makeByName);
   },
   getQuestByName: function (name) {
-    return this.questsByName[name] || false;
+    return this.questsByName[name] || [];
   },
-  noQuestNameConflict: function (q, n, th) {
-    if (th && th.length == 1)
+  noNameConflict: function (t, q, n, th) {
+    if (th.length == 1)
       return true;
-    this.admin.append('log', 'Quest name requirement conflict in ' + this.quests[q].t + ': ' +
+    this.admin.append('log', th.length + ' '+t+' name requirement conflicts in ' + this.quests[q].t + ': ' +
       JSON.stringify({
-        quest: q + '-' + this.quests[q].e,
+        quest: q,
         name: n,
         thatQuest: $.map(th, function (e) {
-          return e.id + '-' + e.link.e;
+          return e[t=='item'?'item_id':'id'];
         }).join('/')
       }) + '\n');
     return false;
@@ -1523,7 +1495,7 @@ TWDB.Q = {
       for (var h in p.solved) {
         var sq = p.solved[h].quests;
         for (var g in sq) {
-          if (sq.hasOwnProperty(g) && (that.config.loadKnown || !that.known[g])) {
+          if (sq.hasOwnProperty(g) && (that.config.loadAlreadyKnown || !that.known[g])) {
             c--;
             $.post('game.php?window=building_quest&mode=get_solved_quests', {
               group: h
@@ -1539,6 +1511,10 @@ TWDB.Q = {
                   for (var j = 0; j < o[k].length; j++)
                     if (o[k][j].isItem)
                       o[k][j].info = o[k][j].info.text;
+                if (q.limited)
+                  q.requirements.push({
+                    info: q.limited
+                  });
                 that.quests[q.id] = {
                   d: q.duel,
                   e: q.employer,
@@ -1570,8 +1546,7 @@ TWDB.Q = {
   findSerie: function (id) {
     if (this.known[id])
       return this.known[id];
-    var q = this.quests[id];
-    var serie = this.getSerie(q, id);
+    var serie = this.getSerie(id);
     if (this.newSeriesByName[serie]) {
       this.newSeriesByName[serie].quests.push(id);
       return this.newSeriesByName[serie].id;
@@ -1581,15 +1556,16 @@ TWDB.Q = {
       quests: [id]
     };
   },
-  getName: function (q, id) {
-    return this.getNameAndSerie(q)[0];
+  getName: function (id) {
+    return this.getNameAndSerie(id)[0];
   },
-  getSerie: function (q, id) {
-    return this.getNameAndSerie(q)[1];
+  getSerie: function (id) {
+    return this.getNameAndSerie(id)[1];
   },
-  getNameAndSerie: function (q) {
+  getNameAndSerie: function (id) {
+    var q = this.quests[id];
     var m = q.t.match(/([^\(]+) \(([^\)]+)\)/);
-    return [(m || [0, q.t])[2], (m || [false])[1]];
+    return [(m[1] || q.t), (m[2] || 'unknown')];
   },
 
   addDuelNPC: function (d, id) {
