@@ -5502,13 +5502,13 @@
                             dat = get_server_date(),
                             datMonth = dat.getMonth(),
                             resetHour = datMonth > 2 && datMonth < 10 ? 3 : 2,
-                            tmp = new Date,
-                            timestamp = tmp.getTime();
+                            tmp = new Date;
                         tmp.setHours(resetHour);
                         tmp.setMinutes(15);
                         tmp.setSeconds(0);
                         tmp.setMilliseconds(0);
-                        if (dat.getHours() <= resetHour && dat.getMinutes() < 15)
+						var timestamp = tmp.getTime();
+                        if (dat.getHours() < resetHour || dat.getHours() == resetHour && dat.getMinutes() < 15)
                             timestamp -= 24 * 60 * 60 * 1e3;
                         bonusjobs = Cache.load("bonusjobs") || {};
                         bonus = Cache.load("bonusdisplay") || { gold: false, silver: false };
