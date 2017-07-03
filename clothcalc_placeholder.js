@@ -5507,7 +5507,7 @@
                         tmp.setMinutes(15);
                         tmp.setSeconds(0);
                         tmp.setMilliseconds(0);
-						var timestamp = tmp.getTime();
+                        var timestamp = tmp.getTime();
                         if (dat.getHours() < resetHour || dat.getHours() == resetHour && dat.getMinutes() < 15)
                             timestamp -= 24 * 60 * 60 * 1e3;
                         bonusjobs = Cache.load("bonusjobs") || {};
