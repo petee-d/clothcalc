@@ -4071,10 +4071,10 @@
                         Ajax.remoteCall('fort_overview', '', {}, function (json) {
                             for (var i in json.js) {
                                 var fort = json.js[i],
-								reg = json.page.match(new RegExp('<div id="ownforts">[\\S\\s]+FortWindow.open\\(undefined, '+fort[1]+', '+fort[2]+'\\)\\)">(.+?)<\/a>[\\S\\s]+<div id="lastbattle">'));
-								if (reg)
-								    tmp.push({fort_id: fort[0], x: fort[1], y: fort[2], name: reg[1]});
-							}
+                                reg = json.page.match(new RegExp('<div id="ownforts">[\\S\\s]+FortWindow.open\\(undefined, '+fort[1]+', '+fort[2]+'\\)\\)">(.+?)<\/a>[\\S\\s]+<div id="lastbattle">'));
+                                if (reg)
+                                    tmp.push({fort_id: fort[0], x: fort[1], y: fort[2], name: reg[1]});
+                            }
                             if (tmp.length > 0)
                                 w.setTimeout(function(){ getFort(); }, Timer.getTimeout());
                         });
@@ -5499,9 +5499,17 @@
                             spot,
                             count,
                             job_id,
-                            dat,
-                            tmp,
-                            timestamp;
+                            dat = get_server_date(),
+                            datMonth = dat.getMonth(),
+                            resetHour = datMonth > 2 && datMonth < 10 ? 3 : 2,
+                            tmp = new Date,
+                            timestamp = tmp.getTime();
+                        tmp.setHours(resetHour);
+                        tmp.setMinutes(15);
+                        tmp.setSeconds(0);
+                        tmp.setMilliseconds(0);
+                        if (dat.getHours() <= resetHour && dat.getMinutes() < 15)
+                            timestamp -= 24 * 60 * 60 * 1e3;
                         bonusjobs = Cache.load("bonusjobs") || {};
                         bonus = Cache.load("bonusdisplay") || { gold: false, silver: false };
                         for (key in bonusjobs) {
@@ -5515,18 +5523,6 @@
                                 if (spot[job_id].gold) {
                                     count++;
                                     continue;
-                                }
-                                var dat = get_server_date(),
-								datMonth = dat.getMonth(),
-								resetHour = datMonth > 2 && datMonth < 10 ? 3 : 2,
-                                tmp = new Date;
-                                tmp.setHours(resetHour);
-                                tmp.setMinutes(15);
-                                tmp.setSeconds(0);
-                                tmp.setMilliseconds(0);
-                                var timestamp = tmp.getTime();
-                                if (dat.getHours() <= resetHour && dat.getMinutes() < 15) {
-                                    timestamp -= 24 * 60 * 60 * 1e3;
                                 }
                                 if (spot[job_id].time > timestamp) {
                                     count++;
