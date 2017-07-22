@@ -11,11 +11,8 @@
 
 /**
  * News on this update :
- * [buyTip] If you have learned a recipe, it won't be shown as new anymore.
- * [marketselldialog] If there is no selling price at the market, it takes the half of the buying price
- * [directsleep] Hotel-shortlink for townless players added
- * [nowofnuggets] Re-added and fixed for future events
- * [chestAnalyser] Layout fixed
+ * [directsleep] Hotel-shortlink support for players with a town but no ally
+ * [misc] Silver jobs reset time set to server time at 2 or 3am (depends on DST)
  * */
 
 (function (f) {
@@ -4070,16 +4067,25 @@
                 };
                 
                 var getForts = function() {
-                    if (w.Character.homeTown.alliance_id == 0) { return; }
-                    Ajax.remoteCallMode("alliance", "get_data", {alliance_id: w.Character.homeTown.alliance_id}, function(resp) {
-                        if (resp.error) {
-                            return new UserMessage(resp.error).show();
-                        }
-                        tmp = resp.data.forts;
-                        if (tmp.length > 0) {
-                            w.setTimeout(function(){ getFort(); }, Timer.getTimeout());
-                        }
-                    });
+                    if (w.Character.homeTown.alliance_id == 0)
+                        Ajax.remoteCall('fort_overview', '', {}, function (json) {
+                            for (var i in json.js) {
+                                var fort = json.js[i],
+                                reg = json.page.match(new RegExp('<div id="ownforts">[\\S\\s]+FortWindow.open\\(undefined, '+fort[1]+', '+fort[2]+'\\)\\)">(.+?)<\/a>[\\S\\s]+<div id="lastbattle">'));
+                                if (reg)
+                                    tmp.push({fort_id: fort[0], x: fort[1], y: fort[2], name: reg[1]});
+                            }
+                            if (tmp.length > 0)
+                                w.setTimeout(function(){ getFort(); }, Timer.getTimeout());
+                        });
+                    else
+                        Ajax.remoteCallMode("alliance", "get_data", {alliance_id: w.Character.homeTown.alliance_id}, function(resp) {
+                            if (resp.error)
+                                return new UserMessage(resp.error).show();
+                            tmp = resp.data.forts;
+                            if (tmp.length > 0)
+                                w.setTimeout(function(){ getFort(); }, Timer.getTimeout());
+                        });
                 };
 
                 var getFort = function() {
@@ -4088,7 +4094,7 @@
                         var fort = tmp.pop();
                         var id = fort.fort_id;
                         if (!isDefined(cache[id])) { cache[id] = {'time': 0, 'stage': 0}; };
-                        $.extend(cache[id], {'id': id, 'x': fort.x, 'y': fort.y, 'name': fort.name, 'type': fort.type});
+                        $.extend(cache[id], {'id': id, 'x': fort.x, 'y': fort.y, 'name': fort.name});
                         if (cache[id].stage !== 5 && (cache[id].time + days*86400) > (new Date().getTime()/1000)) {
                             forts.push(cache[id]);
                             if (tmp.length > 0) { w.setTimeout(function(){ getFort(); }, Timer.getTimeout()); }
@@ -5493,9 +5499,17 @@
                             spot,
                             count,
                             job_id,
-                            dat,
-                            tmp,
-                            timestamp;
+                            dat = get_server_date(),
+                            datMonth = dat.getMonth(),
+                            resetHour = datMonth > 2 && datMonth < 10 ? 3 : 2,
+                            tmp = new Date;
+                        tmp.setHours(resetHour);
+                        tmp.setMinutes(15);
+                        tmp.setSeconds(0);
+                        tmp.setMilliseconds(0);
+                        var timestamp = tmp.getTime();
+                        if (dat.getHours() < resetHour || dat.getHours() == resetHour && dat.getMinutes() < 15)
+                            timestamp -= 24 * 60 * 60 * 1e3;
                         bonusjobs = Cache.load("bonusjobs") || {};
                         bonus = Cache.load("bonusdisplay") || { gold: false, silver: false };
                         for (key in bonusjobs) {
@@ -5509,16 +5523,6 @@
                                 if (spot[job_id].gold) {
                                     count++;
                                     continue;
-                                }
-                                var dat = new Date;
-                                var tmp = new Date;
-                                tmp.setHours(2);
-                                tmp.setMinutes(15);
-                                tmp.setSeconds(0);
-                                tmp.setMilliseconds(0);
-                                var timestamp = tmp.getTime();
-                                if (dat.getHours() < 2 || dat.getHours() == 2 && dat.getMinutes() < 15) {
-                                    timestamp -= 24 * 60 * 60 * 1e3;
                                 }
                                 if (spot[job_id].time > timestamp) {
                                     count++;
