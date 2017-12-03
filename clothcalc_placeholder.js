@@ -11,8 +11,8 @@
 
 /**
  * News on this update :
- * [directsleep] Hotel-shortlink support for players with a town but no ally
- * [misc] Silver jobs reset time set to server time at 2 or 3am (depends on DST)
+ * [misc] Silver jobs reset fixed
+ * [misc] Bonusjob checkboxes at minimap fixed
  * */
 
 (function (f) {
@@ -5500,15 +5500,14 @@
                             count,
                             job_id,
                             dat = get_server_date(),
-                            datMonth = dat.getMonth(),
-                            resetHour = datMonth > 2 && datMonth < 10 ? 3 : 2,
+                            resetHour = 1,
                             tmp = new Date;
-                        tmp.setHours(resetHour);
+                        tmp.setUTCHours(resetHour);
                         tmp.setMinutes(15);
                         tmp.setSeconds(0);
                         tmp.setMilliseconds(0);
                         var timestamp = tmp.getTime();
-                        if (dat.getHours() < resetHour || dat.getHours() == resetHour && dat.getMinutes() < 15)
+                        if (dat.getUTCHours() < resetHour || dat.getUTCHours() == resetHour && dat.getMinutes() < 15)
                             timestamp -= 24 * 60 * 60 * 1e3;
                         bonusjobs = Cache.load("bonusjobs") || {};
                         bonus = Cache.load("bonusdisplay") || { gold: false, silver: false };
@@ -5575,10 +5574,10 @@
                     var inject = function() {
                         var dom = $('<div id="mmap_twdb_bonusjobs" />')
                             .append($('<input title="#HELP_GOLD#" type="checkbox" ' + (bonus.gold ? 'checked="checked"' : "") + ' />')
-                                .change(function() { bonus.gold = ($(this).attr("checked")); handleBonusJobs(); }))
+                                .change(function() { bonus.gold = $(this).is(':checked'); handleBonusJobs(); }))
                             .append('<div title="#HELP_GOLD#" style="background-color:yellow; border:1px solid red;" />')
                             .append($('<input title="#HELP_SILVER#" type="checkbox" ' + (bonus.silver ? 'checked="checked"' : "") + ' />')
-                                .change(function() { bonus.silver = ($(this).attr("checked")); handleBonusJobs(); }))
+                                .change(function() { bonus.silver = $(this).is(':checked'); handleBonusJobs(); }))
                             .append('<div title="#HELP_SILVER#" style="background-color:white; border:1px solid black;" />')
                             .append($('<img title="#BONUS_JOBS# #EXPORT#" src="' + Images.iconExport + '" />')
                                 .click(function() { exportBonusJobs(); }))
@@ -7030,9 +7029,9 @@
                     var update = function() {
                         var $epEl = $("#ui_experience_bar"),
                         prog = (undefined === Character.getTrackingAchievement()) ? WestUi.updateTrackXp($epEl) : WestUi.updateTrackAchievement($epEl);
-                        $(".label", $epEl).off('hover');
+                        $(".label", $epEl).off('mouseenter mouseleave');
                         $(".label span", $epEl).show();
-                        xpString = '';
+                        var xpString = '';
                         if (Character.level < 150) {
                             xpString = prog.percent + '% - ' + niceNumbers(prog.current) + " / " + niceNumbers(prog.required);
                             xpString += " (" + niceNumbers(prog.required - prog.current) + ")";
@@ -8264,7 +8263,7 @@
 
                             e.contentPane.find('.telegram-head:last .author')
                             .css({ left: '81px', width: '140px',
-                                background: 'url(//westzzs.innogamescdn.com/images/window/messages/post-head.jpg) -16px 0' })
+                                background: 'url(/images/window/messages/post-head.jpg) -16px 0' })
                             .before(
                                 $('<div class="telegram-source"><div>BB</div></div>')
                                 .attr('title', '#SWITCH_TELEGRAM_SOURCE#')
@@ -8287,7 +8286,7 @@
                         };
                         TWDB.Util.addCss(
                               '.telegram-source { position: absolute; width: 24px; height: 24px; cursor: pointer; '
-                                + 'background: url(//westzzs.innogamescdn.com/images/window/messages/icons.png) 72px -3px; '
+                                + 'background: url(/images/window/messages/icons.png) 72px -3px; '
                                 + 'left: 52px; }\n'
                             + '.telegram-source div { display: inline-block; width: 14px; height: 11px; color: white; '
                                 + 'background: #523F30; font-size: 10px; margin: 4px; padding: 0px 0 5px 2px; line-height: 16px; '
