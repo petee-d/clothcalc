@@ -13,6 +13,7 @@
  * News on this update :
  * [misc] Silver jobs reset fixed
  * [misc] Bonusjob checkboxes at minimap fixed
+ * [misc] Experience bar fixed
  * */
 
 (function (f) {
@@ -33,8 +34,8 @@
     } else {
         window.TWDB = {};
         TWDB.script = {
-            version: 45,
-            revision: 2,
+            version: 47,
+            revision: 1,
             name: "The West - tw-db.info Cloth Calc",
             update: "tw-db.info/cache/userscripts/clothcalc/dev_clothcalc_eng.user.js",
             check: "tw-db.info/cache/userscripts/clothcalc/dev_version",
