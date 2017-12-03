@@ -11,6 +11,7 @@
 
 /**
  * News on this update :
+ * [main] Updater fixed
  * [misc] Silver jobs reset fixed
  * [misc] Bonusjob checkboxes at minimap fixed
  * [misc] Experience bar fixed
@@ -3906,8 +3907,7 @@
                     var msg = '<div class="txcenter">#MAKE_UPDATE#</div>';
                     msg = msg.replace("=1=", "<b>" + Script.name + "</b>");
                     msg += "<div><br />current version: " + (Script.version / 100) + " revision " + Script.revision + "<br />new version: " + (ver / 100) + " revision " + rev + "</div>";
-                    var url = Script.protocol + "://" + Script.update;
-                    if ($.browser.webkit) { url += "?" + Script.version + Script.revision };
+                    var url = Script.protocol + "://" + Script.update + "?" + Script.version + Script.revision;
                     var refresh = function() {
                         try { location.href = url; } catch (e) {};
                         (new west.gui.Dialog(Script.name, "#UPDATE_RELOAD#.", 'warning')).setModal(true,false,true).show();
