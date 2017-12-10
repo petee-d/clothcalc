@@ -12,9 +12,12 @@
 /**
  * News on this update :
  * [main] Updater fixed
- * [misc] Silver jobs reset fixed
- * [misc] Bonusjob checkboxes at minimap fixed
- * [misc] Experience bar fixed
+ * [chestAnalyser] Compatibility with TWToolkit
+ * [bugfix] Silver jobs reset fixed
+ * [bugfix] Bonusjob checkboxes at minimap fixed
+ * [bugifx] Experience bar fixed
+ * [misc] Only link quest, which are on tw-db.info
+ * [misc] Ready for jQuery v3
  * */
 
 (function (f) {
@@ -45,7 +48,7 @@
             gameversion: 2.19,
             lang: "eng"
         };
-        try { TWDB.script.notes = jQuery.parseJSON('[{\"version\":\"99\",\"notes\":\"DEV version\"}]');
+        try { TWDB.script.notes = JSON.parse('[{\"version\":\"99\",\"notes\":\"DEV version\"}]');
             } catch (e) {}
 
         // START OF SCRIPT CODE THAT CAN BE EDITED IN A RELEASE
@@ -790,6 +793,7 @@
                         _this.joblist.close();
                     } else {
                         _this.joblist.open();
+                        _this.joblist.gui.input.focus();
                     }
                 }.bind(this));
                 this.gui.job.search.click(function () { _this.jobSearch(); }.bind(this));
@@ -1242,8 +1246,7 @@
                     for (i in _this.parent.data.jobs.jobs) { minDur = Math.min(j[i].durations.length - 1, minDur); }
                     if (minDur < jobDurationid) { return _this.mode(0); } // Dun - correcting for level < 20
 
-                    /** TODO: fix this error! **/
-                    try { _this.parent.gui.job.mode.unbind("click"); } catch (err) {}   // -> Uncaught TypeError: Cannot read property 'unbind' of undefined
+                    _this.parent.gui.job.mode.off("click");
 
                     switch (jobDurationid) {
                     case 1:
@@ -1427,18 +1430,18 @@
                     this.ready = true;
                     this.parent = parent;
                     if (!this.gui.main) { this.gui.main = this.getMainDiv(); }
-                    this.gui.result = jQuery('<div class="tw2gui_jobsearchbar_allresults" style="width:285px;" />');
+                    this.gui.result = $('<div class="tw2gui_jobsearchbar_allresults" style="width:285px;" />');
                     this.gui.input = (new west.gui.Textfield()).maxlength(32).setClass4Input("tw2gui_jobsearch_string").setWidth(265);
-                    this.gui.button = jQuery('<div class="tw2gui_jobsearch_showall" style="display:block;cursor:pointer;"></div>');
+                    this.gui.button = $('<div class="tw2gui_jobsearch_showall" style="display:block;cursor:pointer;"></div>');
                     this.gui.scrollpane = new west.gui.Scrollpane();
-                    jQuery(this.gui.scrollpane.getMainDiv()).css({"width": "285px", "height": "250px"});
+                    $(this.gui.scrollpane.getMainDiv()).css({"width": "285px", "height": "250px"});
                     var jobid,
                         job,
                         div,
                         tmp;
                     for (jobid in parent.calcdata.jobs) {
                         job = parent.calcdata.jobs[jobid];
-                        div = jQuery("<p>" + job.name + "</p>");
+                        div = $("<p>" + job.name + "</p>");
                         tmp = {};
                         tmp.dom = div;
                         tmp.id = jobid;
@@ -1455,7 +1458,7 @@
                         }
                         this.elements.push(tmp);
                     }
-                    this.gui.main.append(jQuery('<div style="position:relative;top:0;left:0;width:305px" />').
+                    this.gui.main.append($('<div style="position:relative;top:0;left:0;width:305px" />').
                                          append(this.gui.input.getMainDiv()).
                                          append(this.gui.button)).
                         append(this.gui.result);
@@ -1466,14 +1469,14 @@
                 open: function (name) {
                     var _self = this;
                     this.gui.result.show();
-                    jQuery(this.gui.input.getMainDiv()).unbind().keyup(function (ev) { _self.keyHandler(ev); });
-                    jQuery(this.gui.input.getField()).unbind().focus(function () { _self.gui.result.show(); });
+                    $(this.gui.input.getMainDiv()).off().on("keyup", function (ev) { _self.keyHandler(ev); });
+                    $(this.gui.input.getField()).off().on("focus", function () { _self.gui.result.show(); });
                     delete this.gui.scrollpane;
                     this.gui.scrollpane = new west.gui.Scrollpane();
-                    jQuery(this.gui.scrollpane.getMainDiv()).css({"width": "285px", "height": "250px"});
+                    $(this.gui.scrollpane.getMainDiv()).css({"width": "285px", "height": "250px"});
                     var state = true;
-                    jQuery.each(this.elements, function (k, el) {
-                        el.dom.unbind(); // Dun - remove clic listener
+                    $.each(this.elements, function (k, el) {
+                        el.dom.off(); // Dun - remove clic listener
                         _self.updateJob(k);
                         if (state && el.dom.is(':visible')) {
                             this.focused = k;
@@ -1490,11 +1493,11 @@
                     this.gui.result.append(this.gui.scrollpane.getMainDiv());
                     this.gui.button.click(function () {
                         if (_self.gui.result.is(':visible')) { _self.gui.result.hide();
-                        } else { jQuery(_self.gui.input.getField()).focus(); }
+                        } else { _self.gui.input.focus(); }
                     });
                     this.gui.main.show();
                     if (isDefined(name)) {
-                        jQuery(this.gui.input.getField()).attr('value', name);
+                        $(this.gui.input.getField()).attr('value', name);
                         this.search(name, true);
                     }
                 },
@@ -1504,7 +1507,7 @@
                     var state = true;
                     var _self = this;
                     var $found = [];
-                    jQuery.each(this.elements, function (k, el) {
+                    $.each(this.elements, function (k, el) {
                         el.dom.removeClass("focused");
                         if (regexp.test(el.str)) {
                             el.dom.removeClass("TWDB_filter");
@@ -2018,9 +2021,7 @@
                             return true
                         }
                         try {
-                            var i = jQuery
-                                .parseJSON(this.parent.gui.custom.code
-                                    .getValue())
+                            var i = JSON.parse(this.parent.gui.custom.code.getValue());
                         } catch (a) {
                             return u("#WRONG# #CODE# [2]")
                         }
@@ -2777,7 +2778,7 @@
 
                 _self.load = function(key) {
                     useKey(key);
-                    try { return $.parseJSON(decodeURIComponent(localStorage.getItem(uid+key))); }
+                    try { return JSON.parse(decodeURIComponent(localStorage.getItem(uid+key))); }
                     catch (e) {
                         Error.report(e,'load ' + key + ' from cache');
                         _self.save(key,null);
@@ -7605,7 +7606,7 @@
                         if (TaskQueue.queue.length) {
                             var data = $("script:contains('TaskQueue.init')").text().match(/TaskQueue\.init\(\s*(\[[^\]]*\])/);
                             if (data.length === 2) {
-                                data = $.parseJSON(data[1]);
+                                data = JSON.parse(data[1]);
                                 TaskQueue.init(data, TaskQueue.limit);
                             }
                         }
@@ -7765,10 +7766,11 @@
 
                             save["ItemUse.doIt"] = ItemUse.doIt;
                             try {
-                                var str = ItemUse.doIt.toString();
-                                var pos = str.indexOf("EventHandler.signal('item_used'");
-                                var inject = str.substr(0, pos) + "ItemUse.twdb(itemId,res);" + str.substr(pos);
-                                eval("ItemUse.doIt = " + inject);
+                                var toolkit = ItemUse.doItOrigin ? 'doItOrigin' : 'doIt',
+                                str = ItemUse[toolkit].toString(),
+                                pos = str.indexOf("EventHandler.signal('item_used'"),
+                                inject = str.substr(0, pos) + "ItemUse.twdb(itemId,res);" + str.substr(pos);
+                                eval("ItemUse."+toolkit+" = " + inject);
                             } catch (e) {
                                 ItemUse.doIt = save["ItemUse.doIt"];
                                 Error.report(e, "manipulate ItemUse")
@@ -8475,7 +8477,7 @@
 
                             }
                             try {
-                                var n = e.parseJSON(t.data);
+                                var n = JSON.parse(t.data);
                                 if (isDefined(n.error)) {
                                     (new UserMessage(Script.url + ": " + n.error,
                                         UserMessage.TYPE_ERROR))
@@ -8806,10 +8808,11 @@
                                         }
                                     })
                         }
-                        t.el
-                            .find(".questRequirementHelp")
-                            .append(
-                                '<a target="_blank" title="#QUESTWIKI#" href="' + Script.protocol + '://' + Script.url + "/quest_redirect.php?id=" + t.id + '" style="margin-left:10px;"><img src="' + Images.questwiki + '" /></a>')
+                        //only old/exported questlines
+                        if (t.group < 142 && (t.group != 69 || t.id >= 20000) || [200,201].indexOf(t.group) > -1) {
+                            t.el.find(".questRequirementHelp")
+                            .append('<a target="_blank" title="#QUESTWIKI#" href="' + Script.protocol + '://' + Script.url + "/quest_redirect.php?id=" + t.id + '" style="margin-left:10px;"><img src="' + Images.questwiki + '" /></a>');
+                        }
                     };
                     GameInject.injectQuest(function (e) {
                         n(e)
@@ -9275,20 +9278,19 @@
                 var r = function () {
                     if (n.ready) {
                         return
-
                     }
                     if (Settings.get("forumlastpage", true)) {
-                        e("#windows").on(
-                            "DOMNodeInserted",
-                            "iframe",
-                            function () {
-                                e("iframe[src='forum.php']").load(
-                                    function () {
-                                        i()
-                                    })
-                            })
+                      try {
+                            ForumWindow.twdb_open = ForumWindow.twdb_open || ForumWindow.open;
+                            ForumWindow.open = function () {
+                                ForumWindow.twdb_open.apply(this, arguments);
+                                $("iframe[src='forum.php']").on("load", i);
+                            };
+                        } catch (e) {
+                            Error.report(e, "manipulate ForumWinow.open");
+                        }
                     }
-                    n.ready = true
+                    n.ready = true;
                 };
                 n = Loader.add("Forum", "tw-db Forum", r, {
                     Settings: true
@@ -9296,25 +9298,22 @@
                 var i = function () {
                     var t = e('iframe[src="forum.php"]').contents();
                     if (t.find("#thread_overview").length == 1) {
-                        t
-                            .find(".row")
-                            .each(
-                                function (t) {
-                                    var n = Math.floor(e(this)
-                                        .find(".cell_4")
-                                        .html() / 10) + 1;
-                                    var r = e(this).find(
-                                        ".cell_1 a").attr(
-                                        "onclick").match(
-                                        /\d+/);
-                                    e(this)
-                                        .find(".cell_3")
-                                        .append(
-                                            '<img src="' + TWDB.images.lastpost + '" style="position:absolute;cursor:pointer;margin-left:3px;" onclick="Forum.openThread(' + r + ", " + n + ')"></img>')
-                                })
+                        t.find(".row")
+                        .each(function (t) {
+                            var n = Math.floor(e(this)
+                                .find(".cell_4")
+                                .html() / 10) + 1;
+                            var r = e(this)
+                                .find(".cell_1 a")
+                                .attr("onclick")
+                                .match(/\d+/);
+                            e(this)
+                                .find(".cell_3")
+                                .append('<img src="' + TWDB.images.lastpost + '" style="position:absolute;cursor:pointer;margin-left:3px;" onclick="Forum.openThread(' + r + ", " + n + ')"></img>');
+                        });
                     }
                 };
-                return t
+                return t;
             }($);
             Debugger.Forum = Forum;
 
