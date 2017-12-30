@@ -16,6 +16,7 @@
  * [bugfix] Silver jobs reset fixed
  * [bugfix] Bonusjob checkboxes at minimap fixed
  * [bugifx] Experience bar fixed
+ * [bugifx] Forum last post fixed
  * [misc] Only link quest, which are on tw-db.info
  * [misc] Ready for jQuery v3
  * */
@@ -9284,7 +9285,7 @@
                             ForumWindow.twdb_open = ForumWindow.twdb_open || ForumWindow.open;
                             ForumWindow.open = function () {
                                 ForumWindow.twdb_open.apply(this, arguments);
-                                $("iframe[src='forum.php']").on("load", i);
+                                $("iframe[src='forum.php']").on("load", 0, i);
                             };
                         } catch (e) {
                             Error.report(e, "manipulate ForumWinow.open");
@@ -9295,9 +9296,9 @@
                 n = Loader.add("Forum", "tw-db Forum", r, {
                     Settings: true
                 });
-                var i = function () {
+                var i = function (d) {
                     var t = e('iframe[src="forum.php"]').contents();
-                    if (t.find("#thread_overview").length == 1) {
+                    if (t.find("#thread_overview").length == 1 && t.find(".twdb_lastpost").length == 0) {
                         t.find(".row")
                         .each(function (t) {
                             var n = Math.floor(e(this)
@@ -9309,9 +9310,10 @@
                                 .match(/\d+/);
                             e(this)
                                 .find(".cell_3")
-                                .append('<img src="' + TWDB.images.lastpost + '" style="position:absolute;cursor:pointer;margin-left:3px;" onclick="Forum.openThread(' + r + ", " + n + ')"></img>');
+                                .append('<img src="' + TWDB.images.lastpost + '" class="twdb_lastpost" style="position:absolute;cursor:pointer;margin-left:3px;" onclick="Forum.openThread(' + r + ", " + n + ')"></img>');
                         });
-                    }
+                    } else if (d.data++ < 3)
+                        setTimeout(i, 500, {data: d.data});
                 };
                 return t;
             }($);
