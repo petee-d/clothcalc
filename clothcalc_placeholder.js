@@ -7873,10 +7873,10 @@
                 _self.injectGetBids = function() {
                     try {
                         MarketWindow.twdb_showTab2 = MarketWindow.twdb_showTab2 || MarketWindow.showTab;
-                        MarketWindow.showTab2 = function (id) {
+                        MarketWindow.showTab = function (id) {
                             if (id != 'sell' && id != 'marketmap')
                             TWDB.ClothCalc.getBids();
-                            MarketWindow.twdb_showTab.apply(this, arguments);
+                            MarketWindow.twdb_showTab2.apply(this, arguments);
                         }
                     } catch (e) {
                         Error.report(e,"manipulate MarketWindow.showTab (2)");
