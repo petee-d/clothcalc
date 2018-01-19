@@ -3968,6 +3968,7 @@
                 var loader = {};
                 var pos;
                 var loading = false;
+                var count = 0;
                 var towns = [];
                 var roomz = ['','cubby','bedroom','hotel_room','apartment','luxurious_apartment'];
                 var init = function() {
@@ -4012,16 +4013,12 @@
                 };
                 
                 var nearTowns = function(i, max, e) {
-                    if (i == max)
-                        createMenu(towns, e, max);
-                    else if (towns[i].hasOwnProperty('stage'))
-                        nearTowns(++i, max, e);
-                    else
-                        Ajax.remoteCallMode('building_hotel', 'get_data', {town_id: towns[i].town_id}, function (data){
-                            if (data.error)
-                                return new UserMessage(data.msg).show();
-                            towns[i].stage = data.hotel_level;
-                            nearTowns(++i, max, e);
+                    Ajax.remoteCallMode('building_hotel', 'get_data', {town_id: towns[i].town_id}, function (data){
+                        if (data.error)
+                            return new UserMessage(data.msg).show();
+                        towns[i].stage = data.hotel_level;
+                        if (++count == max)
+                            createMenu(towns, e, max);
                     });
                 };
                 
@@ -4034,7 +4031,14 @@
                             towns[i].distance = w.Map.calcWayTime(pos,towns[i]);
                         towns.sort(function(a, b){ return a.distance - b.distance; });
                         var leng = towns.length > 5 ? 5 : towns.length;
-                        nearTowns(0, leng, e);
+                        count = 0;
+                        for (var j=0; j < leng; j++) {
+                            if (towns[j].hasOwnProperty('stage')) {
+                                if (++count == leng)
+                                    createMenu(towns, e, leng);
+                            } else
+                                nearTowns(j, leng, e);
+                        }
                     } else {
                         for (var i=0; i < forts.length; i++)
                             forts[i].distance = w.Map.calcWayTime(pos,forts[i]);
