@@ -9,7 +9,7 @@
 
 // be aware that the script release system ignores everything before // START OF ...
 
-/**sergeant etc. mustern error
+/**
  * News on this update :
  * [main] Updater fixed
  * [chestAnalyser] Compatibility with TWToolkit
