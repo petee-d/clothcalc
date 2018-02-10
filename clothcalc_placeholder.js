@@ -17,6 +17,7 @@
  * [bugfix] Bonusjob checkboxes at minimap fixed
  * [bugifx] Experience bar fixed
  * [bugifx] Forum last post fixed
+ * [bugifx] Assing ranks pop-up is now hidden for ranks lower than captain
  * [misc] Only link quest, which are on tw-db.info
  * [misc] Ready for jQuery v3
  * */
@@ -3909,9 +3910,9 @@
                     var msg = '<div class="txcenter">#MAKE_UPDATE#</div>';
                     msg = msg.replace("=1=", "<b>" + Script.name + "</b>");
                     msg += "<div><br />current version: " + (Script.version / 100) + " revision " + Script.revision + "<br />new version: " + (ver / 100) + " revision " + rev + "</div>";
-                    var url = Script.protocol + "://" + Script.update + "?" + Script.version + Script.revision;
+                    var url = Script.protocol + "://" + Script.update;
                     var refresh = function() {
-                        try { location.href = url; } catch (e) {};
+                        window.open(url);
                         (new west.gui.Dialog(Script.name, "#UPDATE_RELOAD#.", 'warning')).setModal(true,false,true).show();
                     };
                     (new west.gui.Dialog(title, msg, west.gui.Dialog.SYS_WARNING)).addButton("#NOTNOW#").addButton("ok", refresh).show();
@@ -9988,32 +9989,25 @@
                         newfunction = newfunction
                             .replace(
                                 /totalCnt\s{0,1}=\s{0,1}0;/,
-                                " totalCnt = 0 , totalCntTotal = 0 , gradeCountTotal = { '-2': 0, '-1': 0, '0': 0, '1': 0, '2': 0, '3': 0 };");
-                        newfunction = newfunction
+                                "totalCnt=0, totalCntTotal=0, gradeCountTotal={ '-2':0, '-1':0, '0':0, '1':0, '2':0, '3':0, '4':0 };")
                             .replace(/gradeCount\[g\]/,
-                                "gradeCount[g] + ' [' + gradeCountTotal[g] + ']'");
-                        newfunction = newfunction
+                                "gradeCount[g] + ' [' + gradeCountTotal[g] + ']'")
                             .replace(/\+\s{0,1}totalCnt\s{0,1}\+/,
-                                "+ totalCnt + ' [' + totalCntTotal + ']' +");
-                        newfunction = newfunction
+                                "+totalCnt+' ['+totalCntTotal+']'+")
                             .replace(
-                                /if\(this\.preBattle\.isHidden\(list\[i\]\['class'\],'rank_'\+priv\)\)continue;/g,
-                                "totalCntTotal++;gradeCountTotal[priv]++;if(this.preBattle.isHidden(list[i]['class'],'rank_'+priv,list[i].coords.x,list[i].coords.y))continue;");
-                        newfunction = newfunction
+                                /if\(this\.preBattle\.isHidden\(list\[i\]\['class'\], ?'rank_' ?\+ ?priv\)\)/,
+                                "totalCntTotal++;gradeCountTotal[priv]++;if(this.preBattle.isHidden(list[i]['class'],'rank_'+priv,list[i].coords.x,list[i].coords.y))")
                             .replace(
-                                /getGradeImg\(priv,true,'recruitplayer recruitplayer-'\+i\)/g,
-                                "getGradeImg(priv,true,'recruitplayer recruitplayer-'+i,list[i].officername||'')");
-                        newfunction = newfunction
+                                /getGradeImg\(priv, ?true, ?'recruitplayer recruitplayer-'\+ ?i\)/,
+                                "getGradeImg(priv,true,'recruitplayer recruitplayer-'+i,list[i].officername||'')")
                             .replace(
-                                /\.addColumns\(\['count','name','town','rank','class','status','evaluated'\]\)/g,
-                                ".addColumns(['count','name','town','rank','class','status','healthpoints'])");
-                        newfunction = newfunction
+                                /\.addColumns\(\['count', ?'name', ?'town', ?'rank', ?'class', ?'status', ?'evaluated'\]\)/,
+                                ".addColumns(['count','name','town','rank','class','status','healthpoints'])")
                             .replace(
-                                /\.appendToThCell\('head','evaluated',.*,.*\);var list=/g,
-                                ".appendToThCell('head','healthpoints','#ORDER_HEALTH#','<span class=\"sort sort-healthpoints\">'+'Lp'+'</span>');var list=");
-                        newfunction = newfunction
+                                /\.appendToThCell\('head', ?'evaluated' ?,.*?,.*?\);/,
+                                ".appendToThCell('head','healthpoints','#ORDER_HEALTH#','<span class=\"sort sort-healthpoints\">'+'Lp'+'</span>');")
                             .replace(
-                                /evaluated:list\[i\]\.officername\|\|''/g,
+                                /evaluated ?: ?list\[i\]\.officername ?\|\| ?''/,
                                 "healthpoints:'<p style=\"font-weight: 700; color: '+((this.preBattle.battleData.fortCoords.x-list[i].coords.x==0&&this.preBattle.battleData.fortCoords.y-list[i].coords.y==0) ? 'rgb(0, 153, 0)' : ((Math.abs(this.preBattle.battleData.fortCoords.x-list[i].coords.x)<=500&&Math.abs(this.preBattle.battleData.fortCoords.y-list[i].coords.y)<=500) ? 'rgb(255, 119, 0)' : 'rgb(255, 0, 0)'))+'\">'+list[i].currhealth+'/'+list[i].maxhealth+'</p>'");
                         eval("FortBattleWindow.updateRecruitlist=(function(){ var lastStamp; return " + newfunction + "})();");
                         var newfunction = String(PreBattle.getSortedPlayerlist);
@@ -10024,12 +10018,13 @@
                         var fb_sort = String(FortBattleWindow.recruitListClick);
                         fb_sort = "FortBattleWindow.recruitListClick=" + fb_sort;
                         fb_sort = fb_sort
+                            .replace(/pp ?< ?ownPriv/,
+                            "pp<ownPriv&&ownPriv>gv.SERGEANT")
                             .replace(
-                                /var hidden=function\(classKey,privKey\){return that\.preBattle\.isHidden\(classKey,'rank_'\+privKey\);};/g,
-                                "var hidden=function(classKey,privKey, location){return that.preBattle.isHidden(classKey,'rank_'+privKey, null, null, location);};");
-                        fb_sort = fb_sort
+                                /var hidden ?= ?function\(classKey, ?privKey\) ?{ ?return that\.preBattle\.isHidden\(classKey, ?'rank_'\+ ?privKey\); ?};/,
+                                "var hidden=function(classKey,privKey, location){return that.preBattle.isHidden(classKey,'rank_'+privKey, null, null, location);};")
                             .replace(
-                                /return{message:sorting,title:title};/g,
+                                /return ?{message: ?sorting, ?title: ?title};/,
                                 "else if(key=='healthpoints'){title='#ORDER_HEALTH#';sorting.append(getSortLink('#SORT_CURRENT_HEALTH_ASC#','>currhealth'));sorting.append(getSortLink('#SORT_CURRENT_HEALTH_DESC#','<currhealth')); sorting.append(getSortLink('#SORT_MAX_HEALTH_ASC#','>maxhealth'));sorting.append(getSortLink('#SORT_MAX_HEALTH_DESC#','<maxhealth'));sorting.append('<br />');sorting.append(getSortLink('#SORT_DISTANCE_ASC#','>distance'));sorting.append(getSortLink('#SORT_DISTANCE_DESC#','<distance'));sorting.append(getVisLink(hidden(null,'-3','atfort')?'#SHOW_PLAYER_AT_FORT#':'#HIDE_PLAYER_AT_FORT#','atfort'));sorting.append(getVisLink(hidden(null,'-3','nearbyfort')?'#SHOW_PLAYER_NEAR_FORT#':'#HIDE_PLAYER_NEAR_FORT#','nearbyfort'));sorting.append(getVisLink(hidden(null,'-3','notatfort')?'#SHOW_PLAYER_NOTAT_FORT#':'#HIDE_PLAYER_NOTAT_FORT#','notatfort'));}return{message:sorting,title:title};");
                         eval(fb_sort);
                         PreBattle.recruitSorting.currhealth = function (
